@@ -64,6 +64,8 @@ class SimpleRegressionTest(ClusterTester):
                          threads=self.params.get('cassandra_stress_threads'),
                          mode='write')
         write_results = self.get_stress_results(queue=stress_queue)
+        self.display_results(write_results)
+        return
 
         # run a read workload
         stress_queue = self.run_stress_thread(
