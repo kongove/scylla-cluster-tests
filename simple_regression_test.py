@@ -38,6 +38,42 @@ class SimpleRegressionTest(ClusterTester):
                                           result['latency 95th percentile'],
                                           result['latency 99th percentile'],
                                           result['latency 99.9th percentile']))
+        f = open('jenkins_perf_PerfPublisher.xml', 'w')
+        content = """<report name="{REPORT_NAME}" categ="{CATEGORY_NAME}">
+
+  <test name="simple_regression_test" executed="yes">
+    <description>"description ..."</description>
+
+    <platform name="platform 001">
+    <processor arch="cpu">
+        <frequency unit="1" cpufreq="1" />
+      </processor>
+    </platform>
+
+    <result>
+      <metrics>
+        <op-rate unit="kbs" mesure="%s" isRelevant="true" />
+        <partition-rate unit="kbs" mesure="%s" isRelevant="true" />
+        <row-rate unit="kbs" mesure="%s" isRelevant="true" />
+        <latency-mean unit="kbs" mesure="%s" isRelevant="true" />
+        <latency-median unit="kbs" mesure="%s" isRelevant="true" />
+        <l-95th-pct unit="kbs" mesure="%s" isRelevant="true" />
+        <l-99th-pct unit="kbs" mesure="%s" isRelevant="true" />
+        <l-99.9th-pct unit="kbs" mesure="%s" isRelevant="true" />
+      </metrics>
+    </result>
+  </test>
+</report>
+""" % ( result['op rate'],
+        result['partition rate'],
+        result['row rate'],
+        result['latency mean'],
+        result['latency median'],
+        result['latency 95th percentile'],
+        result['latency 99th percentile'],
+        result['latency 99.9th percentile'])
+        f.write(content)
+        f.close()
 
     def display_results(self, results):
         self.log.info(self.str_pattern % ('op-rate', 'partition-rate',
