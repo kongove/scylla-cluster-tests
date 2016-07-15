@@ -39,18 +39,28 @@ class SimpleRegressionTest(ClusterTester):
                                           result['latency 99th percentile'],
                                           result['latency 99.9th percentile']))
         f = open('jenkins_perf_PerfPublisher.xml', 'w')
-        content = """<report name="{REPORT_NAME}" categ="{CATEGORY_NAME}">
+        content = """<report name="simple_regression_test report" categ="none">
 
   <test name="simple_regression_test" executed="yes">
-    <description>"description ..."</description>
-
-    <platform name="platform 001">
-    <processor arch="cpu">
+    <description>"simple regression test"</description>
+    <targets>
+      <target threaded="yes">target-%s</target>
+    </targets>
+    <platform name="scylla_platform">
+      <processor arch="cpu">
         <frequency unit="1" cpufreq="1" />
       </processor>
+      <os>
+        <type>&lt;![CDATA[{OS_FULLNAME}]]&gt;</type>
+        <name>&lt;![CDATA[{OS_NAME}]]&gt;</name>
+        <version>&lt;![CDATA[{OS_VERSION}]]&gt;</version>
+        <distribution>&lt;![CDATA[{OS_FULL_VERSION}]]&gt;</distribution>
+      </os>
     </platform>
 
     <result>
+      <success passed="yes" state="1"/>
+      <performance unit="kbs" mesure="%s" isRelevant="true" />
       <metrics>
         <op-rate unit="kbs" mesure="%s" isRelevant="true" />
         <partition-rate unit="kbs" mesure="%s" isRelevant="true" />
@@ -61,10 +71,14 @@ class SimpleRegressionTest(ClusterTester):
         <l-99th-pct unit="kbs" mesure="%s" isRelevant="true" />
         <l-99.9th-pct unit="kbs" mesure="%s" isRelevant="true" />
       </metrics>
+      <errorlog><![CDATA[{ERROR_LOG}]]></errorlog>
+      <log name="{LOG_NAME}"><![CDATA[{LOG}]]></log>
     </result>
   </test>
 </report>
-""" % ( result['op rate'],
+""" % ( self.params.get('ami_id_db_scylla'),
+        result['op rate'],
+        result['op rate'],
         result['partition rate'],
         result['row rate'],
         result['latency mean'],
