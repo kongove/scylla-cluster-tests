@@ -9,6 +9,9 @@ n_db_nodes: 6
 # increasing the size of the DB instance (instance_type_db parameter),
 # since 't2.micro' nodes tend to struggle with a lot of load.
 n_loaders: 1
+
+stress_modes: 'write read restart mixed'
+
 # Nemesis class to use (possible types in sdcm.nemesis). Example: StopStartMonkey
 nemesis_class_name: 'ChaosMonkey'
 # Nemesis sleep interval to use if None provided specifically
@@ -67,7 +70,6 @@ backends: !mux
             ami_loader_user: 'centos'
             ami_id_db_cassandra: 'ami-3cf7c979'
             ami_db_cassandra_user: 'ubuntu'
-            stress_modes: 'write read restart mixed'
         us_west_2:
             region_name: 'us-west-2'
             security_group_ids: 'sg-81703ae4'

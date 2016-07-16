@@ -106,7 +106,7 @@ class SimpleRegressionTest(ClusterTester):
         3. Restart node, run a read workload (cache will be empty)
         4. Run a mixed read write workload
         """
-        stress_modes = self.params.get('stress_modes', 'write')
+        stress_modes = self.params.get('stress_modes')
 
         for i in stress_modes.split():
             if i == 'restart':
