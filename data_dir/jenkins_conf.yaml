@@ -67,6 +67,7 @@ backends: !mux
             ami_loader_user: 'centos'
             ami_id_db_cassandra: 'ami-3cf7c979'
             ami_db_cassandra_user: 'ubuntu'
+            stress_modes: 'write read restart mixed'
         us_west_2:
             region_name: 'us-west-2'
             security_group_ids: 'sg-81703ae4'

@@ -106,42 +106,24 @@ class SimpleRegressionTest(ClusterTester):
         3. Restart node, run a read workload (cache will be empty)
         4. Run a mixed read write workload
         """
-        # run a write workload
-        stress_queue = self.run_stress_thread(
-                         duration=self.params.get('cassandra_stress_duration'),
-                         population_size=self.params.get(
-                                           'cassandra_stress_population_size'),
-                         threads=self.params.get('cassandra_stress_threads'),
-                         mode='write')
-        write_results = self.get_stress_results(queue=stress_queue)
-        self.display_results(write_results)
-        return
+        stress_modes = self.params.get('stress_modes', 'write')
 
-        # run a read workload
-        stress_queue = self.run_stress_thread(
-                         duration=self.params.get('cassandra_stress_duration'),
-                         population_size=self.params.get(
-                                           'cassandra_stress_population_size'),
-                         threads=self.params.get('cassandra_stress_threads'),
-                         mode='read')
-        read_results = self.get_stress_results(queue=stress_queue)
+        for i in stress_modes.split():
+            if i == 'restart':
+                # restart all the nodes
+                for loader in self.db_cluster.nodes:
+                    loader.restart()
+            else:
+                # run a write/read/mixed workload
+                stress_queue = self.run_stress_thread(
+                                 duration=self.params.get('cassandra_stress_duration'),
+                                 population_size=self.params.get(
+                                                   'cassandra_stress_population_size'),
+                                 threads=self.params.get('cassandra_stress_threads'),
+                                 mode=i)
+                results = self.get_stress_results(queue=stress_queue)
+                self.display_results(results)
 
-        # restart all the nodes
-        for loader in self.db_cluster.nodes:
-            loader.restart()
-
-        # run a mixed read write workload
-        stress_queue = self.run_stress_thread(
-                         duration=self.params.get('cassandra_stress_duration'),
-                         population_size=self.params.get(
-                                           'cassandra_stress_population_size'),
-                         threads=self.params.get('cassandra_stress_threads'),
-                         mode='mixed')
-        mixed_results = self.get_stress_results(queue=stress_queue)
-
-        self.display_results(write_results)
-        self.display_results(read_results)
-        self.display_results(mixed_results)
 
 if __name__ == '__main__':
     main()
