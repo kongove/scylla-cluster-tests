@@ -45,31 +45,24 @@ class SimpleRegressionTest(ClusterTester):
     <description>"simple regression test"</description>
     <targets>
       <target threaded="yes">target-%s</target>
+      <ami_id>%s</ami_id>
     </targets>
     <platform name="scylla_platform">
-      <processor arch="cpu">
-        <frequency unit="1" cpufreq="1" />
-      </processor>
-      <os>
-        <type>&lt;![CDATA[{OS_FULLNAME}]]&gt;</type>
-        <name>&lt;![CDATA[{OS_NAME}]]&gt;</name>
-        <version>&lt;![CDATA[{OS_VERSION}]]&gt;</version>
-        <distribution>&lt;![CDATA[{OS_FULL_VERSION}]]&gt;</distribution>
-      </os>
+      <instance_type_db>%s</instance_type_db>
     </platform>
 
     <result>
       <success passed="yes" state="1"/>
       <performance unit="kbs" mesure="%s" isRelevant="true" />
       <metrics>
-        <op-rate unit="kbs" mesure="%s" isRelevant="true" />
-        <partition-rate unit="kbs" mesure="%s" isRelevant="true" />
-        <row-rate unit="kbs" mesure="%s" isRelevant="true" />
-        <latency-mean unit="kbs" mesure="%s" isRelevant="true" />
-        <latency-median unit="kbs" mesure="%s" isRelevant="true" />
-        <l-95th-pct unit="kbs" mesure="%s" isRelevant="true" />
-        <l-99th-pct unit="kbs" mesure="%s" isRelevant="true" />
-        <l-99.9th-pct unit="kbs" mesure="%s" isRelevant="true" />
+        <op-rate unit="op/s" mesure="%s" isRelevant="true" />
+        <partition-rate unit="pk/s" mesure="%s" isRelevant="true" />
+        <row-rate unit="row/s" mesure="%s" isRelevant="true" />
+        <latency-mean unit="mean" mesure="%s" isRelevant="true" />
+        <latency-median unit="med" mesure="%s" isRelevant="true" />
+        <l-95th-pct unit=".95" mesure="%s" isRelevant="true" />
+        <l-99th-pct unit=".99" mesure="%s" isRelevant="true" />
+        <l-99.9th-pct unit=".999" mesure="%s" isRelevant="true" />
       </metrics>
       <errorlog><![CDATA[{ERROR_LOG}]]></errorlog>
       <log name="{LOG_NAME}"><![CDATA[{LOG}]]></log>
@@ -77,6 +70,8 @@ class SimpleRegressionTest(ClusterTester):
   </test>
 </report>
 """ % ( self.params.get('ami_id_db_scylla'),
+        self.params.get('ami_id_db_scylla'),
+        self.params.get('instance_type_db'),
         result['op rate'],
         result['op rate'],
         result['partition rate'],
