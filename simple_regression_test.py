@@ -46,6 +46,7 @@ class SimpleRegressionTest(ClusterTester):
     <targets>
       <target threaded="yes">target-%s</target>
       <ami_id>%s</ami_id>
+      <stress_modes>%s</stress_modes>
     </targets>
     <platform name="scylla_platform">
       <instance_type_db>%s</instance_type_db>
@@ -64,13 +65,12 @@ class SimpleRegressionTest(ClusterTester):
         <l-99th-pct unit=".99" mesure="%s" isRelevant="true" />
         <l-99.9th-pct unit=".999" mesure="%s" isRelevant="true" />
       </metrics>
-      <errorlog><![CDATA[{ERROR_LOG}]]></errorlog>
-      <log name="{LOG_NAME}"><![CDATA[{LOG}]]></log>
     </result>
   </test>
 </report>
 """ % ( self.params.get('ami_id_db_scylla'),
         self.params.get('ami_id_db_scylla'),
+        self.params.get('stress_modes'),
         self.params.get('instance_type_db'),
         result['op rate'],
         result['op rate'],
