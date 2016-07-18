@@ -41,14 +41,17 @@ class SimpleRegressionTest(ClusterTester):
         f = open('jenkins_perf_PerfPublisher.xml', 'w')
         content = """<report name="simple_regression_test report" categ="none">
 
-  <test name="simple_regression_test" executed="yes">
-    <description>"simple regression test"</description>
+  <test name="simple_regression_test-stress_modes: (%s)" executed="yes">
+    <description>"simple regression test, ami_id: %s, scylla version:
+    %s", stress_mode: %s, hardware: %s</description>
     <targets>
-      <target threaded="yes">target-ami_id-%s</target>
-      <target threaded="yes">target-version-%s</target>
-      <target threaded="yes">stress_modes-%s</target>
+      <target threaded="yes">AMI_id-%s(scylla version: %s)</target>
     </targets>
-    <platform name="AWS platform">
+    <platform name="AWS centos">
+      <os>
+          <type>centos</type>
+          <version>scylla-%s</version>
+      </os>
       <hardware>%s</hardware>
     </platform>
 
@@ -68,9 +71,15 @@ class SimpleRegressionTest(ClusterTester):
     </result>
   </test>
 </report>
-""" % ( self.params.get('ami_id_db_scylla'),
+""" % (
+        self.params.get('stress_modes'),
+        self.params.get('ami_id_db_scylla'),
         self.params.get('ami_id_db_scylla_desc'),
         self.params.get('stress_modes'),
+        self.params.get('instance_type_db'),
+        self.params.get('ami_id_db_scylla'),
+        self.params.get('ami_id_db_scylla_desc'),
+        self.params.get('ami_id_db_scylla_desc'),
         self.params.get('instance_type_db'),
         result['op rate'],
         result['op rate'],
