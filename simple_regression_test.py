@@ -72,8 +72,8 @@ class SimpleRegressionTest(ClusterTester):
   </test>
 """ % (
         self.params.get('stress_modes'),
-        self.params.get('node_idx'),
-        self.params.get('cpu_idx'),
+        result['node_idx'],
+        result['cpu_idx'],
         self.params.get('ami_id_db_scylla'),
         self.params.get('ami_id_db_scylla_desc'),
         self.params.get('stress_modes'),

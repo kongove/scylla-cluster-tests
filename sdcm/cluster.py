@@ -1512,18 +1512,18 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
         queue = Queue.Queue()
 
         def node_run_stress(node, node_idx, cpu_idx):
-            stress_cmd = 'taskset -c %s %s' % (cpu_idx, stress_cmd)
             try:
                 logdir = path.init_dir(output_dir, self.name)
             except OSError:
                 logdir = os.path.join(output_dir, self.name)
-            result = node.remoter.run(cmd=stress_cmd, timeout=timeout,
+            tag = 'TAG: node_idx:%s-cpu_idx:%s' % (node_idx, cpu_idx)
+            result = node.remoter.run(cmd='echo %s; taskset -c %s %s' % (tag, cpu_idx, stress_cmd),
+                                      timeout=timeout,
                                       ignore_status=True,
                                       watch_stdout_pattern='total,')
             node.cs_start_time = result.stdout_pattern_found_at
             log_file_name = os.path.join(logdir, 'cassandra-stress-n%s-c%s-%s.log' % (node_idx, cpu_idx, uuid.uuid4()))
-            tag = 'TAG: node_idx:%s-cpu_idx:%s' % (node_idx, cpu_idx)
-            result = tag + '\n' + result
+            #result = tag + '\n' + result
             self.log.debug('Writing cassandra-stress log %s', log_file_name)
             with open(log_file_name, 'w') as log_file:
                 log_file.write(str(result))
@@ -1671,7 +1671,7 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
     def get_stress_results(self, queue):
         results = []
         ret = []
-        while len(results) != len(self.nodes):
+        while len(results) != len(self.nodes) * 2:
             try:
                 results.append(queue.get(block=True, timeout=5))
             except Queue.Empty:
