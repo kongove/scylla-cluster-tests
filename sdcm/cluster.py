@@ -1511,7 +1511,8 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
     def run_stress_thread(self, stress_cmd, timeout, output_dir):
         queue = Queue.Queue()
 
-        def node_run_stress(node):
+        def node_run_stress(node, node_idx, cpu_idx):
+            stress_cmd = 'taskset -c %s %s' % (cpu_idx, stress_cmd)
             try:
                 logdir = path.init_dir(output_dir, self.name)
             except OSError:
@@ -1520,18 +1521,21 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
                                       ignore_status=True,
                                       watch_stdout_pattern='total,')
             node.cs_start_time = result.stdout_pattern_found_at
-            log_file_name = os.path.join(logdir, 'cassandra-stress-%s.log' % uuid.uuid4())
+            log_file_name = os.path.join(logdir, 'cassandra-stress-n%s-c%s-%s.log' % (node_idx, cpu_idx, uuid.uuid4()))
+            tag = 'TAG: node_idx:%s-cpu_idx:%s' % (node_idx, cpu_idx)
+            result = tag + '\n' + result
             self.log.debug('Writing cassandra-stress log %s', log_file_name)
             with open(log_file_name, 'w') as log_file:
                 log_file.write(str(result))
             queue.put((node, result))
             queue.task_done()
 
-        for loader in self.nodes:
-            setup_thread = threading.Thread(target=node_run_stress,
-                                            args=(loader,))
-            setup_thread.daemon = True
-            setup_thread.start()
+        for node_idx,loader in enumerate(self.nodes):
+            for cpu_idx in range(2):
+                setup_thread = threading.Thread(target=node_run_stress,
+                                                args=(loader, node_idx, cpu_idx))
+                setup_thread.daemon = True
+                setup_thread.start()
 
         return queue
 
@@ -1625,6 +1629,10 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
 
         for line in lines:
             line.strip()
+            if line.startswith('TAG:'):
+                ret = re.findall("TAG: node_idx:(\d+)-cpu_idx:(\d+)", line)
+                results['node_idx'] = ret[0][0]
+                results['cpu_idx'] = ret[0][1]
             if line.startswith('Results:'):
                 enable_parse = True
                 continue
