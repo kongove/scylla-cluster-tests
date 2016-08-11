@@ -324,6 +324,7 @@ class UpgradeNemesis(Nemesis):
         node.remoter.send_files(scylla_repo, '/tmp/scylla.repo', verbose=True)
         node.remoter.send_files(scylla_1_2_repo, '~/scylla.repo-backup', verbose=True)
         #node.remoter.run('sudo cp /etc/yum.repos.d/scylla.repo ~/scylla.repo-backup')
+        node.remoter.run('sudo cat /etc/yum.repos.d/scylla.repo')
         node.remoter.run('sudo cp /tmp/scylla.repo /etc/yum.repos.d/scylla.repo')
         # backup the data
         node.remoter.run('sudo cp /etc/scylla/scylla.yaml /etc/scylla/scylla.yaml-backup')
