@@ -329,6 +329,8 @@ class UpgradeNemesis(Nemesis):
         node.remoter.run('sudo chown root.root /etc/yum.repos.d/scylla.repo')
         node.remoter.run('sudo chmod 644 /etc/yum.repos.d/scylla.repo')
         node.remoter.run('sudo yum clean all')
+        node.remoter.run('rpm -qi scylla || sudo yum install scylla -y')
+        node.remoter.run('rpm -qi scylla-kernel-conf || sudo yum install scylla-kernel-conf -y')
         node.remoter.run('sudo yum update scylla scylla-server scylla-jmx scylla-tools scylla-conf scylla-kernel-conf -y')
         # flush all memtables to SSTables
         node.remoter.run('sudo nodetool drain')
