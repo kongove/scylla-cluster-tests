@@ -320,8 +320,10 @@ class UpgradeNemesis(Nemesis):
         self.log.info('Upgrading a Node')
         orig_ver = node.remoter.run('rpm -qa scylla-server')
         scylla_repo = get_data_path('scylla.repo.upgrade')
+        scylla_1_2_repo = get_data_path('scylla-1.2.repo')
         node.remoter.send_files(scylla_repo, '/tmp/scylla.repo', verbose=True)
-        node.remoter.run('sudo cp /etc/yum.repos.d/scylla.repo ~/scylla.repo-backup')
+        node.remoter.send_files(scylla_1_2_repo, '~/scylla.repo-backup', verbose=True)
+        #node.remoter.run('sudo cp /etc/yum.repos.d/scylla.repo ~/scylla.repo-backup')
         node.remoter.run('sudo cp /tmp/scylla.repo /etc/yum.repos.d/scylla.repo')
         # backup the data
         node.remoter.run('sudo cp /etc/scylla/scylla.yaml /etc/scylla/scylla.yaml-backup')
