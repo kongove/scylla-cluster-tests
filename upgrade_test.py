@@ -52,7 +52,7 @@ class UpgradeTest(ClusterTester):
 
         self.db_cluster.add_nemesis(RollbackNemesis)
         self.db_cluster.start_nemesis(interval=10)
-        self.run_stress(duration=1)
+        self.run_stress(duration=self.params.get('cassandra_stress_duration'))
 
 if __name__ == '__main__':
     main()
