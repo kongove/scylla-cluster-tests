@@ -294,6 +294,7 @@ class ClusterTester(Test):
         :rtype: basestring
         """
         ip = self.db_cluster.get_node_private_ips()[0]
+        ips = ','.join(self.db_cluster.get_node_private_ips())
         if population_size is None:
             population_size = 10000000
         if duration is None:
@@ -308,7 +309,7 @@ class ClusterTester(Test):
                 "-pop seq=1..%s -node %s "
                 "-schema 'replication(factor=3)' keyspace=mykeyspace "
                 %
-                (mode, duration, threads, population_size, ip))
+                (mode, duration, threads, population_size, ips))
 
     @clean_aws_resources
     def run_stress(self, stress_cmd=None, duration=None, mode='write'):
