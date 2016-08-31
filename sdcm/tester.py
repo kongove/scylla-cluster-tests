@@ -301,9 +301,13 @@ class ClusterTester(Test):
         if threads is None:
             threads = self.params.get('cassandra_stress_threads')
         return ("cassandra-stress %s cl=QUORUM duration=%sm "
-                "-schema 'replication(factor=3)' -port jmx=6868 "
-                "-mode cql3 native -rate threads=%s "
-                "-pop seq=1..%s -node %s" %
+                "n=10000000000 -errors ignore "
+                #"-schema 'replication(factor=3)' -port jmx=6868 "
+                #"-mode cql3 native -rate threads=%s "
+                "-mode native cql3 -rate threads=%s "
+                "-pop seq=1..%s -node %s "
+                "-schema 'replication(factor=3)' keyspace=mykeyspace "
+                %
                 (mode, duration, threads, population_size, ip))
 
     @clean_aws_resources
