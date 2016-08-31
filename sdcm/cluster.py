@@ -1517,7 +1517,8 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
             except OSError:
                 logdir = os.path.join(output_dir, self.name)
             tag = 'TAG: node_idx:%s-cpu_idx:%s' % (node_idx, cpu_idx)
-            result = node.remoter.run(cmd='echo %s; taskset -c %s %s' % (tag, cpu_idx, stress_cmd),
+            #result = node.remoter.run(cmd='echo %s; taskset -c %s %s' % (tag, cpu_idx, stress_cmd),
+            result = node.remoter.run(cmd='echo %s; %s' % (tag, stress_cmd),
                                       timeout=timeout,
                                       ignore_status=True,
                                       watch_stdout_pattern='total,')
@@ -1530,7 +1531,8 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
             queue.put((node, result))
             queue.task_done()
 
-        for node_idx,loader in enumerate(self.nodes):
+        #for node_idx,loader in enumerate(self.nodes):
+        for node_idx,loader in enumerate(self.nodes[:1]):
             for cpu_idx in range(1):
                 setup_thread = threading.Thread(target=node_run_stress,
                                                 args=(loader, node_idx, cpu_idx))
