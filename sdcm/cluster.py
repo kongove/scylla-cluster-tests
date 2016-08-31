@@ -1531,7 +1531,7 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
             queue.task_done()
 
         for node_idx,loader in enumerate(self.nodes):
-            for cpu_idx in range(2):
+            for cpu_idx in range(1):
                 setup_thread = threading.Thread(target=node_run_stress,
                                                 args=(loader, node_idx, cpu_idx))
                 setup_thread.daemon = True
