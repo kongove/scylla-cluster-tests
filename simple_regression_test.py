@@ -125,7 +125,7 @@ class SimpleRegressionTest(ClusterTester):
         """
         stress_modes = self.params.get('stress_modes')
 
-        for i in stress_modes.split():
+        for i in stress_modes.split('END'):
             if i == 'restart':
                 # restart all the nodes
                 for loader in self.db_cluster.nodes:
