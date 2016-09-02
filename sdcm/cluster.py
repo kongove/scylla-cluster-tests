@@ -1673,7 +1673,7 @@ class LoaderSetAWS(AWSCluster, BaseLoaderSet):
     def get_stress_results(self, queue):
         results = []
         ret = []
-        while len(results) != len(self.nodes) * 2:
+        while len(results) != len(self.nodes):
             try:
                 results.append(queue.get(block=True, timeout=5))
             except Queue.Empty:
