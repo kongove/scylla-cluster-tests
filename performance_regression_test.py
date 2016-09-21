@@ -132,12 +132,16 @@ class PerformanceRegressionTest(ClusterTester):
                     "-schema 'replication(factor=3)' -port jmx=6868 "
                     "-mode cql3 native -rate threads=1000 -errors ignore "
                     "-pop seq=1..10000000")
+        base_cmd = ("cassandra-stress %s no-warmup cl=QUORUM duration=1m "
+                    "-schema 'replication(factor=3)' -port jmx=6868 "
+                    "-mode cql3 native -rate threads=2 -errors ignore "
+                    "-pop seq=1..1000")
 
         stress_modes = self.params.get(key='stress_modes', default='write')
         for mode in stress_modes.split():
             if mode == 'restart':
                 # restart all the nodes
-                for loader in self.db_cluster.nodes:
+                for loader in self.db_cluster.nodes: #restart only db_nodes?
                     loader.restart()
             else:
                 # run a workload
