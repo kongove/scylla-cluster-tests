@@ -1513,10 +1513,10 @@ class BaseMonitorSet(object):
             # The init scripts should install/update c-s, so
             # let's try to guarantee it will be there before
             # proceeding
-            node.install_prometheus()
-            node.setup_prometheus(targets=targets)
-            node.install_grafana()
-            node.setup_grafana()
+            #node.install_prometheus()
+            #node.setup_prometheus(targets=targets)
+            #node.install_grafana()
+            #node.setup_grafana()
             node.remoter.run('sudo yum install screen -y')
             queue.put(node)
             queue.task_done()
@@ -1541,6 +1541,7 @@ class BaseMonitorSet(object):
         self.log.debug('Setup duration -> %s s', int(time_elapsed))
 
     def download_monitor_data(self):
+        return
         for node in self.nodes:
             node.remoter.run('sudo systemctl stop prometheus.service')
             node.download_prometheus_data_dir()
@@ -1727,10 +1728,10 @@ class ScyllaLibvirtCluster(LibvirtCluster, BaseScyllaCluster):
             'sudo /usr/lib/scylla/scylla_setup --nic eth0 --no-raid-setup')
         node.remoter.run('sudo systemctl enable scylla-server.service')
         node.remoter.run('sudo systemctl enable scylla-jmx.service')
-        node.remoter.run('sudo systemctl enable collectd.service')
+        #node.remoter.run('sudo systemctl enable collectd.service')
         node.remoter.run('sudo systemctl start scylla-server.service')
         node.remoter.run('sudo systemctl start scylla-jmx.service')
-        node.remoter.run('sudo systemctl start collectd.service')
+        #node.remoter.run('sudo systemctl start collectd.service')
         node.remoter.run('sudo iptables -F')
 
     def wait_for_init(self, node_list=None, verbose=False):
@@ -1755,7 +1756,7 @@ class ScyllaLibvirtCluster(LibvirtCluster, BaseScyllaCluster):
             node.wait_db_up(verbose=verbose)
             node.remoter.run('sudo yum install -y scylla-gdb',
                              verbose=verbose, ignore_status=True)
-            node.install_collectd_exporter()
+            #node.install_collectd_exporter()
             queue.put(node)
             queue.task_done()
 
@@ -2060,7 +2061,7 @@ class ScyllaAWSCluster(AWSCluster, BaseScyllaCluster):
             node.wait_db_up(verbose=verbose)
             node.remoter.run('sudo yum install -y scylla-gdb',
                              verbose=verbose, ignore_status=True)
-            node.install_collectd_exporter()
+            #node.install_collectd_exporter()
             queue.put(node)
             queue.task_done()
 
