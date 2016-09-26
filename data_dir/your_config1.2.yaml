@@ -1,6 +1,6 @@
 # Test duration (min). Parameter used to keep instances produced by tests that
 # are supposed to run longer than 24 hours from being killed
-test_duration: 1
+test_duration: 60
 # cassandra-stress command. You can specify everything but the -node parameter,
 # which is going to be provided by the test suite infrastructure
 #stress_cmd: cassandra-stress write cl=QUORUM duration=60m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000

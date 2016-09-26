@@ -1,6 +1,6 @@
 # Test duration (min). Parameter used to keep instances produced by tests that
 # are supposed to run longer than 24 hours from being killed
-test_duration: 1
+test_duration: 60
 # cassandra-stress command. You can specify everything but the -node parameter,
 # which is going to be provided by the test suite infrastructure
 #stress_cmd: cassandra-stress write cl=QUORUM duration=60m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000
@@ -9,7 +9,7 @@ stress_cmd: cassandra-stress write cl=QUORUM duration=2m -schema 'replication(fa
 #stress_modes: 'write read restart mixed'
 stress_modes: 'write'
 # Number of database nodes
-n_db_nodes: 2
+n_db_nodes: 3
 
 # default cassandra stress duration (min) if none specified
 cassandra_stress_duration: 1
@@ -21,7 +21,7 @@ cassandra_stress_population_size: 1000
 # If you want to use more than 1 loader node, I recommend
 # increasing the size of the DB instance (instance_type_db parameter),
 # since 't2.micro' nodes tend to struggle with a lot of load.
-n_loaders: 1
+n_loaders: 4
 # Nemesis class to use (possible types in sdcm.nemesis). Example: StopStartMonkey
 nemesis_class_name: 'ChaosMonkey'
 # Nemesis sleep interval to use if None provided specifically
@@ -70,7 +70,7 @@ backends: !mux
         cluster_backend: 'aws'
         # From 0.19 on, iotune will require bigger disk, so let's use a big
         # loader instance by default.
-        instance_type_loader: 'i2.2xlarge'
+        instance_type_loader: 'c4.large'
         # Size of AWS monitor instance
         instance_type_monitor: t2.small
         us_west_1:
