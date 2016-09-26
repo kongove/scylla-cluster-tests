@@ -126,4 +126,4 @@ databases: !mux
         instance_type_db: 'i2.2xlarge'
         # The monitoring infrastructure is very specific to cassandra
         # So let's not spawn a monitor node
-        n_monitor_nodes: 0
+        n_monitor_nodes: 1
