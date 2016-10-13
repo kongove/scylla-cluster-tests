@@ -135,8 +135,8 @@ class PerformanceRegressionTest(ClusterTester):
                     "-pop seq=1..10000000")
         base_cmd = ("cassandra-stress %s no-warmup cl=QUORUM duration=1m "
                     "-schema 'replication(factor=3)' -port jmx=6868 "
-                    "-mode cql3 native -rate threads=2 -errors ignore "
-                    "-pop seq=1..1000")
+                    "-mode cql3 native -rate threads=500 -errors ignore "
+                    "-pop seq=1..100000000")
 
         stress_modes = self.params.get(key='stress_modes', default='write')
         for mode in stress_modes.split():
