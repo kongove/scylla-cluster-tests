@@ -1386,6 +1386,8 @@ class BaseLoaderSet(object):
 
         for loader_idx, loader in enumerate(self.nodes):
             for cpu_idx in range(stress_num):
+                if stress_num > 1:
+                    pass #split seq
                 setup_thread = threading.Thread(target=node_run_stress,
                                                 args=(loader, loader_idx,
                                                       cpu_idx))
