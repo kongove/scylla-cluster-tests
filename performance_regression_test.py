@@ -44,13 +44,12 @@ class PerformanceRegressionTest(ClusterTester):
 
     def get_test_xml(self, result):
         test_content = """
-  <test name="simple_regression_test-stress_modes: (%s) Loader%s CPU%s" executed="yes">
+  <test name="simple_regression_test: Loader%s CPU%s" executed="yes">
     <description>"simple regression test, ami_id: %s, scylla version:
-    %s", stress_mode: %s, hardware: %s</description>
+    %s", hardware: %s</description>
     <targets>
       <target threaded="yes">target-ami_id-%s</target>
       <target threaded="yes">target-version-%s</target>
-      <target threaded="yes">stress_modes-%s</target>
     </targets>
     <platform name="AWS platform">
       <hardware>%s</hardware>
@@ -73,16 +72,13 @@ class PerformanceRegressionTest(ClusterTester):
       </metrics>
     </result>
   </test>
-""" % (self.params.get('stress_modes'),
-            result['loader_idx'],
+""" % (     result['loader_idx'],
             result['cpu_idx'],
             self.params.get('ami_id_db_scylla'),
             self.params.get('ami_id_db_scylla_desc'),
-            self.params.get('stress_modes'),
             self.params.get('instance_type_db'),
             self.params.get('ami_id_db_scylla'),
             self.params.get('ami_id_db_scylla_desc'),
-            self.params.get('stress_modes'),
             self.params.get('instance_type_db'),
             result['op rate'],
             result['op rate'],
@@ -129,10 +125,6 @@ class PerformanceRegressionTest(ClusterTester):
         4. Run a mixed read write workload
         """
         # run a write workload
-        base_cmd = ("cassandra-stress %s no-warmup cl=QUORUM duration=60m "
-                    "-schema 'replication(factor=3)' -port jmx=6868 "
-                    "-mode cql3 native -rate threads=1000 -errors ignore "
-                    "-pop seq=1..10000000")
         base_cmd = ("cassandra-stress %s no-warmup cl=QUORUM duration=1m "
                     "-schema 'replication(factor=3)' -port jmx=6868 "
                     "-mode cql3 native -rate threads=500 -errors ignore "
@@ -148,6 +140,25 @@ class PerformanceRegressionTest(ClusterTester):
                 # run a workload
                 stress_queue = self.run_stress_thread(stress_cmd=base_cmd % mode, stress_num=1)
                 results = self.get_stress_results(queue=stress_queue, stress_num=1)
+
+        self.display_results(results)
+
+    @close_master_ssh_nodes
+    def test_write(self):
+        """
+        Test steps:
+
+        1. Run a write workload
+        """
+        # run a write workload
+        base_cmd = ("cassandra-stress write no-warmup cl=QUORUM duration=60m "
+                    "-schema 'replication(factor=3)' -port jmx=6868 "
+                    "-mode cql3 native -rate threads=1000 -errors ignore "
+                    "-pop seq=1..10000000")
+
+        # run a workload
+        stress_queue = self.run_stress_thread(stress_cmd=base_cmd, stress_num=1)
+        results = self.get_stress_results(queue=stress_queue, stress_num=1)
 
         self.display_results(results)
 
