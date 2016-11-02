@@ -134,6 +134,8 @@ version: !mux
         ami_id_loader: 'ami-ab0f57bc'
         ami_id_monitor: 'ami-ab0f57bc'
 
+ami_id_db_scylla_desc: 'version_info'
+
 databases: !mux
     cassandra:
         db_type: cassandra
