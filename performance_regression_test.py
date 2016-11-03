@@ -15,6 +15,7 @@
 
 
 from avocado import main
+from avocado.utils import process
 
 from sdcm.tester import ClusterTester
 from sdcm.cluster import close_master_ssh_nodes
@@ -114,6 +115,11 @@ class PerformanceRegressionTest(ClusterTester):
         f.write(content)
         f.close()
 
+    def get_snapshot(self):
+        process.run('sh grafana_snapshot.sh %s %s' % (
+                     self.monitors.nodes[0].public_ip_address,
+                     self.params.get('test_duration')))
+
     @close_master_ssh_nodes
     def test_simple_regression(self):
         """
@@ -142,6 +148,8 @@ class PerformanceRegressionTest(ClusterTester):
                 results = self.get_stress_results(queue=stress_queue, stress_num=1)
 
         self.display_results(results)
+        self.get_snapshot()
+
 
     @close_master_ssh_nodes
     def test_write(self):
@@ -161,6 +169,7 @@ class PerformanceRegressionTest(ClusterTester):
         results = self.get_stress_results(queue=stress_queue, stress_num=1)
 
         self.display_results(results)
+        self.get_snapshot()
 
     @close_master_ssh_nodes
     def test_read(self):
@@ -220,6 +229,7 @@ class PerformanceRegressionTest(ClusterTester):
             self.display_results(results)
         except:
             pass
+        self.get_snapshot()
 
 
     def test_mixed(self):
@@ -256,6 +266,7 @@ class PerformanceRegressionTest(ClusterTester):
             self.display_results(results)
         except:
             pass
+        self.get_snapshot()
 
 
 
