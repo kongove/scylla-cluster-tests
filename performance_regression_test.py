@@ -116,9 +116,10 @@ class PerformanceRegressionTest(ClusterTester):
         f.close()
 
     def get_snapshot(self):
-        process.run('sh grafana_snapshot.sh %s %s' % (
+        process.run('sh grafana_snapshot.sh %s %s %s' % (
                      self.monitors.nodes[0].public_ip_address,
-                     self.params.get('test_duration')))
+                     self.params.get('test_duration'),
+                     self.monitors.logdir))
 
     @close_master_ssh_nodes
     def test_simple_regression(self):
@@ -130,6 +131,7 @@ class PerformanceRegressionTest(ClusterTester):
         3. Restart node, run a read workload (cache will be empty)
         4. Run a mixed read write workload
         """
+        self.log.info('self.monitors.logdir: %s' % self.monitors.logdir)
         # run a write workload
         base_cmd = ("cassandra-stress %s no-warmup cl=QUORUM duration=1m "
                     "-schema 'replication(factor=3)' -port jmx=6868 "
