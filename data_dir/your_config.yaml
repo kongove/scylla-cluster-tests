@@ -125,6 +125,10 @@ version: !mux
         ami_id_db_scylla: 'ami-eae2a7fd'
         ami_id_loader: 'ami-eae2a7fd'
         ami_id_monitor: 'ami-eae2a7fd'
+    1.3.4:
+        ami_id_db_scylla: 'ami-690a2d7e'
+        ami_id_loader: 'ami-690a2d7e'
+        ami_id_monitor: 'ami-690a2d7e'
     1.4rc2:
         ami_id_db_scylla: 'ami-3caee62b'
         ami_id_loader: 'ami-3caee62b'
