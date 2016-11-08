@@ -80,6 +80,7 @@ class ReduceClusterTest(ClusterTester):
         """
         ip = self.db_cluster.get_node_private_ips()[0]
         population_size = 1000000
+        population_size = 1000000000
         duration = self.params.get('test_duration')
         threads = 1000
         return ("cassandra-stress write cl=QUORUM duration=%sm "
