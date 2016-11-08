@@ -106,6 +106,12 @@ class GrowClusterTest(ClusterTester):
                 "-pop seq=1..%s -node %s" %
                 (duration, threads, population_size, ip))
 
+    def get_snapshot(self):
+        process.run('sh grafana_snapshot.sh %s %s %s' % (
+                     self.monitors.nodes[0].public_ip_address,
+                     90,
+                     self.monitors.logdir))
+
     def grow_cluster(self, cluster_target_size, stress_cmd):
         # 60 minutes should be long enough for adding each node
         nodes_to_add = cluster_target_size - self._cluster_starting_size
@@ -137,6 +143,7 @@ class GrowClusterTest(ClusterTester):
         self.kill_stress_thread()
 
         self.verify_stress_thread(queue=stress_queue)
+        self.get_snapshot()
 
     def test_grow_3_to_5(self):
         """
