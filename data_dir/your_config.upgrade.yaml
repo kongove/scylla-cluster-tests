@@ -1,0 +1,162 @@
+# Test duration (min). Parameter used to keep instances produced by tests that
+# are supposed to run longer than 24 hours from being killed
+test_duration: 70
+# cassandra-stress command. You can specify everything but the -node parameter,
+# which is going to be provided by the test suite infrastructure
+#stress_cmd: cassandra-stress write cl=QUORUM duration=60m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000
+stress_cmd: cassandra-stress write cl=QUORUM duration=2m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=2 -pop seq=1..1000
+# cassandra-stress mode series
+#stress_modes: 'write read restart mixed'
+stress_modes: 'write'
+# Number of database nodes
+#n_db_nodes: 6
+n_db_nodes: 3
+# If you want to use more than 1 loader node, I recommend
+# increasing the size of the DB instance (instance_type_db parameter),
+# since 't2.micro' nodes tend to struggle with a lot of load.
+n_loaders: 1
+# Nemesis class to use (possible types in sdcm.nemesis). Example: StopStartMonkey
+nemesis_class_name: 'ChaosMonkey'
+# Nemesis sleep interval to use if None provided specifically
+nemesis_interval: 15
+# Prefix for your AWS VMs (handy for telling instances from different
+# users apart). If you leave this empty, the prefix will be your unix username.
+user_prefix: 'amostation-jks'
+# Failure/post test behavior
+# Default: Destroy AWS instances and credentials (destroy)
+# Keep AWS instances running and leave credentials alone (keep)
+# Stop AWS instances and leave credentials alone (stop)
+failure_post_behavior: destroy
+# Space node threshold before starting nemesis (bytes)
+# The default value is 6GB (6x1024^3 bytes)
+# This value is supposed to reproduce
+# https://github.com/scylladb/scylla/issues/1140
+#space_node_threshold: 6442450944
+space_node_threshold: 6442
+
+# The new db binary will be uploaded to db instance to replace the one
+# provided by the ami. This is useful to test out a new scylla version
+# without making a new ami.
+# update_db_binary: $path_of_the_new_scylla_binary
+update_db_binary: ''
+
+backends: !mux
+    libvirt: !mux
+        cluster_backend: 'libvirt'
+        libvirt_uri: 'qemu:///system'
+        libvirt_bridge: 'virbr0'
+        #scylla_repo: 'http://downloads.scylladb.com/rpm/centos/scylla-1.2.repo'
+        scylla_repo: 'http://downloads.scylladb.com/rpm/centos/scylla-1.3.repo'
+        libvirt_loader_image: '/path/to/your/loader_base_image.qcow2'
+        libvirt_loader_image_user: 'centos'
+        libvirt_loader_image_password: '123456'
+        libvirt_loader_os_type: 'linux'
+        libvirt_loader_os_variant: 'centos7.0'
+        libvirt_loader_memory: 2048
+        libvirt_db_image: '/path/to/your/db_base_image.qcow2'
+        libvirt_db_image_user: 'centos'
+        libvirt_db_image_password: '123456'
+        libvirt_db_os_type: 'linux'
+        libvirt_db_os_variant: 'centos7.0'
+        libvirt_db_memory: 2048
+        libvirt_monitor_image: '/path/to/your/monitor_base_image.qcow2'
+        libvirt_monitor_image_user: 'centos'
+        libvirt_monitor_image_password: '123456'
+        libvirt_monitor_os_type: 'linux'
+        libvirt_monitor_os_variant: 'centos7.0'
+        libvirt_monitor_memory: 2048
+    aws: !mux
+        # What is the backend that the suite will use to get machines from.
+        cluster_backend: 'aws'
+        # From 0.19 on, iotune will require bigger disk, so let's use a big
+        # loader instance by default.
+        #instance_type_loader: 'c3.large'
+        instance_type_loader: 'c4.large'
+        # Size of AWS monitor instance
+        instance_type_monitor: t2.small
+        #us_west_1:
+        #    user_credentials_path: ''
+        #    region_name: 'us-west-1'
+        #    security_group_ids: 'sg-dcd785b9'
+        #    subnet_id: 'subnet-10a04c75'
+        #    ami_id_db_scylla: 'ami-c3165ba3'
+        #    ami_id_db_scylla_desc: '1.3'
+        #    ami_db_scylla_user: 'centos'
+        #    ami_id_loader: 'ami-c3165ba3'
+        #    ami_loader_user: 'centos'
+        #    ami_id_db_cassandra: 'ami-3cf7c979'
+        #    ami_db_cassandra_user: 'ubuntu'
+        #    ami_id_monitor: 'ami-c3165ba3'
+        #    ami_monitor_user: 'centos'
+        us_west_2:
+            user_credentials_path: ''
+            region_name: 'us-west-2'
+            security_group_ids: 'sg-81703ae4'
+            subnet_id: 'subnet-5207ee37'
+            ami_id_db_scylla: 'ami-4bda0d2b'
+            ami_db_scylla_user: 'centos'
+            ami_id_loader: 'ami-4bda0d2b'
+            ami_loader_user: 'centos'
+            ami_id_db_cassandra: 'ami-1cff962c'
+            ami_db_cassandra_user: 'ubuntu'
+            ami_id_monitor: 'ami-4bda0d2b'
+            ami_monitor_user: 'centos'
+        us_east_1:
+            user_credentials_path: ''
+            region_name: 'us-east-1'
+            security_group_ids: 'sg-c5e1f7a0'
+            subnet_id: 'subnet-ec4a72c4'
+            #ami_id_db_scylla: 'ami-78d7b46f'
+            ami_db_scylla_user: 'centos'
+            #ami_id_loader: 'ami-78d7b46f'
+            ami_loader_user: 'centos'
+            #ami_id_db_cassandra: 'ami-ada2b6c4'
+            ami_db_cassandra_user: 'ubuntu'
+            #ami_id_monitor: 'ami-78d7b46f'
+            ami_monitor_user: 'centos'
+
+# us-east-1 region
+version: !mux
+    1.3:
+        ami_id_db_scylla: 'ami-78d7b46f'
+        ami_id_loader: 'ami-78d7b46f'
+        ami_id_monitor: 'ami-78d7b46f'
+    1.3.1:
+        ami_id_db_scylla: 'ami-eae2a7fd'
+        ami_id_loader: 'ami-eae2a7fd'
+        ami_id_monitor: 'ami-eae2a7fd'
+    1.4rc2:
+        ami_id_db_scylla: 'ami-3caee62b'
+        ami_id_loader: 'ami-3caee62b'
+        ami_id_monitor: 'ami-3caee62b'
+    1.4rc3:
+        ami_id_db_scylla: 'ami-ab0f57bc'
+        ami_id_loader: 'ami-ab0f57bc'
+        ami_id_monitor: 'ami-ab0f57bc'
+    1.4.0:
+        ami_id_db_scylla: 'ami-c59ac0d2'
+        ami_id_loader: 'ami-c59ac0d2'
+        ami_id_monitor: 'ami-c59ac0d2'
+    asiasdev:
+        ami_id_db_scylla: 'ami-7e98bc69'
+        ami_id_loader: 'ami-7e98bc69'
+        ami_id_monitor: 'ami-7e98bc69'
+
+
+ami_id_db_scylla_desc: 'version_info'
+
+databases: !mux
+    cassandra:
+        db_type: cassandra
+        instance_type_db: 'm3.large'
+        # The monitoring infrastructure is very specific to cassandra
+        # So let's not spawn a monitor node
+        n_monitor_nodes: 0
+    scylla:
+        db_type: scylla
+        # Let's use c3.large since we're using iotune
+        # and we'll stress the DB nodes more thoroughly
+        instance_type_db: 'i2.2xlarge'
+        # The monitoring infrastructure is very specific to cassandra
+        # So let's not spawn a monitor node
+        n_monitor_nodes: 1
