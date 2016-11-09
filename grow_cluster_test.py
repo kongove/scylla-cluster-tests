@@ -16,6 +16,7 @@
 import logging
 import time
 import datetime
+from avocado.utils import process
 
 from avocado import main
 

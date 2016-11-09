@@ -17,6 +17,7 @@ import logging
 import datetime
 
 from avocado import main
+from avocado.utils import process
 
 from sdcm.tester import ClusterTester
 from sdcm.tester import clean_aws_resources
