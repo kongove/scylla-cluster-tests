@@ -142,10 +142,15 @@ version: !mux
         ami_id_db_scylla: 'ami-7e98bc69'
         ami_id_loader: 'ami-7e98bc69'
         ami_id_monitor: 'ami-7e98bc69'
-    asiasdev3:
+    #wrong
+    asiasdev3_1:
         ami_id_db_scylla: 'ami-8cc1e29b'
         ami_id_loader: 'ami-8cc1e29b'
         ami_id_monitor: 'ami-8cc1e29b'
+    asiasdev3:
+        ami_id_db_scylla: 'ami-ffd4f9e8'
+        ami_id_loader: 'ami-ffd4f9e8'
+        ami_id_monitor: 'ami-ffd4f9e8'
 
 
 databases: !mux
