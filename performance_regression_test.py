@@ -13,7 +13,7 @@
 #
 # Copyright (c) 2016 ScyllaDB
 
-
+import time
 from avocado import main
 from avocado.utils import process
 
@@ -158,6 +158,8 @@ class PerformanceRegressionTest(ClusterTester):
 
         1. Run a write workload
         """
+        # emulate manual test
+        time.sleep(600)
         # run a write workload
         base_cmd = ("cassandra-stress write no-warmup cl=QUORUM duration=60m "
                     "-schema 'replication(factor=3)' -port jmx=6868 "
