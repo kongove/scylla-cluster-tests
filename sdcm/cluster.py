@@ -2267,7 +2267,7 @@ class MonitorSetAWS(AWSCluster, BaseMonitorSet):
 
     def destroy(self):
         self.log.info('Destroy nodes')
-        self.start_backtrace_thread()
+        #self.start_backtrace_thread()
         self.download_monitor_data()
         for node in self.nodes:
             node.destroy()
