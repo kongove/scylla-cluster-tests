@@ -145,8 +145,8 @@ class PerformanceRegressionTest(ClusterTester):
                     loader.restart()
             else:
                 # run a workload
-                stress_queue = self.run_stress_thread(stress_cmd=base_cmd % mode, stress_num=1)
-                results = self.get_stress_results(queue=stress_queue, stress_num=1)
+                stress_queue = self.run_stress_thread(stress_cmd=base_cmd % mode, stress_num=2)
+                results = self.get_stress_results(queue=stress_queue, stress_num=2)
 
         self.display_results(results)
         self.get_snapshot()
@@ -166,8 +166,8 @@ class PerformanceRegressionTest(ClusterTester):
                     "-pop seq=1..10000000")
 
         # run a workload
-        stress_queue = self.run_stress_thread(stress_cmd=base_cmd, stress_num=1)
-        results = self.get_stress_results(queue=stress_queue, stress_num=1)
+        stress_queue = self.run_stress_thread(stress_cmd=base_cmd, stress_num=2)
+        results = self.get_stress_results(queue=stress_queue, stress_num=2)
 
         self.display_results(results)
         self.get_snapshot()
@@ -191,11 +191,11 @@ class PerformanceRegressionTest(ClusterTester):
                       "-pop 'dist=gauss(1..30000000,15000000,1500000)' ")
 
         # run a write workload
-        stress_queue = self.run_stress_thread(stress_cmd=base_cmd_w, stress_num=1)
-        results = self.get_stress_results(queue=stress_queue, stress_num=1)
+        stress_queue = self.run_stress_thread(stress_cmd=base_cmd_w, stress_num=2)
+        results = self.get_stress_results(queue=stress_queue, stress_num=2)
 
-        stress_queue = self.run_stress_thread(stress_cmd=base_cmd_r, stress_num=1)
-        results = self.get_stress_results(queue=stress_queue, stress_num=1)
+        stress_queue = self.run_stress_thread(stress_cmd=base_cmd_r, stress_num=2)
+        results = self.get_stress_results(queue=stress_queue, stress_num=2)
 
         try:
             self.display_results(results)
@@ -228,14 +228,14 @@ class PerformanceRegressionTest(ClusterTester):
                       "-pop 'dist=gauss(1..30000000,15000000,1500000)' ")
 
         # run a write workload
-        stress_queue = self.run_stress_thread(stress_cmd=base_cmd_w, stress_num=1)
-        self.get_stress_results(queue=stress_queue, stress_num=1)
+        stress_queue = self.run_stress_thread(stress_cmd=base_cmd_w, stress_num=2)
+        self.get_stress_results(queue=stress_queue, stress_num=2)
 
-        #stress_queue = self.run_stress_thread(stress_cmd=base_cmd_r, stress_num=1)
-        #self.get_stress_results(queue=stress_queue, stress_num=1)
+        #stress_queue = self.run_stress_thread(stress_cmd=base_cmd_r, stress_num=2)
+        #self.get_stress_results(queue=stress_queue, stress_num=2)
 
-        stress_queue = self.run_stress_thread(stress_cmd=base_cmd_m, stress_num=1)
-        results = self.get_stress_results(queue=stress_queue, stress_num=1)
+        stress_queue = self.run_stress_thread(stress_cmd=base_cmd_m, stress_num=2)
+        results = self.get_stress_results(queue=stress_queue, stress_num=2)
 
         try:
             self.display_results(results)
