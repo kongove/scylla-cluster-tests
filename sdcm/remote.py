@@ -34,7 +34,7 @@ from avocado.utils import wait
 
 from .log import SDCMAdapter
 
-ENABLE_MASTER_SSH = True
+ENABLE_MASTER_SSH = False
 LOG = process.log
 STDOUT_LOG = process.stdout_log
 STDERR_LOG = process.stderr_log
