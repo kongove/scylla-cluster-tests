@@ -1300,8 +1300,10 @@ class BaseLoaderSet(object):
             dst_stress_script_dir = os.path.join('/home', loader_user)
             dst_stress_script = os.path.join(dst_stress_script_dir,
                                              os.path.basename(stress_script.path))
-            node.remoter.send_files(stress_script.path, dst_stress_script_dir)
-            node.remoter.run(cmd='chmod +x %s' % dst_stress_script)
+
+            if not (stress_num > 1 and cpu_idx > 0):
+                node.remoter.send_files(stress_script.path, dst_stress_script_dir)
+                node.remoter.run(cmd='chmod +x %s' % dst_stress_script)
 
             if stress_num > 1:
                 node_cmd = 'taskset -c %s %s' % (cpu_idx, dst_stress_script)
