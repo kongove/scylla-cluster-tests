@@ -253,8 +253,7 @@ class BaseNode(object):
 
         self.cs_start_time = None
         self.database_log = os.path.join(self.logdir, 'database.log')
-        self.start_journal_thread()
-        self.start_backtrace_thread()
+        #self.start_journal_thread()
 
     def file_exists(self, file_path):
         try:
@@ -2268,6 +2267,7 @@ class MonitorSetAWS(AWSCluster, BaseMonitorSet):
 
     def destroy(self):
         self.log.info('Destroy nodes')
+        self.start_backtrace_thread()
         self.download_monitor_data()
         for node in self.nodes:
             node.destroy()
