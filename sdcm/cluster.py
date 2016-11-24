@@ -1306,7 +1306,7 @@ class BaseLoaderSet(object):
                 node.remoter.run(cmd='chmod +x %s' % dst_stress_script)
 
             if stress_num > 1:
-                node_cmd = 'taskset -c %s %s' % (cpu_idx, dst_stress_script)
+                node_cmd = 'screen -d -m taskset -c %s %s' % (cpu_idx, dst_stress_script)
             else:
                 node_cmd = dst_stress_script
             node_cmd = 'echo %s; %s' % (tag, node_cmd)
