@@ -164,7 +164,7 @@ class PerformanceRegressionTest(ClusterTester):
         # run a write workload
         base_cmd = ("cassandra-stress write cl=QUORUM duration=60m "
                     "-schema 'replication(factor=3)' -port jmx=6868 "
-                    "-log interval=60 "
+                    #"-log interval=60 "
                     "-mode cql3 native -rate threads=500 -errors ignore "
                     "-pop seq=1..10000000")
 
