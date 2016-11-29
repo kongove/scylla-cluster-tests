@@ -14,7 +14,7 @@ n_db_nodes: 3
 # If you want to use more than 1 loader node, I recommend
 # increasing the size of the DB instance (instance_type_db parameter),
 # since 't2.micro' nodes tend to struggle with a lot of load.
-n_loaders: 2
+n_loaders: 4
 # Nemesis class to use (possible types in sdcm.nemesis). Example: StopStartMonkey
 nemesis_class_name: 'ChaosMonkey'
 # Nemesis sleep interval to use if None provided specifically
