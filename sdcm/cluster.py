@@ -1375,7 +1375,7 @@ class BaseLoaderSet(object):
                 node_cmd = 'taskset -c %s %s' % (cpu_idx, dst_stress_script)
             else:
                 node_cmd = dst_stress_script
-            node_cmd = 'echo %s; %s' % (tag, node_cmd)
+            node_cmd = 'echo %s; screen -d -m %s' % (tag, node_cmd)
 
             result = node.remoter.run(cmd=node_cmd,
                                       timeout=timeout,
