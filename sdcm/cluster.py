@@ -2030,9 +2030,16 @@ class AWSCluster(BaseCluster):
                                                MinCount=count,
                                                MaxCount=count,
                                                KeyName=self._credentials.key_pair_name,
-                                               SecurityGroupIds=self._ec2_security_group_ids,
+                                               #SecurityGroupIds=self._ec2_security_group_ids,
                                                BlockDeviceMappings=self._ec2_block_device_mappings,
-                                               SubnetId=self._ec2_subnet_id,
+                                               #SubnetId=self._ec2_subnet_id,
+                                               NetworkInterfaces=[
+                                               {
+                                                   'DeviceIndex': 0,
+                                                   'SubnetId': self._ec2_subnet_id,
+                                                   'AssociatePublicIpAddress': True,
+                                                   'Groups': self._ec2_security_group_ids
+                                               },],
                                                InstanceType=self._ec2_instance_type)
         instance_ids = [i.id for i in instances]
         region_name = self.params.get('region_name')
