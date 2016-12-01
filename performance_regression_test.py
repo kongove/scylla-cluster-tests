@@ -162,6 +162,12 @@ class PerformanceRegressionTest(ClusterTester):
         1. Run a write workload
         """
         # run a write workload
+        base_cmd1 = ("cassandra-stress write cl=QUORUM duration=15m "
+                    "-schema 'replication(factor=3)' -port jmx=6868 "
+                    #"-log interval=60 "
+                    "-log interval=60 level=minimal "
+                    "-mode cql3 native -rate threads=1000 -errors ignore "
+                    "-pop seq=1..10000000")
         base_cmd = ("cassandra-stress write cl=QUORUM duration=60m "
                     "-schema 'replication(factor=3)' -port jmx=6868 "
                     #"-log interval=60 "
@@ -170,17 +176,38 @@ class PerformanceRegressionTest(ClusterTester):
                     "-pop seq=1..10000000")
 
         # run a workload
-        stress_queue = self.run_stress_thread(stress_cmd=base_cmd, stress_num=1)
+        stress_queue = self.run_stress_thread(stress_cmd=base_cmd1, stress_num=1)
 
         for loader_node in self.loaders.nodes:
             loader_node.remoter.close()
+
         import time
+        time.sleep(900)
+
+        for loader_node in self.loaders.nodes:
+            try:
+                loader_node.remoter.run("killall cassandra-stress")
+            except:
+                pass
+
+        try:
+            self.db_cluster.run("cqlsh -e 'drop keyspace keyspace1;'", verbose=True)
+        except:
+            pass
+        self.db_cluster.run("sudo systemctl restart scylla-server", verbose=True)
+
+        time.sleep(100)
+
+        stress_queue = self.run_stress_thread(stress_cmd=base_cmd, stress_num=1)
+        for loader_node in self.loaders.nodes:
+            loader_node.remoter.close()
+
         time.sleep(3600)
 
+        self.get_snapshot()
         results = self.get_stress_results(queue=stress_queue, stress_num=1)
 
         self.display_results(results)
-        self.get_snapshot()
 
     @close_master_ssh_nodes
     def test_read(self):
