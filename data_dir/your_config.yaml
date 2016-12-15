@@ -159,6 +159,26 @@ version: !mux
         ami_id_db_scylla: 'ami-38c2f22f'
         ami_id_loader: 'ami-38c2f22f'
         ami_id_monitor: 'ami-38c2f22f'
+    1.5rc2:
+        ami_id_db_scylla: 'ami-299b9d3e'
+        ami_id_loader: 'ami-299b9d3e'
+        ami_id_monitor: 'ami-299b9d3e'
+    1.5rc2.v2:
+        ami_id_db_scylla: 'ami-299b9d3e'
+        ami_id_loader: 'ami-299b9d3e'
+        ami_id_monitor: 'ami-299b9d3e'
+    1.5preview.glommer:
+        ami_id_db_scylla: 'ami-3d101f2a'
+        ami_id_loader: 'ami-3d101f2a'
+        ami_id_monitor: 'ami-3d101f2a'
+    1.5preview.glommer.v2:
+        ami_id_db_scylla: 'ami-b8c5caaf'
+        ami_id_loader: 'ami-b8c5caaf'
+        ami_id_monitor: 'ami-b8c5caaf'
+    1.5preview.glommer.v3:
+        ami_id_db_scylla: 'ami-8986899e'
+        ami_id_loader: 'ami-8986899e'
+        ami_id_monitor: 'ami-8986899e'
 
 
 ami_id_db_scylla_desc: 'version_info'
