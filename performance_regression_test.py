@@ -175,28 +175,28 @@ class PerformanceRegressionTest(ClusterTester):
                     "-mode cql3 native -rate threads=1000 -errors ignore "
                     "-pop seq=1..10000000")
 
-        # run a workload
-        stress_queue = self.run_stress_thread(stress_cmd=base_cmd1, stress_num=1)
+        ## run a workload
+        #stress_queue = self.run_stress_thread(stress_cmd=base_cmd1, stress_num=1)
 
-        for loader_node in self.loaders.nodes:
-            loader_node.remoter.close()
+        #for loader_node in self.loaders.nodes:
+        #    loader_node.remoter.close()
 
         import time
-        time.sleep(900)
+        #time.sleep(900)
 
-        for loader_node in self.loaders.nodes:
-            try:
-                loader_node.remoter.run("killall cassandra-stress")
-            except:
-                pass
+        #for loader_node in self.loaders.nodes:
+        #    try:
+        #        loader_node.remoter.run("killall cassandra-stress")
+        #    except:
+        #        pass
 
-        try:
-            self.db_cluster.run("cqlsh -e 'drop keyspace keyspace1;'", verbose=True)
-        except:
-            pass
-        self.db_cluster.run("sudo systemctl restart scylla-server", verbose=True)
+        #try:
+        #    self.db_cluster.run("cqlsh -e 'drop keyspace keyspace1;'", verbose=True)
+        #except:
+        #    pass
+        #self.db_cluster.run("sudo systemctl restart scylla-server", verbose=True)
 
-        time.sleep(100)
+        #time.sleep(100)
 
         stress_queue = self.run_stress_thread(stress_cmd=base_cmd, stress_num=1)
         for loader_node in self.loaders.nodes:
