@@ -172,7 +172,7 @@ class PerformanceRegressionTest(ClusterTester):
                     "-schema 'replication(factor=3)' -port jmx=6868 "
                     #"-log interval=60 "
                     "-log interval=60 level=minimal "
-                    "-mode cql3 native -rate threads=1000 -errors ignore "
+                    "-mode cql3 native -rate threads=100 -errors ignore "
                     "-pop seq=1..10000000")
 
         ## run a workload
