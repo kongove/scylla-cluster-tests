@@ -45,7 +45,7 @@ class PerformanceRegressionTest(ClusterTester):
 
     def get_test_xml(self, result):
         test_content = """
-  <test name="simple_regression_test: Loader%s CPU%s" executed="yes">
+  <test name="simple_regression_test: Loader%s CPU%s Keyspace %s" executed="yes">
     <description>"simple regression test, ami_id: %s, scylla version:
     %s", hardware: %s</description>
     <targets>
@@ -75,6 +75,7 @@ class PerformanceRegressionTest(ClusterTester):
   </test>
 """ % (     result['loader_idx'],
             result['cpu_idx'],
+            result['keyspace_idx'],
             self.params.get('ami_id_db_scylla'),
             self.params.get('ami_id_db_scylla_desc'),
             self.params.get('instance_type_db'),
