@@ -691,6 +691,10 @@ WantedBy=multi-user.target
         self._backtrace_thread = threading.Thread(target=self.backtrace_thread)
         self._backtrace_thread.start()
 
+    def stop_backtrace_thread(self):
+        self.stop_backtrace_thread()
+        self._backtrace_thread = None
+
     def __str__(self):
         return 'Node %s [%s | %s] (seed: %s)' % (self.name,
                                                  self.public_ip_address,
@@ -941,6 +945,7 @@ class OpenStackNode(BaseNode):
         self._instance.reboot()
 
     def destroy(self):
+        self.stop_backtrace_thread()
         self._instance.destroy()
         self.log.info('Destroyed')
 
@@ -1032,6 +1037,7 @@ class GCENode(BaseNode):
         self._instance_wait_safe(self._instance.reboot)
 
     def destroy(self):
+        self.stop_backtrace_thread()
         self._instance_wait_safe(self._instance.destroy)
         self.log.info('Destroyed')
 
@@ -1118,6 +1124,7 @@ class AWSNode(BaseNode):
         self.wait_db_up()
 
     def destroy(self):
+        self.stop_backtrace_thread()
         self._instance.terminate()
         global EC2_INSTANCES
         EC2_INSTANCES.remove(self._instance)
@@ -1202,6 +1209,7 @@ class LibvirtNode(BaseNode):
         self.wait_db_up()
 
     def destroy(self):
+        self.stop_backtrace_thread()
         self._domain.destroy()
         self._domain.undefine()
         remove_if_exists(self._backing_image)
