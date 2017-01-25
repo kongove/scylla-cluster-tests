@@ -2697,6 +2697,14 @@ class ScyllaGCECluster(GCECluster, BaseScyllaCluster):
         scylla_yaml_contents = scylla_yaml_contents.replace("cluster_name: 'Test Cluster'",
                                                             "cluster_name: '{0}'".format(self.name))
 
+        if 'auto_bootstrap' in scylla_yaml_contents:
+            p = re.compile('auto_bootstrap:.*')
+            scylla_yaml_contents = p.sub('auto_bootstrap: False',
+                                         scylla_yaml_contents)
+        else:
+            scylla_yaml_contents += "\nauto_bootstrap: False\n"
+
+
         with open(yaml_dst_path, 'w') as f:
             f.write(scylla_yaml_contents)
 
