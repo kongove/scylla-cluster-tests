@@ -123,7 +123,7 @@ def clean_aws_resources(method):
         try:
             return method(*args, **kwargs)
         except Exception:
-            args[0].clean_resources()
+            #args[0].clean_resources()
             raise
     return wrapper
 

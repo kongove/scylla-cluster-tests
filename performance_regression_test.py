@@ -320,7 +320,7 @@ class PerformanceRegressionTest(ClusterTester):
             self.display_results(results, test_name='test_write')
         except:
             pass
-        self.generate_stats_json(results, [base_cmd_w])
+        #self.generate_stats_json(results, [base_cmd_w])
 
     def test_read(self):
         """
