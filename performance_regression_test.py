@@ -316,7 +316,7 @@ class PerformanceRegressionTest(ClusterTester):
         results = self.get_stress_results(queue=stress_queue, stress_num=2, keyspace_num=1)
 
         self.display_results(results, test_name='test_write')
-        self.generate_stats_json(results, [base_cmd_w])
+        #self.generate_stats_json(results, [base_cmd_w])
 
     def test_read(self):
         """
