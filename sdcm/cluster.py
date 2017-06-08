@@ -3138,14 +3138,24 @@ class ScyllaAWSCluster(AWSCluster, BaseScyllaCluster):
 
     def add_nodes(self, count, ec2_user_data='', dc_idx=0):
         if not ec2_user_data:
-            if self.nodes:
+            ec2_user_data = ('--clustername %s --bootstrap true '
+                             '--totalnodes %s ' % (self.name,
+                                                   count))
+        if self.nodes:
+            if dc_idx > 0:
+                node_public_ips = [node.public_ip_address for node
+                                    in self.nodes if node.is_seed]
+                seeds = ",".join(node_public_ips)
+                if not seeds:
+                    seeds = self.nodes[0].public_ip_address
+            else:
                 node_private_ips = [node.private_ip_address for node
                                     in self.nodes if node.is_seed]
                 seeds = ",".join(node_private_ips)
-                ec2_user_data = ('--clustername %s --bootstrap true '
-                                 '--totalnodes %s ' % (self.name,
-                                                       count))
-                #FIXME: '--totalnodes %s --seeds %s' % (self.name,
+                if not seeds:
+                    seeds = self.nodes[0].private_ip_address
+            ec2_user_data += ' --seeds %s' % seeds
+
         added_nodes = super(ScyllaAWSCluster, self).add_nodes(count=count,
                                                               ec2_user_data=ec2_user_data,
                                                               dc_idx=dc_idx)
@@ -3156,7 +3166,10 @@ class ScyllaAWSCluster(AWSCluster, BaseScyllaCluster):
         if len(self.datacenter) > 1:
             endpoint_snitch = "Ec2MultiRegionSnitch"
             node.datacenter_setup(self.datacenter)
-        node.config_setup(enable_exp=True, endpoint_snitch=endpoint_snitch)
+            seed_address = self.nodes[0].public_ip_address
+            node.config_setup(seed_address=seed_address, enable_exp=True, endpoint_snitch=endpoint_snitch)
+        else:
+            node.config_setup(enable_exp=True, endpoint_snitch=endpoint_snitch)
         node.remoter.run('sudo systemctl restart scylla-server.service')
 
     def wait_for_init(self, node_list=None, verbose=False):
@@ -3167,8 +3180,8 @@ class ScyllaAWSCluster(AWSCluster, BaseScyllaCluster):
 
         def node_setup(node):
             node.wait_ssh_up(verbose=verbose)
-            if self._experimental():
-                self._node_setup(node=node)
+            #if self._experimental():
+            self._node_setup(node=node)
             node.wait_db_up(verbose=verbose)
             node.remoter.run('sudo yum install -y {}-gdb'.format(node.scylla_pkg()),
                              verbose=verbose, ignore_status=True)
