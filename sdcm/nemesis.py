@@ -239,7 +239,7 @@ class Nemesis(object):
         cmd = 'nodetool -h localhost compact'
         self._run_nodetool(cmd, self.target_node)
 
-    def disrupt_nodetool_refresh(self, big_sstable=True):
+    def disrupt_nodetool_refresh(self, big_sstable=True, skip_download=False):
         node = self.target_node
         self._set_current_disruption('Refresh keyspace1.standard1 on {}'.format(node.name))
         if big_sstable:
@@ -252,8 +252,9 @@ class Nemesis(object):
             sstable_url = 'https://s3.amazonaws.com/scylla-qa-team/keyspace1.standard1.small.tar.gz'
             sstable_file = "/tmp/keyspace1.standard1.small.tar.gz"
             sstable_md5 = '76cca3135e175d859c0efb67c6a7b233'
-        remote_get_file(node.remoter, sstable_url, sstable_file,
-                        hash_expected=sstable_md5, retries=2)
+        if not skip_download:
+            remote_get_file(node.remoter, sstable_url, sstable_file,
+                            hash_expected=sstable_md5, retries=2)
 
         self.log.debug('Make sure keyspace1.standard1 exists')
         result = self._run_nodetool('nodetool --host localhost cfstats keyspace1.standard1',
@@ -411,7 +412,7 @@ class RefreshBigMonkey(Nemesis):
 
     @log_time_elapsed_and_status
     def disrupt(self):
-        self.disrupt_nodetool_refresh(big_sstable=True)
+        self.disrupt_nodetool_refresh(big_sstable=True, skip_download=True)
 
 
 class ChaosMonkey(Nemesis):
