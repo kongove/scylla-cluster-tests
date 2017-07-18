@@ -494,7 +494,7 @@ class BaseNode(object):
         self.remoter.run('sudo yum install https://grafanarel.s3.amazonaws.com/builds/grafana-3.1.1-1470047149.x86_64.rpm -y')
         self.remoter.run('sudo grafana-cli plugins install grafana-piechart-panel')
 
-    def setup_grafana(self, scylla_version=''):
+    def setup_grafana(self):
         self.remoter.run('sudo cp /etc/grafana/grafana.ini /tmp/grafana-noedit.ini')
         self.remoter.run('sudo chown %s /tmp/grafana-noedit.ini' % self.remoter.user)
         grafana_ini_dst_path = os.path.join(tempfile.mkdtemp(prefix='sct'),
@@ -532,7 +532,7 @@ class BaseNode(object):
         else:
             process.run('sudo yum install git -y')
 
-        scylla_version = get_monitor_version(scylla_version, clone=True)
+        scylla_version = get_monitor_version(self.scylla_version, clone=True)
         for i in glob.glob('data_dir/grafana/*.%s.json' % scylla_version):
             json_mapping[i.replace('data_dir/', '')] = 'dashboards/db'
 
@@ -1973,7 +1973,7 @@ class BaseMonitorSet(object):
     grafana_start_time = None
     scylla_version = ''
 
-    def wait_for_init(self, targets, verbose=False, scylla_version=''):
+    def wait_for_init(self, targets, verbose=False, scylla_version='', is_enterprise=None):
         queue = Queue.Queue()
 
         def node_setup(node):
@@ -1985,8 +1985,9 @@ class BaseMonitorSet(object):
             node.install_prometheus()
             node.setup_prometheus(targets=targets)
             node.install_grafana()
-            node.setup_grafana(scylla_version)
             self.scylla_version = scylla_version
+            self.is_enterprise = is_enterprise
+            node.setup_grafana()
             # The time will be used in url of Grafana monitor,
             # the data from this point to the end of test will
             # be captured.
@@ -2035,9 +2036,10 @@ class BaseMonitorSet(object):
             scylla_version = get_monitor_version(self.scylla_version)
             version = scylla_version.replace('.', '-')
 
+            scylla_pkg = 'scylla-enterprise' if self.is_enterprise else 'scylla'
             for n, node in enumerate(self.nodes):
-                grafana_url = "http://%s:3000/dashboard/db/scylla-per-server-metrics-%s?from=%s&to=now" % (
-                              node.public_ip_address, version, start_time)
+                grafana_url = "http://%s:3000/dashboard/db/%s-per-server-metrics-%s?from=%s&to=now" % (
+                              node.public_ip_address, scylla_pkg, version, start_time)
                 snapshot_path = os.path.join(self.logdir,
                                              "grafana-snapshot-%s.png" % n)
                 process.run("cd phantomjs-2.1.1-linux-x86_64 && "
@@ -2069,7 +2071,7 @@ class NoMonitorSet(object):
     def __str__(self):
         return 'NoMonitorSet'
 
-    def wait_for_init(self, targets, verbose=False, scylla_version=''):
+    def wait_for_init(self, targets, verbose=False, scylla_version='', is_enterprise=None):
         del targets
         del verbose
         self.log.info('Monitor nodes disabled for this run')
