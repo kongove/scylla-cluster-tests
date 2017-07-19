@@ -1494,7 +1494,7 @@ class BaseCluster(object):
                 errors.append({node.name: node_errors})
         return errors
 
-    def set_tc(self, node, dst_nodes):
+    def set_tc(self, node, dst_nodes, local_nodes):
         node.remoter.run("sudo modprobe sch_netem")
         node.remoter.run("sudo tc qdisc del dev eth0 root", ignore_status=True)
         node.remoter.run("sudo tc qdisc add dev eth0 handle 1: root prio")
@@ -3074,7 +3074,8 @@ class ScyllaGCECluster(GCECluster, BaseScyllaCluster):
 
         for node in node_list:
             dst_nodes = [n for n in node_list if n.dc_idx != node.dc_idx]
-            #self.set_tc(node, dst_nodes)
+            local_nodes = [n for n in node_list if n.dc_idx == node.dc_idx and n != node]
+            self.set_tc(node, dst_nodes, local_nodes)
 
     def destroy(self):
         self.stop_nemesis()

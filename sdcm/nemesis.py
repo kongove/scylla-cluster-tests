@@ -227,7 +227,7 @@ class Nemesis(object):
                 self.reconfigure_monitoring()
                 # Replace the node that was terminated.
                 if add_node:
-                    new_nodes = self.cluster.add_nodes(count=1)
+                    new_nodes = self.cluster.add_nodes(count=1, dc_idx=target_node.dc_idx)
                     self.cluster.wait_for_init(node_list=new_nodes)
                     self.reconfigure_monitoring()
 
@@ -241,6 +241,10 @@ class Nemesis(object):
         if not disrupt_methods:
             disrupt_methods = [attr[1] for attr in inspect.getmembers(self) if
                                attr[0].startswith('disrupt_') and
+                               callable(attr[1])]
+        else:
+            disrupt_methods = [attr[1] for attr in inspect.getmembers(self) if
+                               attr[0] in disrupt_methods and
                                callable(attr[1])]
         disrupt_method = random.choice(disrupt_methods)
         disrupt_method()
