@@ -227,7 +227,7 @@ class Nemesis(object):
                 self.reconfigure_monitoring()
                 # Replace the node that was terminated.
                 if add_node:
-                    new_nodes = self.cluster.add_nodes(count=1, dc_idx=target_node.dc_idx)
+                    new_nodes = self.cluster.add_nodes(count=1, dc_idx=self.target_node.dc_idx)
                     self.cluster.wait_for_init(node_list=new_nodes)
                     self.reconfigure_monitoring()
 
@@ -278,7 +278,7 @@ def log_time_elapsed_and_status(method):
                 self.log.info('unable to get nodetool status from: %s' % node)
 
     def wrapper(*args, **kwargs):
-        print_nodetool_status(args[0])
+        #print_nodetool_status(args[0])
         num_nodes_before = len(args[0].cluster.nodes)
         start_time = time.time()
         args[0].log.debug('Start disruption at `%s`', datetime.datetime.fromtimestamp(start_time))
@@ -296,7 +296,7 @@ def log_time_elapsed_and_status(method):
                                           'start': int(start_time),
                                           'end': int(end_time), 'duration': time_elapsed})
             args[0].log.debug('%s duration -> %s s', args[0].current_disruption, time_elapsed)
-            print_nodetool_status(args[0])
+            #print_nodetool_status(args[0])
             num_nodes_after = len(args[0].cluster.nodes)
             if num_nodes_before != num_nodes_after:
                 args[0].log.error('num nodes before %s and nodes after %s does not match' %

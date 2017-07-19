@@ -571,14 +571,15 @@ class ClusterTester(Test):
 
     @clean_aws_resources
     def run_stress_thread(self, stress_cmd, duration=None, stress_num=1, keyspace_num=1):
-        stress_cmd = self._cs_add_node_flag(stress_cmd)
+        #stress_cmd = self._cs_add_node_flag(stress_cmd)
         if duration is None:
             duration = self.params.get('test_duration')
         timeout = duration * 60 + 600
         return self.loaders.run_stress_thread(stress_cmd, timeout,
                                               self.outputdir,
                                               stress_num=stress_num,
-                                              keyspace_num=keyspace_num)
+                                              keyspace_num=keyspace_num,
+                                              node_list=self.db_cluster.nodes)
 
     @clean_aws_resources
     def kill_stress_thread(self):

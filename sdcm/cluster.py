@@ -1137,7 +1137,7 @@ class GCENode(BaseNode):
     def __init__(self, gce_instance, gce_service, credentials,
                  node_prefix='node', node_index=1, gce_image_username='root',
                  base_logdir=None, dc_idx=0):
-        name = '%s-%s' % (node_prefix, node_index)
+        name = '%s-%s-%s' % (node_prefix, dc_idx, node_index)
         self._instance = gce_instance
         self._gce_service = gce_service
         self._wait_public_ip()
@@ -1803,19 +1803,21 @@ class BaseLoaderSet(object):
         time_elapsed = time.time() - start_time
         self.log.debug('Setup duration -> %s s', int(time_elapsed))
 
-    def run_stress_thread(self, stress_cmd, timeout, output_dir, stress_num=1, keyspace_num=1):
+    def run_stress_thread(self, stress_cmd, timeout, output_dir, stress_num=1, keyspace_num=1, node_list=[]):
         stress_cmd = stress_cmd.replace(" -schema ", " -schema keyspace=keyspace$2 ")
-        stress_cmd = "mkfifo /tmp/cs_pipe_$1_$2; cat /tmp/cs_pipe_$1_$2|python /usr/bin/cassandra_stress_exporter & " +\
-                     stress_cmd +\
-                     "|tee /tmp/cs_pipe_$1_$2; pkill -P $$ -f cassandra_stress_exporter; rm -f /tmp/cs_pipe_$1_$2"
-        # We'll save a script with the last c-s command executed on loaders
-        stress_script = script.TemporaryScript(name='run_cassandra_stress.sh',
-                                               content='%s\n' % stress_cmd)
-        self.log.info('Stress script content:\n%s' % stress_cmd)
-        stress_script.save()
         queue = Queue.Queue()
 
-        def node_run_stress(node, loader_idx, cpu_idx, keyspace_idx):
+        def node_run_stress(node, loader_idx, cpu_idx, keyspace_idx, stress_cmd):
+            first_node = [n for n in node_list if n.dc_idx == loader_idx % 3][0]
+            stress_cmd += " -node {}".format(first_node.private_ip_address)
+            stress_cmd = "mkfifo /tmp/cs_pipe_$1_$2; cat /tmp/cs_pipe_$1_$2|python /usr/bin/cassandra_stress_exporter & " +\
+                         stress_cmd +\
+                         "|tee /tmp/cs_pipe_$1_$2; pkill -P $$ -f cassandra_stress_exporter; rm -f /tmp/cs_pipe_$1_$2"
+            # We'll save a script with the last c-s command executed on loaders
+            stress_script = script.TemporaryScript(name='run_cassandra_stress.sh',
+                                                   content='%s\n' % stress_cmd)
+            self.log.info('Stress script content:\n%s' % stress_cmd)
+            stress_script.save()
             try:
                 logdir = path.init_dir(output_dir, self.name)
             except OSError:
@@ -1854,7 +1856,7 @@ class BaseLoaderSet(object):
                 for ks_idx in range(1, keyspace_num + 1):
                     setup_thread = threading.Thread(target=node_run_stress,
                                                     args=(loader, loader_idx,
-                                                          cpu_idx, ks_idx))
+                                                          cpu_idx, ks_idx, stress_cmd))
                     setup_thread.daemon = True
                     setup_thread.start()
                     time.sleep(30)
@@ -2603,6 +2605,7 @@ class GCECluster(BaseCluster):
         nodes = []
         for node_index in range(self._node_index + 1, self._node_index + count + 1):
             name = "%s-%s-%s" % (self.node_prefix, dc_idx, node_index)
+            assert len(name) <= 63
             gce_disk_struct = list()
             gce_disk_struct.append(self._get_root_disk_struct(name=name,
                                                               disk_type=self._gce_image_type,
@@ -2610,8 +2613,10 @@ class GCECluster(BaseCluster):
             for i in range(self._gce_n_local_ssd):
                 gce_disk_struct.append(self._get_scratch_disk_struct(name=name, index=i, dc_idx=dc_idx))
             self.log.info(gce_disk_struct)
+            #size = '' if dc_idx == 2 else self._gce_instance_type
+            size = self._gce_instance_type
             instance = self._gce_services[dc_idx].create_node(name=name,
-                                                              size=self._gce_instance_type,
+                                                              size=size,
                                                               image=self._gce_image,
                                                               ex_disks_gce_struct=gce_disk_struct)
             self.log.info('Created instance %s', instance)
@@ -2631,7 +2636,9 @@ class GCECluster(BaseCluster):
 
             self._node_index += 1
             self.nodes += [n]
-            if len(self.nodes) - len(nodes) > 0:
+
+            local_nodes = [n for n in self.nodes if n.dc_idx == dc_idx]
+            if len(local_nodes) - len(nodes) > 0:
                 n.is_addition = True
 
         assert len(nodes) == count, 'Fail to create {} instances'.format(count)
@@ -3069,13 +3076,14 @@ class ScyllaGCECluster(GCECluster, BaseScyllaCluster):
         time_elapsed = time.time() - start_time
         self.log.debug('Setup duration -> %s s', int(time_elapsed))
         if not node_list[0].scylla_version:
-            result = node_list[0].remoter.run("scylla --version")
-            node_list[0].scylla_version = result.stdout
+            result = node_list[0].remoter.run("rpm -q scylla")
+            match = re.findall("scylla-(.*).el7.centos", result.stdout)
+            node_list[0].scylla_version = match[0] if match else ''
 
         for node in node_list:
             dst_nodes = [n for n in node_list if n.dc_idx != node.dc_idx]
             local_nodes = [n for n in node_list if n.dc_idx == node.dc_idx and n != node]
-            self.set_tc(node, dst_nodes, local_nodes)
+            #self.set_tc(node, dst_nodes, local_nodes)
 
     def destroy(self):
         self.stop_nemesis()
@@ -3202,8 +3210,9 @@ class ScyllaAWSCluster(AWSCluster, BaseScyllaCluster):
         time_elapsed = time.time() - start_time
         self.log.debug('Setup duration -> %s s', int(time_elapsed))
         if not node_list[0].scylla_version:
-            result = node_list[0].remoter.run("scylla --version")
-            node_list[0].scylla_version = result.stdout
+            result = node_list[0].remoter.run("rpm -q scylla")
+            match = re.findall("scylla-(.*).el7.centos", result.stdout)
+            node_list[0].scylla_version = match[0] if match else ''
 
     def destroy(self):
         self.stop_nemesis()
