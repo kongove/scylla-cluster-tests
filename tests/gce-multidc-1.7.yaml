@@ -7,7 +7,7 @@ cassandra_stress_population_size: 100000000000
 n_db_nodes: '5 5 3'
 n_loaders: 3
 n_monitor_nodes: 1
-nemesis_class_name: 'MdcChaosMonkey'
+nemesis_class_name: 'ChaosMonkey'
 #nemesis_class_name: 'DrainerMonkey'
 nemesis_interval: 5
 user_prefix: 'sct-multidc'
