@@ -227,12 +227,12 @@ class ClusterTester(Test):
         self.test_index = self.__class__.__name__.lower()
         self.test_type = self.params.id.name
         self.test_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        self.stats = {k: {} for k in ['test_details', 'setup_details', 'versions', 'results', 'nemesis',
-                                      'errors', 'coredumps']}
-        self.stats['setup_details'] = self.get_setup_details()
-        self.stats['versions'] = self.get_scylla_versions()
-        self.stats['test_details'] = self.get_test_details()
-        self.create_test_stats()
+        #self.stats = {k: {} for k in ['test_details', 'setup_details', 'versions', 'results', 'nemesis',
+        #                              'errors', 'coredumps']}
+        #self.stats['setup_details'] = self.get_setup_details()
+        #self.stats['versions'] = self.get_scylla_versions()
+        #self.stats['test_details'] = self.get_test_details()
+        #self.create_test_stats()
 
     def get_nemesis_class(self):
         """
