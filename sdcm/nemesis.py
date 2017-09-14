@@ -255,12 +255,11 @@ class Nemesis(object):
                 self.log.info('Decommission %s PASS', self.target_node)
                 self.cluster.nodes.remove(self.target_node)
                 self.target_node.destroy()
-                self.reconfigure_monitoring()
                 # Replace the node that was terminated.
                 if add_node:
                     new_nodes = self.cluster.add_nodes(count=1, dc_idx=self.target_node.dc_idx)
                     self.cluster.wait_for_init(node_list=new_nodes)
-                    self.reconfigure_monitoring()
+                self.reconfigure_monitoring()
 
     def disrupt_no_corrupt_repair(self):
         self._set_current_disruption('NoCorruptRepair %s' % self.target_node)
