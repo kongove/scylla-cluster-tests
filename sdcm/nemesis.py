@@ -594,6 +594,7 @@ class UpgradeNemesis(Nemesis):
             # flush all memtables to SSTables
             node.remoter.run('sudo nodetool drain')
             node.remoter.run('sudo nodetool snapshot')
+            node.remoter.run('sudo systemctl stop scylla-server.service')
             # update *development* packages
             node.remoter.run('sudo rpm -UvhR --oldpackage /tmp/scylla/*development*', ignore_status=True)
             # and all the rest
@@ -609,13 +610,14 @@ class UpgradeNemesis(Nemesis):
             # flush all memtables to SSTables
             node.remoter.run('sudo nodetool drain')
             node.remoter.run('sudo nodetool snapshot')
+            node.remoter.run('sudo systemctl stop scylla-server.service')
             node.remoter.run('sudo chown root.root /etc/yum.repos.d/scylla.repo')
             node.remoter.run('sudo chmod 644 /etc/yum.repos.d/scylla.repo')
             node.remoter.run('sudo yum clean all')
             ver_suffix = '-{}'.format(new_version) if new_version else ''
             node.remoter.run('sudo yum install scylla{0} scylla-server{0} scylla-jmx{0} scylla-tools{0}'
                              ' scylla-conf{0} scylla-kernel-conf{0} scylla-debuginfo{0} -y'.format(ver_suffix))
-        node.remoter.run('sudo systemctl restart scylla-server.service')
+        node.remoter.run('sudo systemctl start scylla-server.service')
         node.wait_db_up(verbose=True)
         new_ver = node.remoter.run('rpm -qa scylla-server')
         if orig_ver == new_ver:
