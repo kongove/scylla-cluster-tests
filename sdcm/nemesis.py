@@ -657,14 +657,14 @@ class RollbackNemesis(Nemesis):
         self.log.info('Rollbacking a Node')
         orig_ver = node.remoter.run('rpm -qa scylla-server')
         node.remoter.run('sudo cp ~/scylla.repo-backup /etc/yum.repos.d/scylla.repo')
+        # flush all memtables to SSTables
+        node.remoter.run('nodetool drain')
         # backup the data
         node.remoter.run('nodetool snapshot')
         node.remoter.run('sudo chown root.root /etc/yum.repos.d/scylla.repo')
         node.remoter.run('sudo chmod 644 /etc/yum.repos.d/scylla.repo')
         node.remoter.run('sudo yum clean all')
         node.remoter.run('sudo yum downgrade scylla scylla-server scylla-jmx scylla-tools scylla-conf scylla-kernel-conf scylla-debuginfo -y')
-        # flush all memtables to SSTables
-        node.remoter.run('nodetool drain')
         node.remoter.run('sudo cp /etc/scylla/scylla.yaml-backup /etc/scylla/scylla.yaml')
         node.remoter.run('sudo systemctl restart scylla-server.service')
         node.wait_db_up(verbose=True)
