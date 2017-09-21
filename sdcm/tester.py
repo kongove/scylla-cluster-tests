@@ -984,7 +984,7 @@ class ClusterTester(Test):
             if ('/run/backends/gce', 'cluster_backend', 'gce') == p:
                 is_gce = True
         for p in self.params.iteritems():
-            if p[1] in ['stress_cmd', 'stress_modes']:
+            if p[1] in ['stress_cmd', 'stress_modes', 'n_db_nodes']:
                 continue
             else:
                 if is_gce and (p[0], p[1]) in \
@@ -994,6 +994,8 @@ class ClusterTester(Test):
                     # exclude these params from gce run
                     continue
                 elif p[1] == 'n_db_nodes' and isinstance(p[2], str) and re.search('\s', p[2]):  # multidc
+                    print p
+                    p = list(p)
                     p[2] = re.sub('\s', '_', p[2])
                 setup_details[p[1]] = p[2]
 
