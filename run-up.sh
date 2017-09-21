@@ -1,0 +1,1 @@
+avocado run upgrade_test.py:UpgradeTest.test_20_minutes --xunit jenkins_perf.xml --job-results-dir "./" --multiplex ./tests/upgrade.yaml --filter-only /run/backends/gce /run/databases/scylla  --show-job-log
