@@ -1,15 +1,17 @@
 test_duration: 45
-n_db_nodes: 2
+n_db_nodes: 3
 n_loaders: 1
 n_monitor_nodes: 1
-user_prefix: 'gce-refresh-1-7'
-failure_post_behavior: destroy
+user_prefix: 'gce-refresh-1-7-amos2'
+failure_post_behavior: keep 
 prepare_stress_cmd: cassandra-stress write no-warmup cl=QUORUM duration=30s -schema 'replication(factor=1)' -port jmx=6868 -mode cql3 native -rate threads=10 -errors ignore -pop seq=1..10000000 -log interval=5
 stress_cmd: cassandra-stress write no-warmup cl=QUORUM duration=3m -schema 'replication(factor=1)' -port jmx=6868 -mode cql3 native -rate threads=100 -errors ignore -pop seq=1..10000000 -log interval=5
 # 100M (300000 rows)
 sstable_url: 'https://s3.amazonaws.com/scylla-qa-team/keyspace1.standard1.100M.tar.gz'
 sstable_file: '/tmp/keyspace1.standard1.100M.tar.gz'
 sstable_md5: 'f641f561067dd612ff95f2b89bd12530'
+repo_file: 'scylla.repo.upgrade'
+experimental: 'true'
 
 backends: !mux
     gce: !mux
@@ -32,7 +34,8 @@ backends: !mux
         gce_root_disk_type_monitor: 'pd-standard'
         gce_root_disk_size_monitor: 50
         gce_n_local_ssd_disk_monitor: 0
-        scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/branch-1.7/30/scylla.repo'
+        #scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/branch-2.0/23/scylla.repo'
+        scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/branch-1.7/45/scylla.repo'
         us_east_1:
           gce_datacenter: 'us-east1-b'
 
