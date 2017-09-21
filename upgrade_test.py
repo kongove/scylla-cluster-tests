@@ -73,8 +73,7 @@ class UpgradeTest(ClusterTester):
         node.remoter.run('sudo systemctl restart scylla-server.service')
         node.wait_db_up(verbose=True)
         new_ver = node.remoter.run('rpm -qa scylla-server')
-        if orig_ver == new_ver:
-            self.log.error('scylla-server version isn\'t changed')
+        assert orig_ver != new_ver, "scylla-server version isn't changed"
 
     default_params = {'timeout': 650000}
 
