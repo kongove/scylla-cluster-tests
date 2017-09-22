@@ -984,7 +984,7 @@ class ClusterTester(Test):
             if ('/run/backends/gce', 'cluster_backend', 'gce') == p:
                 is_gce = True
         for p in self.params.iteritems():
-            if p[1] in ['stress_cmd', 'stress_modes']:
+            if p[1] in ['stress_cmd', 'stress_modes', 'n_db_nodes']:
                 continue
             else:
                 if is_gce and (p[0], p[1]) in \
