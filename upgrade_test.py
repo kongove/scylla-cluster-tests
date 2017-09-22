@@ -87,7 +87,7 @@ class UpgradeTest(ClusterTester):
         #duration = 30 * len(self.db_cluster.nodes)
 
         self.log.info('Starting c-s write workload for 5m')
-        stress_cmd = self._cs_add_node_flag(self.params.get('stress_cmd'))
+        stress_cmd = self.params.get('stress_cmd')
         stress_queue = self.run_stress_thread(stress_cmd=stress_cmd)
                                               #duration=duration)
 
@@ -95,7 +95,7 @@ class UpgradeTest(ClusterTester):
         time.sleep(360)
 
         self.log.info('Starting c-s mixed workload for 60m')
-        stress_cmd_1 = self._cs_add_node_flag(self.params.get('stress_cmd_1'))
+        stress_cmd_1 = self.params.get('stress_cmd_1')
         stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_1)
                                               #duration=duration)
         self.log.info('Sleeping for 120s to let cassandra-stress start before the upgrade...')
