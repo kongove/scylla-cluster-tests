@@ -115,9 +115,9 @@ class UpgradeTest(ClusterTester):
         # upgrade all the nodes in random order
         for i in indexes:
             self.db_cluster.node_to_upgrade = self.db_cluster.nodes[i]
-            self.log.info('Upgrade Node begin')
+            self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
             self.upgrade_node(self.db_cluster.node_to_upgrade)
-            self.log.info('Upgrade Node ended')
+            self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
 
         self.verify_stress_thread(stress_queue)
 
