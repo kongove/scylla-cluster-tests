@@ -75,7 +75,7 @@ class UpgradeTest(ClusterTester):
             #node.remoter.run('sudo yum install scylla{0} scylla-server{0} scylla-jmx{0} scylla-tools{0}'
             #                 ' scylla-conf{0} scylla-kernel-conf{0} scylla-debuginfo{0} -y'.format(ver_suffix))
             node.remoter.run('sudo yum update scylla{0}\* -y'.format(ver_suffix))
-        node.remoter.run('sudo systemctl stop scylla-server.service')
+        node.remoter.run('sudo systemctl start scylla-server.service')
         node.wait_db_up(verbose=True)
         new_ver = node.remoter.run('rpm -qa scylla-server')
         assert orig_ver != new_ver, "scylla-server version isn't changed"
@@ -99,7 +99,7 @@ class UpgradeTest(ClusterTester):
         time.sleep(360)
 
         self.log.info('Starting c-s mixed workload for 60m')
-        stress_cmd_1 = self._cs_add_node_flag(self.params.get('stress_cmd_1'))
+        #stress_cmd_1 = self._cs_add_node_flag(self.params.get('stress_cmd_1'))
         stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_1)
                                               #duration=duration)
         self.log.info('Sleeping for 120s to let cassandra-stress start before the upgrade...')
