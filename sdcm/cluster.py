@@ -1420,8 +1420,11 @@ class BaseCluster(object):
         node.remoter.run("sudo tc qdisc del dev eth0 root", ignore_status=True)
         node.remoter.run("sudo tc qdisc add dev eth0 handle 1: root prio")
         for dst in dst_nodes:
-            node.remoter.run("sudo tc filter add dev eth0 protocol ip parent 1:0 prio 1 u32 match ip dst {} flowid 2:1".format(dst.private_ip_address))
-        node.remoter.run("sudo tc qdisc add dev eth0 parent 1:1 handle 2:1 netem delay 100ms 20ms 25% reorder 5% 25% loss random 5% 25%")
+            node.remoter.run("sudo tc filter add dev eth0 protocol ip parent 1:0 prio 1 u32 match ip dst {} flowid 1:2".format(dst.private_ip_address))
+        for dst in local_nodes:
+            node.remoter.run("sudo tc filter add dev eth0 protocol ip parent 1:0 prio 1 u32 match ip dst {} flowid 1:3".format(dst.private_ip_address))
+        node.remoter.run("sudo tc qdisc add dev eth0 parent 1:2 handle 2:1 netem delay 100ms 20ms 25% reorder 5% 25% loss random 5% 25%")
+        node.remoter.run("sudo tc qdisc add dev eth0 parent 1:3 handle 3:1 netem delay 50ms 20ms 15% reorder 5% 15% loss random 5% 15%")
         node.remoter.run("sudo tc qdisc show dev eth0", verbose=True)
         node.remoter.run("sudo tc filter show dev eth0", verbose=True)
 
