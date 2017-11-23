@@ -38,6 +38,7 @@ from avocado.utils import path
 from avocado.utils import process
 from avocado.utils import script
 from avocado.utils import runtime as avocado_runtime
+from avocado.utils import wait_for
 
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
@@ -1728,6 +1729,8 @@ class BaseLoaderSet(object):
                 self.log.info('Profile content:\n%s' % profile_content)
                 cs_profile.save()
         queue = Queue.Queue()
+        prepared_threads = []
+        stress_threads = []
 
         def node_run_stress(node, loader_idx, cpu_idx, keyspace_idx, profile, stress_cmd):
             if node_list and '-node' not in stress_cmd:
@@ -1774,6 +1777,12 @@ class BaseLoaderSet(object):
                 node_cmd = dst_stress_script
             node_cmd = 'echo %s; %s %s %s' % (tag, node_cmd, cpu_idx, keyspace_idx)
 
+            prepared_threads.append(os.getpid())
+            wait.wait_for(func=lambda: len(stress_threads) == len(prepared_threads),
+                          step=2,
+                          timeout=1000,
+                          text='Wait for c-s stress setup finishes')
+
             result = node.remoter.run(cmd=node_cmd,
                                       timeout=timeout,
                                       ignore_status=True,
@@ -1791,6 +1800,7 @@ class BaseLoaderSet(object):
                                                           cpu_idx, ks_idx, profile, stress_cmd))
                     setup_thread.daemon = True
                     setup_thread.start()
+                    stress_threads.append(setup_thread)
 
         return queue
 
