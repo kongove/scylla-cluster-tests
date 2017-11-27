@@ -295,12 +295,12 @@ class ScyllaGCECluster(GCECluster, cluster.BaseScyllaCluster):
         node.remoter.run('sudo yum remove -y abrt')
         # Let's re-create the yum database upon update
         node.remoter.run('sudo yum clean all')
-        result = node.remoter.run('ls /etc/yum.repos.d/epel.repo', ignore_status=True)
-        if result.exit_status == 0:
-            node.remoter.run('sudo yum update -y --skip-broken --disablerepo=epel')
-        else:
-            node.remoter.run('sudo yum update -y --skip-broken')
-        node.remoter.run('sudo yum install -y rsync tcpdump screen wget net-tools')
+        #result = node.remoter.run('ls /etc/yum.repos.d/epel.repo', ignore_status=True)
+        #if result.exit_status == 0:
+        #    node.remoter.run('sudo yum update -y --skip-broken --disablerepo=epel')
+        #else:
+        #    node.remoter.run('sudo yum update -y --skip-broken')
+        #node.remoter.run('sudo yum install -y rsync tcpdump screen wget net-tools')
         yum_config_path = '/etc/yum.repos.d/scylla.repo'
         node.remoter.run('sudo curl %s -o %s' %
                          (self.params.get('scylla_repo'), yum_config_path))
@@ -331,7 +331,12 @@ class ScyllaGCECluster(GCECluster, cluster.BaseScyllaCluster):
             result = node.remoter.run('ls /dev/sd[b-z]')
             disks_str = ",".join(re.findall('/dev/sd\w+', result.stdout))
         assert disks_str != ""
+        node.remoter.run('sudo sed -i -e "s/mdadm --create/udevadm settle; mdadm --create/g" /usr/lib/scylla/scylla_raid_setup; sudo sed -i -e "s/mkfs.xfs/udevadm settle; mkfs.xfs/g" /usr/lib/scylla/scylla_raid_setup; cat /usr/lib/scylla/scylla_raid_setup', verbose=True, ignore_status=True)
+        node.remoter.run('cat /proc/mdstat;ls -l /dev/mapper;cat /sys/block/dm-*/slaves/*', verbose=True, ignore_status=True)
+        node.remoter.run('echo root:redhat |sudo chpasswd')
+        #time.sleep(180)
         node.remoter.run('sudo /usr/lib/scylla/scylla_setup --nic eth0 --disks {}'.format(disks_str))
+        node.remoter.run('cat /proc/mdstat;ls -l /dev/mapper;cat /sys/block/dm-*/slaves/*', verbose=True, ignore_status=True)
         node.remoter.run('sudo sync')
         self.log.info('io.conf right after setup')
         node.remoter.run('sudo cat /etc/scylla.d/io.conf')
