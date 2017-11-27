@@ -1776,7 +1776,7 @@ class BaseLoaderSet(object):
                 node_cmd = 'taskset -c %s %s' % (cpu_idx, dst_stress_script)
             else:
                 node_cmd = dst_stress_script
-            node_cmd = 'echo %s; %s %s %s' % (tag, node_cmd, cpu_idx, keyspace_idx)
+            node_cmd = 'echo %s; sleep 10; %s %s %s' % (tag, node_cmd, cpu_idx, keyspace_idx)
 
             prepared_threads.append(os.getpid())
             wait_status = wait.wait_for(func=lambda: len(stress_threads) == len(prepared_threads),
