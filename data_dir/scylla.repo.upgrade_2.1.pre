@@ -1,0 +1,23 @@
+
+[scylla]
+name=Scylla for Centos $releasever - $basearch
+baseurl=http://downloads.scylladb.com/rpm/unstable/centos/370a6482e3921eb618f8f7b9e77e631394cd8835-66d95f85001848be959e69b2f65af1bb4219b43d-825cc5ae05ba92bb500b0c453804bca44fa7e3cc/21/scylla/\7/$basearch/
+enabled=1
+gpgcheck=0
+
+[scylla-generic]
+name=Scylla for centos $releasever
+baseurl=http://downloads.scylladb.com/rpm/unstable/centos/370a6482e3921eb618f8f7b9e77e631394cd8835-66d95f85001848be959e69b2f65af1bb4219b43d-825cc5ae05ba92bb500b0c453804bca44fa7e3cc/21/scylla/\7/noarch/
+enabled=1
+gpgcheck=0
+
+[scylladb-scylla-3rdparty]
+name=Copr repo for scylla-3rdparty owned by scylladb
+baseurl=https://copr-be.cloud.fedoraproject.org/results/scylladb/scylla-3rdparty/epel-7-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://copr-be.cloud.fedoraproject.org/results/scylladb/scylla-3rdparty/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
