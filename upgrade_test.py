@@ -41,7 +41,8 @@ class UpgradeTest(ClusterTester):
 
         # We assume that if update_db_packages is not empty we install packages from there.
         # In this case we don't use upgrade based on repo_file(ignored sudo yum update scylla...)
-        orig_ver = node.remoter.run('rpm -qa scylla-server')
+        result = node.remoter.run('rpm -qa scylla-server')
+        orig_ver = result.stdout
         if upgrade_node_packages:
             # update_scylla_packages
             node.remoter.send_files(upgrade_node_packages, '/tmp/scylla', verbose=True)
@@ -146,7 +147,8 @@ class UpgradeTest(ClusterTester):
         #node.remoter.run("sudo cd /var/lib/scylla/data/system_schema; for i in `sudo ls`;do test -e $i/snapshots/1506125094259 && sudo /bin/cp $i/snapshots/1506125094259/* $i/; done")
         node.remoter.run('sudo systemctl start scylla-server.service')
         node.wait_db_up(verbose=True)
-        new_ver = node.remoter.run('rpm -qa scylla-server')
+        result = node.remoter.run('rpm -qa scylla-server')
+        new_ver = result.stdout
         self.log.debug('original scylla-server version is %s, latest: %s' % (orig_ver, new_ver))
         assert orig_ver != new_ver, "scylla-server version isn't changed"
 
