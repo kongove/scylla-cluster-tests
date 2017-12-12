@@ -59,7 +59,10 @@ class LongevityTest(ClusterTester):
                 cs_profile = os.path.join(os.path.dirname(__file__), 'data_dir', os.path.basename(cs_profile))
                 params.update({'profile': cs_profile})
             self.log.debug('stress cmd: {}'.format(stress_cmd))
-            stress_queue.append(self.run_stress_thread(**params))
+            if 'counter_write' in stress_cmd:
+                self.run_stress_thread(**params)
+            else:
+                stress_queue.append(self.run_stress_thread(**params))
             if 'profile' in params:
                 del params['profile']
         if not prepare_write_cmd:
