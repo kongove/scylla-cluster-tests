@@ -34,12 +34,12 @@ class LongevityTest(ClusterTester):
         """
         Run cassandra-stress with params defined in data_dir/scylla.yaml
         """
-        self.db_cluster.add_nemesis(nemesis=self.get_nemesis_class(),
-                                    loaders=self.loaders,
-                                    monitoring_set=self.monitors,
-                                    test_index=self.test_index,
-                                    test_type=self.test_type,
-                                    test_id=self.test_id)
+        #self.db_cluster.add_nemesis(nemesis=self.get_nemesis_class(),
+        #                            loaders=self.loaders,
+        #                            monitoring_set=self.monitors,
+        #                            test_index=self.test_index,
+        #                            test_type=self.test_type,
+        #                            test_id=self.test_id)
         stress_queue = list()
 
         # prepare write workload
@@ -47,7 +47,7 @@ class LongevityTest(ClusterTester):
         if prepare_write_cmd:
             write_queue = self.run_stress_thread(stress_cmd=prepare_write_cmd)
             self.db_cluster.wait_total_space_used_per_node()
-            self.db_cluster.start_nemesis(interval=self.params.get('nemesis_interval'))
+            #self.db_cluster.start_nemesis(interval=self.params.get('nemesis_interval'))
             self.verify_stress_thread(queue=write_queue)
 
         for stress_cmd in self.params.get('stress_cmd'):
@@ -67,7 +67,7 @@ class LongevityTest(ClusterTester):
                 del params['profile']
         if not prepare_write_cmd:
             self.db_cluster.wait_total_space_used_per_node()
-            self.db_cluster.start_nemesis(interval=self.params.get('nemesis_interval'))
+            #self.db_cluster.start_nemesis(interval=self.params.get('nemesis_interval'))
 
         stress_read_cmd = self.params.get('stress_read_cmd', default=None)
         if stress_read_cmd:

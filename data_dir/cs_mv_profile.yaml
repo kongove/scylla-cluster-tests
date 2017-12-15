@@ -16,7 +16,7 @@ table_definition: |
     email text,
     last_access timeuuid,
     PRIMARY KEY(username)
-  );
+  ) WITH COMPACT STORAGE;
 
 extra_definitions:
   - CREATE MATERIALIZED VIEW mview.users_by_first_name AS SELECT * FROM mview.users WHERE first_name IS NOT NULL and username IS NOT NULL PRIMARY KEY (first_name, username);
