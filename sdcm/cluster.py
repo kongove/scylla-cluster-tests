@@ -504,9 +504,9 @@ class BaseNode(object):
 
     def install_prometheus(self):
         self._set_prometheus_paths()
-        self.remoter.run('curl %s/%s -o %s/%s -L' %
-                         (self.prometheus_base_url, self.prometheus_tarball,
-                          self.prometheus_system_base_dir, self.prometheus_tarball))
+        prometheus_url = '%s/%s' % (self.prometheus_base_url, self.prometheus_tarball)
+        dst_file = '%s/%s' % (self.prometheus_system_base_dir, self.prometheus_tarball)
+        self.curl_get(dst_file, prometheus_url)
         self.remoter.run('tar -xzvf %s/%s -C %s' %
                          (self.prometheus_system_base_dir,
                           self.prometheus_tarball,
@@ -1063,6 +1063,9 @@ client_encryption_options:
                                 dst='/tmp/scylla.yaml')
         self.remoter.run('sudo mv /tmp/scylla.yaml {}'.format(yaml_file))
 
+    def curl_get(self, dst_file, url):
+        self.remoter.run('sudo curl -o %s -L %s' % (dst_file, url))
+
     def install_mgmt(self, scylla_repo, scylla_mgmt_repo, mgmt_port, db_hosts):
         self.log.debug('Install scylla-manager')
         rsa_id_dst = '/tmp/scylla-test'
@@ -1071,8 +1074,8 @@ client_encryption_options:
         mgmt_conf_dst = '/etc/scylla-manager/scylla-manager.yaml'
 
         self.remoter.run('sudo yum install -y epel-release', retry=3)
-        self.remoter.run('sudo curl -o /etc/yum.repos.d/scylla.repo -L {}'.format(scylla_repo))
-        self.remoter.run('sudo curl -o /etc/yum.repos.d/scylla-manager.repo -L {}'.format(scylla_mgmt_repo))
+        self.curl_get('/etc/yum.repos.d/scylla.repo', scylla_repo)
+        self.curl_get('/etc/yum.repos.d/scylla-manager.repo', scylla_mgmt_repo)
         if self.is_docker():
             self.remoter.run('sudo yum remove -y scylla scylla-jmx scylla-tools scylla-tools-core'
                              ' scylla-server scylla-conf')
