@@ -1,12 +1,12 @@
 [scylla]
 name=Scylla for Centos $releasever - $basearch
-baseurl=http://downloads.scylladb.com/enterprise/rpm/unstable/centos/branch-2018.1-branch-2018.1-branch-2018.1/6/scylla/\7/$basearch/
+baseurl=http://downloads.scylladb.com/enterprise/rpm/unstable/centos/35ac97647bea634d7daa958aabe3bc5f93e854f7-69ba4d946eddeae1e30cf6f27239222ad86af97b-7212abfa3068183863666ccada1b653b0d232bb4/14/scylla/7/$basearch/
 enabled=1
 gpgcheck=0
 
 [scylla-generic]
 name=Scylla for centos $releasever
-baseurl=http://downloads.scylladb.com/enterprise/rpm/unstable/centos/branch-2018.1-branch-2018.1-branch-2018.1/6/scylla/\7/noarch/
+baseurl=http://downloads.scylladb.com/enterprise/rpm/unstable/centos/35ac97647bea634d7daa958aabe3bc5f93e854f7-69ba4d946eddeae1e30cf6f27239222ad86af97b-7212abfa3068183863666ccada1b653b0d232bb4/14/scylla/7/noarch/
 enabled=1
 gpgcheck=0
 
