@@ -135,7 +135,7 @@ class UpgradeTest(ClusterTester):
         node.remoter.run('sudo chmod 644 /etc/yum.repos.d/scylla.repo')
         node.remoter.run('sudo yum clean all')
         # workaround Part 1
-        node.remoter.run('sudo yum remove scylla-tools-core -y')
+        node.remoter.run('sudo yum remove scylla\*tools-core -y')
         node.remoter.run('sudo yum downgrade scylla\* -y')
         # workaround Part 2
         node.remoter.run('sudo yum install scylla -y')
