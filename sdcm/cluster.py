@@ -1109,10 +1109,18 @@ client_encryption_options:
         if debug_install and self.get_distro() == 'centos':
             self.remoter.run('sudo yum install -y scylla-gdb', verbose=True, ignore_status=True)
 
-    def download_scylla_repo(self, scylla_repo, repo_path='/etc/yum.repos.d/scylla.repo'):
+    def download_scylla_repo(self, scylla_repo):
+        if self.get_distro() == 'centos':
+            repo_path = '/etc/yum.repos.d/scylla.repo'
+        else:
+            repo_path = '/etc/apt/sources.list.d/scylla.list'
         self.remoter.run('sudo curl -o %s -L %s' % (repo_path, scylla_repo))
 
-    def download_scylla_manager_repo(self, scylla_repo, repo_path='/etc/yum.repos.d/scylla-manager.repo'):
+    def download_scylla_manager_repo(self, scylla_repo):
+        if self.get_distro() == 'centos':
+            repo_path = '/etc/yum.repos.d/scylla-manager.repo'
+        else:
+            repo_path = '/etc/apt/sources.list.d/scylla-manager.list'
         self.remoter.run('sudo curl -o %s -L %s' % (repo_path, scylla_repo))
 
     def clean_scylla(self):
