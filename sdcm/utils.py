@@ -18,6 +18,8 @@ import glob
 import time
 import datetime
 from functools import wraps
+from enum import Enum
+
 
 from avocado.utils import process
 
@@ -148,3 +150,12 @@ def log_run_info(arg):
         return _inner(arg, arg.__name__)
     else:
         return lambda f: _inner(f, arg)
+
+class Distro(Enum):
+    UNKNOWN = 0
+    CENTOS7 = 1
+    RHEL7 = 2
+    UBUNTU14 = 3
+    UBUNTU16 = 4
+    DEBIAN8 = 5
+    DEBIAN9 = 6

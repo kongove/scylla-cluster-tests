@@ -18,4 +18,5 @@ elasticsearch
 sortedcontainers
 jinja2
 prometheus_client
+enum
 
