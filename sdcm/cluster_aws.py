@@ -417,8 +417,6 @@ class ScyllaAWSCluster(AWSCluster, cluster.BaseScyllaCluster):
                                   server_encrypt=self._param_enabled('server_encrypt'),
                                   client_encrypt=self._param_enabled('client_encrypt'))
 
-            node.remoter.run('sudo yum install -y {}-gdb'.format(node.scylla_pkg()),
-                             verbose=verbose, ignore_status=True)
             node.stop_scylla_server(verify_down=False)
             node.start_scylla_server(verify_up=False)
 
