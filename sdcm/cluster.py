@@ -1193,9 +1193,13 @@ client_encryption_options:
         """
         Uninstall scylla
         """
-        self.remoter.run('sudo systemctl stop scylla-server.service', ignore_status=True)
-        self.remoter.run('sudo yum remove -y "scylla*"')
-        self.remoter.run('sudo yum clean all')
+        self.stop_scylla_server(verify_down=False)
+        if self.like_centos():
+            self.remoter.run('sudo yum remove -y scylla\*')
+            self.remoter.run('sudo yum clean all')
+        else:
+            self.remoter.run('sudo apt-get remove -y scylla\*')
+            self.remoter.run('sudo apt-get clean all')
         self.remoter.run('sudo rm -rf /var/lib/scylla/commitlog/*')
         self.remoter.run('sudo rm -rf /var/lib/scylla/data/*')
 
