@@ -1567,6 +1567,7 @@ class BaseScyllaCluster(object):
         self.log.debug('Update DB binary duration -> %s s', int(time_elapsed))
 
     def _update_db_packages(self, new_scylla_bin, node_list):
+        # fixme: only support centos distro
         self.log.debug('User requested to update DB packages...')
 
         seed_nodes = self.get_seed_nodes()
@@ -1728,15 +1729,25 @@ class BaseScyllaCluster(object):
 
     def get_scylla_version(self):
         if not self.nodes[0].scylla_version:
-            try:
-                result = self.nodes[0].remoter.run("rpm -q {}".format(self.nodes[0].scylla_pkg()))
-            except Exception as ex:
-                self.log.error('Failed getting scylla version: %s', ex)
+            if self.nodes[0].get_distro == 'centos':
+                try:
+                    result = self.nodes[0].remoter.run("rpm -q {}".format(self.nodes[0].scylla_pkg()))
+                except Exception as ex:
+                    self.log.error('Failed getting scylla version: %s', ex)
+                else:
+                    match = re.findall("scylla-(.*).el7.centos", result.stdout)
+                    if match:
+                        for node in self.nodes:
+                            node.scylla_version = match[0]
             else:
-                match = re.findall("scylla-(.*).el7.centos", result.stdout)
-                if match:
+                try:
+                    result = self.nodes[0].remoter.run("dpkg -l {}|tail -n 1".format(self.nodes[0].scylla_pkg()))
+                    version = result.stdout.split()[2]
+                except Exception as ex:
+                    self.log.error('Failed getting scylla version: %s', ex)
+                else:
                     for node in self.nodes:
-                        node.scylla_version = match[0]
+                        node.scylla_version = version
 
     def cfstat_reached_threshold(self, key, threshold):
         """
