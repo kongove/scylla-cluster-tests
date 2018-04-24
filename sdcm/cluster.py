@@ -322,6 +322,29 @@ class BaseNode(object):
         self.is_enterprise = None
         self.replacement_node_ip = None  # if node is a replacement for a dead node, store dead node private ip here
         self._set_prometheus_paths()
+        self.distro = None
+
+    def get_distro(self):
+        if self.distro:
+            return self.distro
+
+        result = self.remoter.run('grep CentOS /etc/redhat-release', ignore_status=True)
+        if result.exit_status == 0:
+            self.distro = 'centos'
+
+        result = self.remoter.run('cat /etc/issue', ignore_status=True)
+        if 'Ubuntu 14.04' in result.stdout:
+            self.distro = 'ubuntu14'
+        elif 'Ubuntu 16.04' in self.stdout:
+            self.distro = 'ubuntu16'
+        elif 'Debian GNU/Linux 8' in result.stdout:
+            self.distro = 'debian8'
+        elif 'Debian GNU/Linux 9' in result.stdout:
+            self.distro = 'debian9'
+        else:
+            self.log.debug("fail to detect the distro name, %s" % result.stdout)
+
+        return self.distro
 
     def is_docker(self):
         return self.__class__.__name__ == 'DockerNode'
