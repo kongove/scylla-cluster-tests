@@ -413,9 +413,13 @@ class BaseNode(object):
 
     def scylla_pkg(self):
         if self.is_enterprise is None:
-            result = self.remoter.run("sudo yum search scylla-enterprise", ignore_status=True)
-            self.is_enterprise = True if ('scylla-enterprise.x86_64' in result.stdout or
-                                          'No matches found' not in result.stdout) else False
+            if self.like_centos():
+                result = self.remoter.run("sudo yum search scylla-enterprise", ignore_status=True)
+                self.is_enterprise = True if ('scylla-enterprise.x86_64' in result.stdout or
+                                              'No matches found' not in result.stdout) else False
+            else:
+                result = self.remoter.run("sudo apt-cache search scylla-enterprise", ignore_status=True)
+                self.is_enterprise = True if 'scylla-enterprise' in result.stdout else False
 
         return 'scylla-enterprise' if self.is_enterprise else 'scylla'
 
@@ -834,6 +838,9 @@ WantedBy=multi-user.target
         Verify the number of backtraces stored, report if new ones were found.
         """
         self.wait_ssh_up(verbose=False)
+        if self.is_ubuntu14():
+            # fixme: ubuntu14 doesn't has coredumpctl, skip it.
+            return
         new_n_coredumps = self._get_n_coredumps()
         if new_n_coredumps is not None:
             if (new_n_coredumps - self.n_coredumps) == 1:
@@ -1162,7 +1169,7 @@ client_encryption_options:
                                 dst='/tmp/scylla.yaml')
         self.remoter.run('sudo mv /tmp/scylla.yaml {}'.format(yaml_file))
 
-        if debug_install:
+        if debug_install and self.like_centos():
             self.remoter.run('sudo yum install -y scylla-gdb', verbose=True, ignore_status=True)
 
     def download_scylla_repo(self, scylla_repo, repo_path='/etc/yum.repos.d/scylla.repo'):
