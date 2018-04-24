@@ -1059,7 +1059,7 @@ WantedBy=multi-user.target
 
     def config_setup(self, seed_address=None, cluster_name=None, enable_exp=True, endpoint_snitch=None,
                      yaml_file=SCYLLA_YAML_PATH, broadcast=None, authenticator=None,
-                     server_encrypt=None, client_encrypt=None, append_conf=None):
+                     server_encrypt=None, client_encrypt=None, append_conf=None, debug_install=False):
         yaml_dst_path = os.path.join(tempfile.mkdtemp(prefix='scylla-longevity'), 'scylla.yaml')
         self.remoter.receive_files(src=yaml_file, dst=yaml_dst_path)
 
@@ -1161,6 +1161,10 @@ client_encryption_options:
         self.remoter.send_files(src=yaml_dst_path,
                                 dst='/tmp/scylla.yaml')
         self.remoter.run('sudo mv /tmp/scylla.yaml {}'.format(yaml_file))
+
+        if debug_install:
+            self.remoter.run('sudo yum install -y {}-gdb'.format(self.scylla_pkg()),
+                             verbose=True, ignore_status=True)
 
     def download_scylla_repo(self, scylla_repo, repo_path='/etc/yum.repos.d/scylla.repo'):
         self.remoter.run('sudo curl -o %s -L %s' % (repo_path, scylla_repo))
