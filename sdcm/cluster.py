@@ -1163,8 +1163,7 @@ client_encryption_options:
         self.remoter.run('sudo mv /tmp/scylla.yaml {}'.format(yaml_file))
 
         if debug_install:
-            self.remoter.run('sudo yum install -y {}-gdb'.format(self.scylla_pkg()),
-                             verbose=True, ignore_status=True)
+            self.remoter.run('sudo yum install -y scylla-gdb', verbose=True, ignore_status=True)
 
     def download_scylla_repo(self, scylla_repo, repo_path='/etc/yum.repos.d/scylla.repo'):
         self.remoter.run('sudo curl -o %s -L %s' % (repo_path, scylla_repo))
