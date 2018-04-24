@@ -1112,6 +1112,9 @@ client_encryption_options:
     def download_scylla_repo(self, scylla_repo, repo_path='/etc/yum.repos.d/scylla.repo'):
         self.remoter.run('sudo curl -o %s -L %s' % (repo_path, scylla_repo))
 
+    def download_scylla_manager_repo(self, scylla_repo, repo_path='/etc/yum.repos.d/scylla-manager.repo'):
+        self.remoter.run('sudo curl -o %s -L %s' % (repo_path, scylla_repo))
+
     def clean_scylla(self):
         """
         Uninstall scylla
@@ -1173,7 +1176,7 @@ client_encryption_options:
 
         self.remoter.run('sudo yum install -y epel-release', retry=3)
         self.download_scylla_repo(scylla_repo)
-        self.download_scylla_repo(scylla_mgmt_repo, repo_path='/etc/yum.repos.d/scylla-manager.repo')
+        self.download_scylla_manager_repo(scylla_mgmt_repo)
         if self.is_docker():
             self.remoter.run('sudo yum remove -y scylla scylla-jmx scylla-tools scylla-tools-core'
                              ' scylla-server scylla-conf')
