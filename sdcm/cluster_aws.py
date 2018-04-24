@@ -419,7 +419,8 @@ class ScyllaAWSCluster(AWSCluster, cluster.BaseScyllaCluster):
 
             node.remoter.run('sudo yum install -y {}-gdb'.format(node.scylla_pkg()),
                              verbose=verbose, ignore_status=True)
-            node.remoter.run('sudo systemctl restart scylla-server.service')
+            node.stop_scylla_server(verify_down=False)
+            node.start_scylla_server(verify_up=False)
 
         node.wait_db_up(verbose=verbose)
         node.remoter.run('nodetool status', verbose=True, retry=5)
