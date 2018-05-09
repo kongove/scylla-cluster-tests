@@ -387,7 +387,8 @@ class ScyllaAWSCluster(AWSCluster, cluster.BaseScyllaCluster):
                                     in self.nodes if node.is_seed]
                 seeds = ",".join(node_private_ips)
                 if not seeds:
-                    seeds = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (self.nodes[0].private_ip_address, 
+                    pass
+                seeds = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" % (self.nodes[0].private_ip_address, 
                                    self.nodes[1].private_ip_address, 
                                    self.nodes[2].private_ip_address, 
                                    self.nodes[3].private_ip_address, 
