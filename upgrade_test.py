@@ -16,6 +16,7 @@
 
 import random
 import time
+import re
 
 from avocado import main
 
@@ -67,15 +68,17 @@ class UpgradeTest(FillDatabaseData):
             node.remoter.run('sudo rpm -URvh --replacefiles /tmp/scylla/* | true')
             node.remoter.run('rpm -qa scylla\*')
         elif new_scylla_repo:
-            assert new_scylla_repo.startswith('http')
-            node.remoter.run('sudo curl -L {} -o /etc/yum.repos.d/scylla.repo'.format(new_scylla_repo))
             # backup the data
             node.remoter.run('sudo cp /etc/scylla/scylla.yaml /etc/scylla/scylla.yaml-backup')
+            node.remoter.run('sudo cp /etc/yum.repos.d/scylla.repo ~/scylla.repo-backup')
+            node.remoter.run('sudo cp /etc/scylla.d/io.conf /etc/scylla.d/io.conf-backup')
+            assert new_scylla_repo.startswith('http')
+            node.remoter.run('sudo curl -L {} -o /etc/yum.repos.d/scylla.repo'.format(new_scylla_repo))
             # flush all memtables to SSTables
             node.remoter.run('sudo nodetool drain')
             node.remoter.run('sudo nodetool snapshot')
             node.remoter.run('sudo systemctl stop scylla-server.service')
-            node.remoter.run('sudo chown root.root /etc/yum.repos.d/scylla.repo')
+            node.remoter.run('sudo chown root:root /etc/yum.repos.d/scylla.repo')
             node.remoter.run('sudo chmod 644 /etc/yum.repos.d/scylla.repo')
             node.remoter.run('sudo yum clean all')
 
@@ -127,13 +130,17 @@ class UpgradeTest(FillDatabaseData):
                 node.remoter.run('sudo yum remove %s -y' % new_introduced_pkgs)
             node.remoter.run('sudo yum downgrade scylla\* -y')
             if new_introduced_pkgs:
-                node.remoter.run('sudo yum install {} -y' % node.scylla_pkg())
+                node.remoter.run('sudo yum install %s -y' % node.scylla_pkg())
 
         node.remoter.run('sudo cp /etc/scylla/scylla.yaml-backup /etc/scylla/scylla.yaml')
+        #node.remoter.run('sudo cp /etc/scylla.d/io.conf.rpmsave /etc/scylla.d/io.conf')
+        node.remoter.run('sudo cp /etc/scylla.d/io.conf-backup /etc/scylla.d/io.conf')
         result = node.remoter.run('sudo find /var/lib/scylla/data/system')
         snapshot_name = re.findall("system/peers-[a-z0-9]+/snapshots/(\d+)\n", result.stdout)
         cmd = "DIR='/var/lib/scylla/data/system'; for i in `sudo ls $DIR`;do sudo test -e $DIR/$i/snapshots/%s && sudo find $DIR/$i/snapshots/%s -type f -exec sudo /bin/cp {} $DIR/$i/ \;; done" % (snapshot_name[0], snapshot_name[0])
-        node.remoter.run(cmd, verbose=True)
+        # recover the system tables
+        if self.db_cluster.params.get('recover_system_tables', default=None):
+            node.remoter.run(cmd, verbose=True)
         node.remoter.run('sudo systemctl start scylla-server.service')
         node.wait_db_up(verbose=True)
         result = node.remoter.run('scylla --version')
@@ -209,7 +216,6 @@ class UpgradeTest(FillDatabaseData):
         self.log.info('Starting c-s prepare write workload (n=10000000)')
         prepare_write_stress = self.params.get('prepare_write_stress')
         prepare_write_stress_queue = self.run_stress_thread(stress_cmd=prepare_write_stress)
-
         self.log.info('Sleeping for 60s to let cassandra-stress start before the upgrade...')
         time.sleep(60)
 
@@ -238,14 +244,14 @@ class UpgradeTest(FillDatabaseData):
         self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
         self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
 
-        # wiat for the 10m read workload to finish
+        # wait for the 10m read workload to finish
         self.verify_stress_thread(read_10m_stress_queue)
 
         ### read workload (cl=ALL)
         self.log.info('Starting c-s read workload (cl=ALL n=10000000)')
         stress_cmd_read_clall = self.params.get('stress_cmd_read_clall')
         read_clall_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_clall)
-        # wiat for the cl=ALL read workload to finish
+        # wait for the cl=ALL read workload to finish
         self.verify_stress_thread(read_clall_stress_queue)
 
         ### read workload (20m)
@@ -259,8 +265,8 @@ class UpgradeTest(FillDatabaseData):
         self.log.info('Rollback Node %s ended', self.db_cluster.nodes[indexes[1]].name)
         self.db_cluster.nodes[indexes[1]].remoter.run("nodetool status")
 
-        for idx in indexs[1:]:
-            self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[i]]
+        for i in indexes[1:]:
+            self.db_cluster.node_to_upgrade = self.db_cluster.nodes[i]
             self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
             self.upgrade_node(self.db_cluster.node_to_upgrade)
             self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
