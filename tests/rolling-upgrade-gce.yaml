@@ -46,8 +46,8 @@ base_version: !mux
     2.0:
         scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.0.repo
     2.1:
-        #scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.1.repo
-        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/f6c4d558eb84dce0d8a17fc3e9c7d9198695b55b-29b3c6ee621c9bec9e9fa2fafbb9dd6802ce39e5-93105fd9242e8b6e2c50416ec1a268765a266e83/100/scylla.repo
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.1.repo
+        #scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/f6c4d558eb84dce0d8a17fc3e9c7d9198695b55b-29b3c6ee621c9bec9e9fa2fafbb9dd6802ce39e5-93105fd9242e8b6e2c50416ec1a268765a266e83/100/scylla.repo
     2.2:
         scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.2.repo
     2017.1:
