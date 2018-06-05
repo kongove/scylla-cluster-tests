@@ -72,6 +72,7 @@ class UpgradeTest(FillDatabaseData):
             node.remoter.run('sudo cp /etc/scylla/scylla.yaml /etc/scylla/scylla.yaml-backup')
             node.remoter.run('sudo cp /etc/yum.repos.d/scylla.repo ~/scylla.repo-backup')
             node.remoter.run('sudo cp /etc/scylla.d/io.conf /etc/scylla.d/io.conf-backup')
+            node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf $conf.autobackup; done')
             assert new_scylla_repo.startswith('http')
             node.remoter.run('sudo curl -L {} -o /etc/yum.repos.d/scylla.repo'.format(new_scylla_repo))
             # flush all memtables to SSTables
@@ -86,14 +87,16 @@ class UpgradeTest(FillDatabaseData):
             result = node.remoter.run("sudo yum search scylla-enterprise", ignore_status=True)
             new_is_enterprise = True if ('scylla-enterprise.x86_64' in result.stdout or
                                          'No matches found' not in result.stdout) else False
+            scylla_pkg = 'scylla-enterprise' if new_is_enterprise else 'scylla'
             if orig_is_enterprise != new_is_enterprise:
                 self.upgrade_rollback_mode = 'reinstall'
             ver_suffix = '\*{}'.format(new_version) if new_version else ''
             if self.upgrade_rollback_mode == 'reinstall':
                 node.remoter.run('sudo yum remove scylla\* -y')
-                node.remoter.run('sudo yum install scylla{0} -y'.format(ver_suffix))
+                node.remoter.run('sudo yum install {}{} -y'.format(scylla_pkg, ver_suffix))
+                node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf.autobackup $conf; done')
             else:
-                node.remoter.run('sudo yum update scylla{0}\* -y'.format(ver_suffix))
+                node.remoter.run('sudo yum update {}{}\* -y'.format(scylla_pkg, ver_suffix))
         node.remoter.run('sudo systemctl start scylla-server.service')
         node.wait_db_up(verbose=True)
         result = node.remoter.run('scylla --version')
@@ -123,6 +126,7 @@ class UpgradeTest(FillDatabaseData):
         if self.upgrade_rollback_mode == 'reinstall':
             node.remoter.run('sudo yum remove scylla\* -y')
             node.remoter.run('sudo yum install {} -y' % node.scylla_pkg())
+            node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf.autobackup $conf; done')
         elif self.upgrade_rollback_mode == 'minor_release':
             node.remoter.run('sudo yum downgrade scylla\*%s -y' % self.orig_ver.split('-')[0])
         else:
@@ -131,10 +135,12 @@ class UpgradeTest(FillDatabaseData):
             node.remoter.run('sudo yum downgrade scylla\* -y')
             if new_introduced_pkgs:
                 node.remoter.run('sudo yum install %s -y' % node.scylla_pkg())
+            node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf.autobackup $conf; done')
 
-        node.remoter.run('sudo cp /etc/scylla/scylla.yaml-backup /etc/scylla/scylla.yaml')
+        #node.remoter.run('sudo cp /etc/scylla/scylla.yaml-backup /etc/scylla/scylla.yaml')
         #node.remoter.run('sudo cp /etc/scylla.d/io.conf.rpmsave /etc/scylla.d/io.conf')
-        node.remoter.run('sudo cp /etc/scylla.d/io.conf-backup /etc/scylla.d/io.conf')
+        #node.remoter.run('sudo cp /etc/scylla.d/io.conf-backup /etc/scylla.d/io.conf')
+
         result = node.remoter.run('sudo find /var/lib/scylla/data/system')
         snapshot_name = re.findall("system/peers-[a-z0-9]+/snapshots/(\d+)\n", result.stdout)
         cmd = "DIR='/var/lib/scylla/data/system'; for i in `sudo ls $DIR`;do sudo test -e $DIR/$i/snapshots/%s && sudo find $DIR/$i/snapshots/%s -type f -exec sudo /bin/cp {} $DIR/$i/ \;; done" % (snapshot_name[0], snapshot_name[0])
@@ -218,6 +224,11 @@ class UpgradeTest(FillDatabaseData):
         prepare_write_stress_queue = self.run_stress_thread(stress_cmd=prepare_write_stress)
         self.log.info('Sleeping for 60s to let cassandra-stress start before the upgrade...')
         time.sleep(60)
+
+        node = self.db_cluster.nodes[0]
+        cmd = 'ALTER TABLE keyspace1.standard1 with dclocal_read_repair_chance = 0.0 and read_repair_chance =0.0'
+        if self.params.get('disable_read_repair_chance', default=None):
+            node.remoter.run('cqlsh -e "{}" {}'.format(cmd, node.private_ip_address), verbose=True)
 
         # upgrade first node
         self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[0]]

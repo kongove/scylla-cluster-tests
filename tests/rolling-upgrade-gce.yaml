@@ -6,10 +6,10 @@ n_monitor_nodes: 1
 gce_datacenter: 'us-east1-b'
 
 # workloads
-prepare_write_stress: cassandra-stress write no-warmup cl=QUORUM n=10000000 -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=100 -pop seq=1..10000000 -log interval=5
-stress_cmd_read_10m: cassandra-stress read no-warmup cl=QUORUM duration=10m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=100 -pop seq=1..10000000 -log interval=5
-stress_cmd_read_clall: cassandra-stress read no-warmup cl=ALL n=10000000 -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=100 -pop seq=1..10000000 -log interval=5
-stress_cmd_read_20m: cassandra-stress read no-warmup cl=QUORUM duration=20m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=100 -pop seq=1..10000000 -log interval=5
+prepare_write_stress: cassandra-stress write no-warmup cl=QUORUM n=10000000 -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5
+stress_cmd_read_10m: cassandra-stress read no-warmup cl=QUORUM duration=10m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5
+stress_cmd_read_clall: cassandra-stress read no-warmup cl=ALL n=10000000 -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5
+stress_cmd_read_20m: cassandra-stress read no-warmup cl=QUORUM duration=20m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5
 
 user_prefix: 'rolling-upgrade-VERSION'
 failure_post_behavior: keep
@@ -46,7 +46,8 @@ base_version: !mux
     2.0:
         scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.0.repo
     2.1:
-        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.1.repo
+        #scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.1.repo
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/f6c4d558eb84dce0d8a17fc3e9c7d9198695b55b-29b3c6ee621c9bec9e9fa2fafbb9dd6802ce39e5-93105fd9242e8b6e2c50416ec1a268765a266e83/100/scylla.repo
     2.2:
         scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.2.repo
     2017.1:
