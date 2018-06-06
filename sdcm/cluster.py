@@ -1252,6 +1252,10 @@ client_encryption_options:
         Setup scylla
         :param disks: list of disk names
         """
+        # workaround issue (raid0: Unknown parameter `devices_discard_performance' #3427)
+        # otherwise, second disn't won't be mounted rightly. Througput will be very bad.
+        # issue exists in 2.0.4 / 2.1.3
+        self.remoter.run('sudo rm -f /etc/modprobe.d/scylla-raid0.conf')
         self.remoter.run('sudo /usr/lib/scylla/scylla_setup --nic eth0 --disks {}'.format(','.join(disks)))
         self.remoter.run('sudo sync')
         self.log.info('io.conf right after setup')
