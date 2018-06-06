@@ -325,6 +325,97 @@ class UpgradeTest(FillDatabaseData):
         #self.verify_stress_thread(read_20m_stress_queue)
         self.log.info('all nodes were upgraded, and last workaround is verified.')
 
+    def test_rolling_restart(self):
+        """
+        Upgrade half of nodes in the cluster, and start special read workload
+        during the stage. Checksum method is changed to xxhash from Scylla 2.2,
+        we want to use this case to verify the read (cl=ALL) workload works
+        well, upgrade all nodes to new version in the end.
+        """
+
+        # generate random order to upgrade
+        nodes_num = len(self.db_cluster.nodes)
+        # prepare an array containing the indexes
+        indexes = [x for x in range(nodes_num)]
+        # shuffle it so we will upgrade the nodes in a
+        # random order
+        random.shuffle(indexes)
+
+        ### prepare write workload
+        self.log.info('Starting c-s prepare write workload (n=10000000)')
+        prepare_write_stress = self.params.get('prepare_write_stress')
+        prepare_write_stress_queue = self.run_stress_thread(stress_cmd=prepare_write_stress)
+        self.log.info('Sleeping for 60s to let cassandra-stress start before the upgrade...')
+        time.sleep(60)
+
+        node = self.db_cluster.nodes[0]
+        cmd = 'ALTER TABLE keyspace1.standard1 with dclocal_read_repair_chance = 0.0 and read_repair_chance =0.0'
+        if self.params.get('disable_read_repair_chance', default=None):
+            node.remoter.run('cqlsh -e "{}" {}'.format(cmd, node.private_ip_address), verbose=True)
+
+        # upgrade first node
+        self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[0]]
+        self.log.info('restart Node %s begin', self.db_cluster.node_to_upgrade.name)
+        #self.upgrade_node(self.db_cluster.node_to_upgrade)
+        self.db_cluster.node_to_upgrade.restart()
+        self.db_cluster.node_to_upgrade.wait_jmx_up()
+        self.log.info('restart Node %s ended', self.db_cluster.node_to_upgrade.name)
+        self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
+
+        # wait for the prepare write workload to finish
+        self.verify_stress_thread(prepare_write_stress_queue)
+
+        ### read workload
+        self.log.info('Starting c-s read workload for 10m')
+        stress_cmd_read_10m = self.params.get('stress_cmd_read_10m')
+        read_10m_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_10m)
+
+        self.log.info('Sleeping for 60s to let cassandra-stress start before the restart...')
+        time.sleep(60)
+
+        # upgrade second node
+        self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[1]]
+        self.log.info('restart Node %s begin', self.db_cluster.node_to_upgrade.name)
+        #self.upgrade_node(self.db_cluster.node_to_upgrade)
+        self.db_cluster.node_to_upgrade.restart()
+        self.db_cluster.node_to_upgrade.wait_jmx_up()
+        self.log.info('restart Node %s ended', self.db_cluster.node_to_upgrade.name)
+        self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
+
+        # wait for the 10m read workload to finish
+        self.verify_stress_thread(read_10m_stress_queue)
+
+        ### read workload (cl=ALL)
+        self.log.info('Starting c-s read workload (cl=ALL n=10000000)')
+        stress_cmd_read_clall = self.params.get('stress_cmd_read_clall')
+        read_clall_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_clall)
+        # wait for the cl=ALL read workload to finish
+        self.verify_stress_thread(read_clall_stress_queue)
+
+        ### read workload (20m)
+        self.log.info('Starting c-s read workload for 20m')
+        stress_cmd_read_20m = self.params.get('stress_cmd_read_20m')
+        read_20m_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_20m)
+
+        # rollback second node
+        # self.log.info('Rollback Node %s begin', self.db_cluster.nodes[indexes[1]].name)
+        # self.rollback_node(self.db_cluster.nodes[indexes[1]])
+        # self.log.info('Rollback Node %s ended', self.db_cluster.nodes[indexes[1]].name)
+        # self.db_cluster.nodes[indexes[1]].remoter.run("nodetool status")
+
+        for i in indexes[1:]:
+            self.db_cluster.node_to_upgrade = self.db_cluster.nodes[i]
+            self.log.info('restart Node %s begin', self.db_cluster.node_to_upgrade.name)
+            #self.upgrade_node(self.db_cluster.node_to_upgrade)
+            self.db_cluster.node_to_upgrade.restart()
+            self.db_cluster.node_to_upgrade.wait_jmx_up()
+            self.log.info('restart Node %s ended', self.db_cluster.node_to_upgrade.name)
+            self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
+
+        # wait for the 20m read workload to finish
+        self.verify_stress_thread(read_20m_stress_queue)
+        self.log.info('all nodes were upgraded, and last workaround is verified.')
+
 
 if __name__ == '__main__':
     main()
