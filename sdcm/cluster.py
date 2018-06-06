@@ -1187,6 +1187,7 @@ client_encryption_options:
         Setup scylla
         :param disks: list of disk names
         """
+        self.remoter.run('sudo rm /etc/modprobe.d/scylla-raid0.conf')
         self.remoter.run('sudo /usr/lib/scylla/scylla_setup --nic eth0 --disks {}'.format(','.join(disks)))
         self.remoter.run('sudo sync')
         self.log.info('io.conf right after setup')
