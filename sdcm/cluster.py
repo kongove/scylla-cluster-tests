@@ -574,6 +574,7 @@ class BaseNode(object):
         prometheus_cfg = """
 global:
   scrape_interval: 15s
+  scrape_timeout: 10s
 
   external_labels:
     monitor: 'scylla-monitor'
