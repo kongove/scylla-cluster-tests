@@ -207,9 +207,10 @@ class GCECluster(cluster.BaseCluster):
             return self._gce_services[dc_idx].ex_get_node('amos-debug-loader-node-2f352cd2-0-1', zone='us-east1-b')
         elif 'monitor' in self.node_prefix:
             return self._gce_services[dc_idx].ex_get_node('amos-debug-monitor-node-3b3188c6-0-1', zone='us-east1-b')
-        else:
+        elif node_index < 5:
             return self._gce_services[dc_idx].ex_get_node('amos-debug-db-node-dc7fd332-0-%s' % node_index, zone='us-east1-b')
 
+        self.node_prefix = 'amos-debug-db-node-dc7fd332'
         name = "%s-%s-%s" % (self.node_prefix, dc_idx, node_index)
         gce_disk_struct = list()
         gce_disk_struct.append(self._get_root_disk_struct(name=name,
