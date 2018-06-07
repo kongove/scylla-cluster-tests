@@ -524,10 +524,16 @@ class BaseNode(object):
                                    verbose=verbose)
 
     def install_grafana(self):
-        self.remoter.run('sudo yum install rsync -y')
-        self.remoter.run(
-            'sudo yum install https://grafanarel.s3.amazonaws.com/builds/grafana-3.1.1-1470047149.x86_64.rpm -y',
-            ignore_status=True)
+        if self.like_centos():
+            self.remoter.run('sudo yum install rsync -y')
+            self.remoter.run(
+                'sudo yum install https://grafanarel.s3.amazonaws.com/builds/grafana-3.1.1-1470047149.x86_64.rpm -y',
+                ignore_status=True)
+        else:
+            self.remoter.run('sudo apt-get install -y rsync')
+            self.remoter.run(
+                'curl -sLO https://grafanarel.s3.amazonaws.com/builds/grafana_3.1.1-1469444398_amd64.deb && sudo apt-get install -y ./grafana_3.1.1-1469444398_amd64.deb',
+                ignore_status=True)
         self.remoter.run('sudo grafana-cli plugins install grafana-piechart-panel')
 
     def setup_grafana(self, scylla_version=''):
@@ -1198,7 +1204,7 @@ client_encryption_options:
             self.remoter.run('sudo yum remove -y scylla\*')
             self.remoter.run('sudo yum clean all')
         else:
-            self.remoter.run('sudo rm /etc/apt/sources.list.d/scylla.list')
+            self.remoter.run('sudo rm -f /etc/apt/sources.list.d/scylla.list')
             self.remoter.run('sudo apt-get remove -y scylla\*', ignore_status=True)
             self.remoter.run('sudo apt-get clean all')
         self.remoter.run('sudo rm -rf /var/lib/scylla/commitlog/*')
@@ -1220,7 +1226,7 @@ client_encryption_options:
             self.remoter.run('sudo yum install -y {}'.format(self.scylla_pkg()))
             self.remoter.run('sudo yum install -y scylla-gdb', ignore_status=True)
         else:
-            self.remoter.run('sudo apt-get upgrade')
+            self.remoter.run('sudo apt-get upgrade -y')
             self.remoter.run('sudo apt-get install -y rsync tcpdump screen wget net-tools')
             self.download_scylla_repo(scylla_repo)
             self.remoter.run('sudo apt-get update')
@@ -2463,7 +2469,10 @@ class BaseMonitorSet(object):
         # the data from this point to the end of test will
         # be captured.
         self.grafana_start_time = time.time()
-        node.remoter.run('sudo yum install screen -y')
+        if node.like_centos():
+            node.remoter.run('sudo yum install screen -y')
+        else:
+            node.remoter.run('sudo apt-get install screen -y')
         if 'scylla_repo' in kwargs and 'scylla_mgmt_repo' in kwargs:
             if kwargs.get('mgmt_db_local') is True:
                 mgmt_db_hosts = ['127.0.0.1']
