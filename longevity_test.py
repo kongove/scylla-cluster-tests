@@ -73,6 +73,9 @@ class LongevityTest(ClusterTester):
 
     default_params = {'timeout': 650000}
 
+    def test_new(self):
+        self.log.info('skip the testing')
+
     def test_custom_time(self):
         """
         Run cassandra-stress with params defined in data_dir/scylla.yaml
