@@ -335,7 +335,7 @@ class BaseNode(object):
         result = self.remoter.run('cat /etc/issue', ignore_status=True)
         if 'Ubuntu 14.04' in result.stdout:
             self.distro = 'ubuntu14'
-        elif 'Ubuntu 16.04' in self.stdout:
+        elif 'Ubuntu 16.04' in result.stdout:
             self.distro = 'ubuntu16'
         elif 'Debian GNU/Linux 8' in result.stdout:
             self.distro = 'debian8'
@@ -823,7 +823,7 @@ WantedBy=multi-user.target
     def destroy(self):
         raise NotImplementedError('Derived classes must implement destroy')
 
-    def wait_ssh_up(self, verbose=True, timeout=300):
+    def wait_ssh_up(self, verbose=True, timeout=500):
         text = None
         if verbose:
             text = '%s: Waiting for SSH to be up' % self
@@ -1127,12 +1127,13 @@ client_encryption_options:
         """
         Uninstall scylla
         """
-        self.stop_scylla_server(verify_down=False)
+        self.stop_scylla_server(verify_down=False, ignore_status=True)
         if self.get_distro() == 'centos':
             self.remoter.run('sudo yum remove -y scylla\*')
             self.remoter.run('sudo yum clean all')
         else:
-            self.remoter.run('sudo apt-get remove -y scylla\*')
+            self.remoter.run('sudo rm /etc/apt/sources.list.d/scylla.list')
+            self.remoter.run('sudo apt-get remove -y scylla\*', ignore_status=True)
             self.remoter.run('sudo apt-get clean all')
         self.remoter.run('sudo rm -rf /var/lib/scylla/commitlog/*')
         self.remoter.run('sudo rm -rf /var/lib/scylla/data/*')
@@ -1154,9 +1155,11 @@ client_encryption_options:
             self.remoter.run('sudo yum install -y scylla-gdb', ignore_status=True)
         else:
             self.remoter.run('sudo apt-get upgrade')
-            self.remoter.run('sudo yum install -y rsync tcpdump screen wget net-tools')
+            self.remoter.run('sudo apt-get install -y rsync tcpdump screen wget net-tools')
+            scylla_repo = 'https://s3.amazonaws.com/downloads.scylladb.com/deb/unstable/xenial/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/37/scylladb-2.2/scylla.list'
             self.download_scylla_repo(scylla_repo)
-            self.remoter.run('sudo apt-get install -y {}'.format(self.scylla_pkg()))
+            self.remoter.run('sudo apt-get update')
+            self.remoter.run('sudo apt-get install -y --allow-unauthenticated {}'.format(self.scylla_pkg()))
 
     @log_run_info("Detecting disks")
     def detect_disks(self, nvme=True):
@@ -1182,7 +1185,7 @@ client_encryption_options:
         self.remoter.run('sudo sync')
         self.log.info('io.conf right after setup')
         self.remoter.run('sudo cat /etc/scylla.d/io.conf')
-        if self._init_system == 'systemd':
+        if self.init_system == 'systemd':
             self.remoter.run('sudo systemctl enable scylla-server.service')
             self.remoter.run('sudo systemctl enable scylla-jmx.service')
 
@@ -1233,7 +1236,7 @@ client_encryption_options:
     def start_scylla_server(self, verify_up=True, verify_down=False, timeout=300):
         if verify_down:
             self.wait_db_down(timeout=timeout)
-        if self._init_system == 'systemd':
+        if self.init_system == 'systemd':
             self.remoter.run('sudo systemctl start scylla-server.service', timeout=timeout)
         else:
             self.remoter.run('sudo service scylla-server start', timeout=timeout)
@@ -1243,7 +1246,7 @@ client_encryption_options:
     def start_scylla_jmx(self, verify_up=True, verify_down=False, timeout=300):
         if verify_down:
             self.wait_jmx_down(timeout=timeout)
-        if self._init_system == 'systemd':
+        if self.init_system == 'systemd':
             self.remoter.run('sudo systemctl start scylla-jmx.service', timeout=timeout)
         else:
             self.remoter.run('sudo service scylla-jmx start', timeout=timeout)
@@ -1254,20 +1257,22 @@ client_encryption_options:
         self.start_scylla_server(verify_up=verify_up, verify_down=verify_down, timeout=timeout)
         self.start_scylla_jmx(verify_up=verify_up, verify_down=verify_down, timeout=timeout)
 
-    def stop_scylla_server(self, verify_up=False, verify_down=True, timeout=300):
+    def stop_scylla_server(self, verify_up=False, verify_down=True, timeout=300, ignore_status=False):
         if verify_up:
             self.wait_db_up(timeout=timeout)
-        if self._init_system == 'systemd':
-            self.remoter.run('sudo systemctl stop scylla-server.service', timeout=timeout)
+        print 'lllllllllllllllllllllllll'
+        print self.init_system
+        if self.init_system == 'systemd':
+            self.remoter.run('sudo systemctl stop scylla-server.service', timeout=timeout, ignore_status=ignore_status)
         else:
-            self.remoter.run('sudo service scylla-server stop', timeout=timeout)
+            self.remoter.run('sudo service scylla-server stop', timeout=timeout, ignore_status=ignore_status)
         if verify_down:
             self.wait_db_down(timeout=timeout)
 
     def stop_scylla_jmx(self, verify_up=False, verify_down=True, timeout=300):
         if verify_up:
             self.wait_jmx_up(timeout=timeout)
-        if self._init_system == 'systemd':
+        if self.init_system == 'systemd':
             self.remoter.run('sudo systemctl stop scylla-jmx.service', timeout=timeout)
         else:
             self.remoter.run('sudo service scylla-jmx stop', timeout=timeout)
@@ -1909,10 +1914,17 @@ class BaseLoaderSet(object):
 
         if self._install_cs:
             node.download_scylla_repo(self.params.get('scylla_repo'))
-            node.remoter.run('sudo yum install -y {}-tools'.format(node.scylla_pkg()))
+            if node.get_distro() == 'centos':
+                node.remoter.run('sudo yum install -y {}-tools'.format(node.scylla_pkg()))
+            else:
+                node.remoter.run('sudo apt-get update')
+                node.remoter.run('sudo apt-get install -y --allow-unauthenticated {}-tools'.format(node.scylla_pkg()))
 
         node.wait_cs_installed(verbose=verbose)
-        node.remoter.run('sudo yum install -y screen')
+        if node.get_distro() == 'centos':
+            node.remoter.run('sudo yum install -y screen')
+        else:
+            node.remoter.run('sudo apt-get install -y screen')
         if db_node_address is not None:
             node.remoter.run("echo 'export DB_ADDRESS=%s' >> $HOME/.bashrc" %
                              db_node_address)
