@@ -60,3 +60,5 @@ base_version: !mux
     2018.1.0:
         # official release 2018.1.0
         scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/enterprise/rpm/unstable/centos/branch-2018.1/29/scylla.repo
+    2018.1.2:
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/enterprise/rpm/unstable/centos/086e2cfec85da448c39a019185fcafcfbaa3c9ec-891c01c2d829c4929973d5eedad0f47f0f4f7438-3cf577a864354c668cdeff55679143c312298687/42/scylla.repo
