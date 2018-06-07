@@ -170,6 +170,7 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         logging.getLogger('botocore').setLevel(logging.CRITICAL)
         logging.getLogger('boto3').setLevel(logging.CRITICAL)
         self.init_resources()
+        #self.monitors.wait_for_init(targets={'db_nodes': ['10.240.0.133'], 'loaders': ['10.240.0.58']}, scylla_version='2.2.rc1-0.20180521.eb646c61e')
         self.db_cluster.wait_for_init()
         if self.cs_db_cluster:
             self.cs_db_cluster.wait_for_init()

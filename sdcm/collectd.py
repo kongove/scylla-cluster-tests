@@ -29,6 +29,8 @@ class CollectdSetup(object):
 
     def _setup_collectd(self):
         system_path_remote = self.collectd_config()
+        if self.node.get_distro() != 'centos':
+            system_path_remote = '/etc/collectd/collectd.conf'
         tmp_dir_exporter = tempfile.mkdtemp(prefix='collectd')
         tmp_path_exporter = os.path.join(tmp_dir_exporter, 'scylla.conf')
         tmp_path_remote = "/tmp/scylla-collectd.conf"

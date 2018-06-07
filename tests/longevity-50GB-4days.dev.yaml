@@ -1,5 +1,6 @@
 test_duration: 100
-prepare_write_cmd: "cassandra-stress write cl=QUORUM n=100000000 -schema 'replication(factor=3) compaction(strategy=SizeTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native -rate threads=500 -pop seq=1..100000000"
+prepare_write_cmd: "cassandra-stress write cl=QUORUM duration=5m -schema 'replication(factor=3) compaction(strategy=SizeTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native -rate threads=500 -pop seq=1..100000000"
+#prepare_write_cmd: "cassandra-stress write cl=QUORUM n=100000000 -schema 'replication(factor=3) compaction(strategy=SizeTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native -rate threads=500 -pop seq=1..100000000"
 stress_cmd: ["cassandra-stress mixed cl=QUORUM duration=5760m -schema 'replication(factor=3) compaction(strategy=SizeTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native -rate threads=20 -pop seq=1..100000000 -log interval=5",
              "cassandra-stress counter_write cl=QUORUM duration=5760m -schema 'replication(factor=3) compaction(strategy=DateTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native -rate threads=1 -pop seq=1..1000000",
              "cassandra-stress user profile=/tmp/cs_mv_profile.yaml ops'(insert=3,read1=1,read2=1,read3=1)' cl=QUORUM duration=5760m -port jmx=6868 -mode cql3 native -rate threads=10",
@@ -11,9 +12,9 @@ stress_read_cmd: ["cassandra-stress read cl=QUORUM duration=5760m -port jmx=6868
                   "cassandra-stress read cl=QUORUM duration=5760m -schema 'replication(factor=3) compression=LZ4Compressor compaction(strategy=SizeTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native compression=lz4 -rate threads=20 -pop seq=1..100000000 -log interval=5",
                   "cassandra-stress read cl=QUORUM duration=5760m -schema 'replication(factor=3) compression=SnappyCompressor compaction(strategy=SizeTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native compression=snappy -rate threads=20 -pop seq=1..100000000 -log interval=5",
                   "cassandra-stress read cl=QUORUM duration=5760m -schema 'replication(factor=3) compression=DeflateCompressor compaction(strategy=SizeTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native compression=none -rate threads=20 -pop seq=1..100000000 -log interval=5"]
-n_db_nodes: 1
+n_db_nodes: 3
 n_loaders: 1
-n_monitor_nodes: 0
+n_monitor_nodes: 1
 nemesis_class_name: 'ChaosMonkey'
 nemesis_interval: 5
 user_prefix: 'amos-debug'
@@ -42,8 +43,8 @@ backends: !mux
         gce_project: 'skilled-adapter-452'
         #gce_network: 'qa-vpc'
         gce_network: 'default'
-        gce_image: 'https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/family/centos-7'
-        #gce_image: 'https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20180522'
+        #gce_image: 'https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/family/centos-7'
+        gce_image: 'https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20180522'
         gce_image_username: 'scylla-test'
         gce_instance_type_db: 'n1-highmem-16'
         gce_root_disk_type_db: 'pd-ssd'
@@ -57,8 +58,8 @@ backends: !mux
         gce_root_disk_size_monitor: 50
         gce_n_local_ssd_disk_monitor: 0
         #scylla_repo: 'SCYLLA_REPO_FILE_URL'
-        #scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/deb/unstable/xenial/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/37/scylladb-2.2/scylla.list'
-        scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/34/scylla.repo'
+        scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/deb/unstable/xenial/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/37/scylladb-2.2/scylla.list'
+        #scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/34/scylla.repo'
         us_east_1:
           gce_datacenter: 'us-east1-b'
     aws: !mux
