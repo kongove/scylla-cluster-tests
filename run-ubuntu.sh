@@ -1,0 +1,2 @@
+#avocado --show test run upgrade_test.py:UpgradeTest.test_rolling_upgrade --multiplex tests/rolling-upgrade-gce3.yaml --filter-only /run/backends/gce /run/databases/scylla /run/base_version/2.1 --job-results-dir ./
+avocado run longevity_test.py:LongevityTest.test_new --xunit jenkins_perf.xml --job-results-dir "./" --multiplex ./tests/longevity-50GB-4days.dev.yaml --filter-only /run/backends/gce /run/databases/scylla  --show-job-log
