@@ -201,6 +201,17 @@ class GCECluster(cluster.BaseCluster):
                 "autoDelete": True}
 
     def _create_instance(self, node_index, dc_idx):
+        if False:
+            self.node_prefix = 'amos-debug-db-node-419d3b4d'
+            loader_name = 'amos-debug-loader-node-2841de9f-0-1'
+            monitor_name = 'amos-debug-monitor-node-f11a7e1c-0-1'
+            if 'loader' in self.node_prefix:
+                return self._gce_services[dc_idx].ex_get_node(loader_name, zone='us-east1-b')
+            elif 'monitor' in self.node_prefix:
+                return self._gce_services[dc_idx].ex_get_node(monitor_name, zone='us-east1-b')
+            elif node_index < 5:
+                return self._gce_services[dc_idx].ex_get_node('%s-0-%s' % (self.node_prefix, node_index), zone='us-east1-b')
+
         name = "%s-%s-%s" % (self.node_prefix, dc_idx, node_index)
         gce_disk_struct = list()
         gce_disk_struct.append(self._get_root_disk_struct(name=name,
