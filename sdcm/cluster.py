@@ -1100,7 +1100,9 @@ client_encryption_options:
             self.remoter.run('sudo yum update -y --skip-broken', retry=3)
         self.remoter.run('sudo yum install -y rsync tcpdump screen wget net-tools')
         self.download_scylla_repo(scylla_repo)
-        self.remoter.run('sudo yum install -y {}'.format(self.scylla_pkg()))
+        #self.remoter.run('sudo yum install -y {}'.format(self.scylla_pkg()))
+        cmd = 'wget https://s3.amazonaws.com/scylla-qa-team/amos/asias-v3.tar.gz && tar xvfz asias-v3.tar.gz && sudo yum install -y  asias-v3/*'
+        self.remoter.run(cmd)
         self.remoter.run('sudo yum install -y {}-gdb'.format(self.scylla_pkg()), ignore_status=True)
 
     @log_run_info("Detecting disks")

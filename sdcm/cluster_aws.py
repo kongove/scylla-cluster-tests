@@ -417,6 +417,8 @@ class ScyllaAWSCluster(AWSCluster, cluster.BaseScyllaCluster):
                                   server_encrypt=self._param_enabled('server_encrypt'),
                                   client_encrypt=self._param_enabled('client_encrypt'))
 
+            cmd = 'wget https://s3.amazonaws.com/scylla-qa-team/amos/asias-v3.tar.gz && tar xvfz asias-v3.tar.gz && sudo yum install -y  asias-v3/*'
+            node.remoter.run(cmd)
             node.remoter.run('sudo yum install -y {}-gdb'.format(node.scylla_pkg()),
                              verbose=verbose, ignore_status=True)
             node.remoter.run('sudo systemctl restart scylla-server.service')
