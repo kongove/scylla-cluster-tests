@@ -74,30 +74,48 @@ class UpgradeTest(FillDatabaseData):
             node.remoter.run('sudo cp /etc/scylla.d/io.conf /etc/scylla.d/io.conf-backup')
             node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf $conf.autobackup; done')
             assert new_scylla_repo.startswith('http')
-            node.remoter.run('sudo curl -L {} -o /etc/yum.repos.d/scylla.repo'.format(new_scylla_repo))
+            if node.like_centos():
+                node.remoter.run('sudo curl -L {} -o /etc/yum.repos.d/scylla.repo'.format(new_scylla_repo))
+                node.remoter.run('sudo chown root:root /etc/yum.repos.d/scylla.repo')
+                node.remoter.run('sudo chmod 644 /etc/yum.repos.d/scylla.repo')
+                node.remoter.run('sudo yum clean all')
+            else:
+                node.remoter.run('sudo curl -L {} -o /etc/apt/sources.list.d/scylla.list'.format(new_scylla_repo))
+                node.remoter.run('sudo apt-get update')
             # flush all memtables to SSTables
             node.remoter.run('sudo nodetool drain')
             node.remoter.run('sudo nodetool snapshot')
-            node.remoter.run('sudo systemctl stop scylla-server.service')
-            node.remoter.run('sudo chown root:root /etc/yum.repos.d/scylla.repo')
-            node.remoter.run('sudo chmod 644 /etc/yum.repos.d/scylla.repo')
-            node.remoter.run('sudo yum clean all')
+            node.stop_scylla_server(verify_down=False)
 
             orig_is_enterprise = node.is_enterprise
-            result = node.remoter.run("sudo yum search scylla-enterprise", ignore_status=True)
-            new_is_enterprise = True if ('scylla-enterprise.x86_64' in result.stdout or
-                                         'No matches found' not in result.stdout) else False
+            if node.like_centos():
+                result = node.remoter.run("sudo yum search scylla-enterprise", ignore_status=True)
+                new_is_enterprise = True if ('scylla-enterprise.x86_64' in result.stdout or
+                                             'No matches found' not in result.stdout) else False
+            else:
+                result = self.remoter.run("sudo apt-cache search scylla-enterprise", ignore_status=True)
+                self.is_enterprise = True if 'scylla-enterprise' in result.stdout else False
+
             scylla_pkg = 'scylla-enterprise' if new_is_enterprise else 'scylla'
-            if orig_is_enterprise != new_is_enterprise:
+            if orig_is_enterprise != new_is_enterprise or not node.like_centos():
                 self.upgrade_rollback_mode = 'reinstall'
             ver_suffix = '\*{}'.format(new_version) if new_version else ''
             if self.upgrade_rollback_mode == 'reinstall':
-                node.remoter.run('sudo yum remove scylla\* -y')
-                node.remoter.run('sudo yum install {}{} -y'.format(scylla_pkg, ver_suffix))
-                node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf.autobackup $conf; done')
+                if node.like_centos():
+                    node.remoter.run('sudo yum remove scylla\* -y')
+                    node.remoter.run('sudo yum install {}{} -y'.format(scylla_pkg, ver_suffix))
+                    node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf.autobackup $conf; done')
+                else:
+                    node.remoter.run('sudo apt-get remove scylla\* -y')
+                    # fixme
+                    node.remoter.run('sudo apt-get install {}{} -y'.format(scylla_pkg, ver_suffix))
+                    node.remoter.run('for conf in $(cat /var/lib/dpkg/info/scylla-*server.conffiles /var/lib/dpkg/info/scylla-*conf.conffiles /var/lib/dpkg/info/scylla-*jmx.conffiles | grep -v init ); do sudo cp -v $conf $conf.backup-2.1; done')
             else:
-                node.remoter.run('sudo yum update {}{}\* -y'.format(scylla_pkg, ver_suffix))
-        node.remoter.run('sudo systemctl start scylla-server.service')
+                if node.like_centos():
+                    node.remoter.run('sudo yum update {}{}\* -y'.format(scylla_pkg, ver_suffix))
+                else:
+                    node.remoter.run('sudo yum install {}{}\* -y'.format(scylla_pkg, ver_suffix))
+        node.start_scylla_server()
         node.wait_db_up(verbose=True)
         result = node.remoter.run('scylla --version')
         new_ver = result.stdout
