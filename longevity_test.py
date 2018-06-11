@@ -156,7 +156,7 @@ class LongevityTest(ClusterTester):
         # and tables while wait_total_space_used is checking only keyspace1.
         # Todo: refactor wait_total_space_used to consider all keyspaces/tables in our stress list.
 
-        time.sleep(600)
+        #time.sleep(600)
 
         stress_read_cmd = self.params.get('stress_read_cmd', default=None)
         if stress_read_cmd:
