@@ -249,7 +249,7 @@ class Nemesis(object):
             result = self._run_nodetool(rebuild_cmd, node)
             self.log.debug(result.stdout)
             self.log.debug(result.stderr)
-            node.remoter.run('journalctl |grep storage_service|grep for|grep ks', verbose=True)
+            node.remoter.run('journalctl |grep "Done checksum for"', verbose=True, ignore_status=True)
         self._set_current_disruption('Decommission %s' % self.target_node)
         target_node_ip = self.target_node.private_ip_address
         decommission_cmd = 'nodetool --host localhost decommission'
