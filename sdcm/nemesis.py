@@ -270,6 +270,11 @@ class Nemesis(object):
                 self.log.error(error_msg)
             else:
                 self.log.info('Decommission %s PASS', self.target_node)
+                for node in self.cluster.nodes:
+                    result = self._run_nodetool(rebuild_cmd, node)
+                    self.log.debug(result.stdout)
+                    self.log.debug(result.stderr)
+                    node.remoter.run('journalctl |grep "Done checksum for"', verbose=True, ignore_status=True)
                 self._terminate_cluster_node(self.target_node)
                 # Replace the node that was terminated.
                 if add_node:
