@@ -244,6 +244,12 @@ class Nemesis(object):
             except Exception as details:
                 self.log.error(str(details))
                 return None
+        rebuild_cmd = 'nodetool --host localhost rebuild'
+        for node in self.cluster.nodes:
+            result = self._run_nodetool(rebuild_cmd, node)
+            self.log.debug(result.stdout)
+            self.log.debug(result.stderr)
+            node.remoter.run('journalctl |grep storage_service|grep for|grep ks', verbose=True)
         self._set_current_disruption('Decommission %s' % self.target_node)
         target_node_ip = self.target_node.private_ip_address
         decommission_cmd = 'nodetool --host localhost decommission'
