@@ -275,10 +275,13 @@ class Nemesis(object):
                     self.log.debug(result.stdout)
                     self.log.debug(result.stderr)
                     node.remoter.run('journalctl |grep "Done checksum for"', verbose=True, ignore_status=True)
-                self._terminate_cluster_node(self.target_node)
-                # Replace the node that was terminated.
-                if add_node:
-                    self._add_and_init_new_cluster_node(target_node_ip)
+                #self._terminate_cluster_node(self.target_node)
+                # # Replace the node that was terminated.
+                #if add_node:
+                #    self._add_and_init_new_cluster_node(target_node_ip)
+        import time
+        #sleep 2 days
+        time.sleep(172800)
 
     def disrupt_terminate_and_replace_node(self):
         # using "Replace a Dead Node" procedure from http://docs.scylladb.com/procedures/replace_dead_node/
