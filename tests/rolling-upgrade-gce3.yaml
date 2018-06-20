@@ -1,0 +1,72 @@
+test_duration: 65
+
+n_db_nodes: 4
+n_loaders: 1
+n_monitor_nodes: 1
+gce_datacenter: 'us-east1-b'
+
+# workloads
+prepare_write_stress: cassandra-stress write no-warmup cl=QUORUM n=10000000 -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5
+stress_cmd_read_10m: cassandra-stress read no-warmup cl=QUORUM duration=10m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5
+stress_cmd_read_clall: cassandra-stress read no-warmup cl=ALL n=10000000 -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5
+stress_cmd_read_20m: cassandra-stress read no-warmup cl=QUORUM duration=20m -schema 'replication(factor=3)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5
+
+#user_prefix: 'rolling-upgrade-2-2-ak'
+user_prefix: 'amos-debug'
+failure_post_behavior: keep
+
+experimental: 'true'
+
+backends: !mux
+    gce: !mux
+        cluster_backend: 'gce'
+        user_credentials_path: '~/.ssh/scylla-test'
+        gce_user_credentials: '~/Scylla-c41b78923a54.json'
+        gce_service_account_email: 'skilled-adapter-452@appspot.gserviceaccount.com'
+        gce_project: 'skilled-adapter-452'
+        #gce_image: 'https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/family/centos-7'
+        gce_network: 'default'
+        gce_image: 'https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20180522'
+        gce_image_username: 'scylla-test'
+        gce_instance_type_db: 'n1-highmem-8'
+        gce_root_disk_type_db: 'pd-ssd'
+        gce_root_disk_size_db: 50
+        gce_n_local_ssd_disk_db: 1
+        gce_instance_type_loader: 'n1-standard-2'
+        gce_root_disk_type_loader: 'pd-standard'
+        gce_root_disk_size_loader: 50
+        gce_n_local_ssd_disk_loader: 0
+        gce_instance_type_monitor: 'n1-standard-1'
+        gce_root_disk_type_monitor: 'pd-standard'
+        gce_root_disk_size_monitor: 50
+        gce_n_local_ssd_disk_monitor: 0
+
+databases: !mux
+    scylla:
+        db_type: scylla
+
+base_version: !mux
+    2.0:
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.0.repo
+    2.0+:
+        scylla_repo: http://downloads.scylladb.com/rpm/unstable/centos/scylladb-2.0/55/scylla.repo
+    2.1:
+        #scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.1.repo
+        scylla_repo: 'http://downloads.scylladb.com.s3.amazonaws.com/deb/ubuntu/scylla-2.1-xenial.list'
+    2.1+:
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/f6c4d558eb84dce0d8a17fc3e9c7d9198695b55b-29b3c6ee621c9bec9e9fa2fafbb9dd6802ce39e5-93105fd9242e8b6e2c50416ec1a268765a266e83/100/scylla.repo
+    2.2:
+        #scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.2.repo
+        scylla_repo: 'http://downloads.scylladb.com.s3.amazonaws.com/deb/ubuntu/scylla-2.2-xenial.list'
+    2.2+:
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/34/scylla.repo
+    2017.1:
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/enterprise/rpm/centos/scylla-enterprise-2017.1.repo
+    2018.1.0:
+        # official release 2018.1.0
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/enterprise/rpm/unstable/centos/branch-2018.1/29/scylla.repo
+    2018.1.2:
+        scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/enterprise/rpm/unstable/centos/086e2cfec85da448c39a019185fcafcfbaa3c9ec-891c01c2d829c4929973d5eedad0f47f0f4f7438-3cf577a864354c668cdeff55679143c312298687/42/scylla.repo
+
+
+new_scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/deb/unstable/xenial/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/37/scylladb-2.2/scylla.list'
