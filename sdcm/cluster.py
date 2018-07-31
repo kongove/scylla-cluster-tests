@@ -2304,6 +2304,8 @@ class BaseMonitorSet(object):
         pass
 
     def install_scylla_monitoring_prereqs(self, node):
+        self.log.debug('node.distro: %s' % node.distro)
+        self.log.debug('node.is_ubuntu: %s' % node.is_ubuntu())
         if node.is_rhel_like():
             prereqs_script = dedent("""
                 yum install -y python-pip unzip wget docker
