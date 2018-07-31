@@ -276,7 +276,7 @@ class UpgradeTest(FillDatabaseData):
         self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
 
         # wait for the prepare write workload to finish
-        self.verify_stress_thread(prepare_write_stress_queue)
+        #self.verify_stress_thread(prepare_write_stress_queue)
 
         ### read workload
         self.log.info('Starting c-s read workload for 10m')
@@ -294,14 +294,14 @@ class UpgradeTest(FillDatabaseData):
         self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
 
         # wait for the 10m read workload to finish
-        self.verify_stress_thread(read_10m_stress_queue)
+        #self.verify_stress_thread(read_10m_stress_queue)
 
-        ### read workload (cl=ALL)
-        self.log.info('Starting c-s read workload (cl=ALL n=10000000)')
-        stress_cmd_read_clall = self.params.get('stress_cmd_read_clall')
-        read_clall_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_clall)
-        # wait for the cl=ALL read workload to finish
-        self.verify_stress_thread(read_clall_stress_queue)
+        #   ### read workload (cl=ALL)
+        #   self.log.info('Starting c-s read workload (cl=ALL n=10000000)')
+        #   stress_cmd_read_clall = self.params.get('stress_cmd_read_clall')
+        #   read_clall_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_clall)
+        #   # wait for the cl=ALL read workload to finish
+        #   self.verify_stress_thread(read_clall_stress_queue)
 
         ### read workload (20m)
         self.log.info('Starting c-s read workload for 20m')
@@ -322,7 +322,7 @@ class UpgradeTest(FillDatabaseData):
             self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
 
         # wait for the 20m read workload to finish
-        self.verify_stress_thread(read_20m_stress_queue)
+        #self.verify_stress_thread(read_20m_stress_queue)
         self.log.info('all nodes were upgraded, and last workaround is verified.')
 
 
