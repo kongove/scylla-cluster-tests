@@ -1056,7 +1056,7 @@ client_encryption_options:
             self.remoter.run('sudo apt-get install -y rsync tcpdump screen wget net-tools')
             self.download_scylla_repo(scylla_repo)
             self.remoter.run('sudo apt-get update')
-            self.remoter.run('sudo apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated {}'.format(self.scylla_pkg()))
+            self.remoter.run('sudo apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --allow --allow-unauthenticated {}'.format(self.scylla_pkg()))
 
     @log_run_info("Detecting disks")
     def detect_disks(self, nvme=True):
@@ -1844,7 +1844,7 @@ class BaseLoaderSet(object):
             node.remoter.run('sudo yum install -y {}-tools'.format(node.scylla_pkg()))
         else:
             node.remoter.run('sudo apt-get update')
-            node.remoter.run('sudo apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated {}-tools'.format(node.scylla_pkg()))
+            node.remoter.run('sudo apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --allow --allow-unauthenticated {}-tools'.format(node.scylla_pkg()))
 
         node.wait_cs_installed(verbose=verbose)
         if node.is_rhel_like():

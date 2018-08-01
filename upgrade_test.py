@@ -112,14 +112,14 @@ class UpgradeTest(FillDatabaseData):
                 else:
                     node.remoter.run('sudo apt-get remove scylla\* -y')
                     # fixme: add publick key
-                    node.remoter.run('sudo apt-get install {}{} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated'.format(scylla_pkg, ver_suffix))
+                    node.remoter.run('sudo apt-get install {}{} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --allow --allow-unauthenticated'.format(scylla_pkg, ver_suffix))
                     node.remoter.run('for conf in $(cat /var/lib/dpkg/info/scylla-*server.conffiles /var/lib/dpkg/info/scylla-*conf.conffiles /var/lib/dpkg/info/scylla-*jmx.conffiles | grep -v init ); do sudo cp -v $conf $conf.backup-2.1; done')
             else:
                 if node.is_rhel_like():
                     node.remoter.run('sudo yum update {}{}\* -y'.format(scylla_pkg, ver_suffix))
                 else:
                     node.remoter.run('sudo apt-get update')
-                    node.remoter.run('sudo apt-get dist-upgrade {} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated'.format(scylla_pkg))
+                    node.remoter.run('sudo apt-get dist-upgrade {} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --allow --allow-unauthenticated'.format(scylla_pkg))
         node.start_scylla_server()
         node.wait_db_up(verbose=True)
         result = node.remoter.run('scylla --version')
@@ -162,7 +162,7 @@ class UpgradeTest(FillDatabaseData):
                 node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf.autobackup $conf; done')
             else:
                 node.remoter.run('sudo apt-get remove scylla\* -y')
-                node.remoter.run('sudo apt-get install %s -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated' % node.scylla_pkg())
+                node.remoter.run('sudo apt-get install %s -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --allow --allow-unauthenticated' % node.scylla_pkg())
                 node.remoter.run('for conf in $(cat /var/lib/dpkg/info/scylla-*server.conffiles /var/lib/dpkg/info/scylla-*conf.conffiles /var/lib/dpkg/info/scylla-*jmx.conffiles | grep -v init ); do sudo cp -v $conf.backup $conf; done')
                 node.remoter.run('sudo systemctl daemon-reload')
         elif self.upgrade_rollback_mode == 'minor_release':
@@ -172,7 +172,7 @@ class UpgradeTest(FillDatabaseData):
                 node.remoter.run('sudo yum remove %s -y' % new_introduced_pkgs)
             node.remoter.run('sudo yum downgrade scylla\* -y')
             if new_introduced_pkgs:
-                node.remoter.run('sudo yum install %s -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated' % node.scylla_pkg())
+                node.remoter.run('sudo yum install %s -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --allow --allow-unauthenticated' % node.scylla_pkg())
             if node.is_rhel_like():
                 node.remoter.run('for conf in $( rpm -qc $(rpm -qa | grep scylla) | grep -v contains ); do sudo cp -v $conf.autobackup $conf; done')
             else:
