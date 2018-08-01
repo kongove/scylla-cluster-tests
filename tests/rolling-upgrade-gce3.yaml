@@ -26,7 +26,7 @@ backends: !mux
         gce_project: 'skilled-adapter-452'
         #gce_image: 'https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/family/centos-7'
         gce_network: 'default'
-        gce_image: 'https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20180522'
+        gce_image: 'https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1404-trusty-v20180722'
         gce_image_username: 'scylla-test'
         gce_instance_type_db: 'n1-highmem-8'
         gce_root_disk_type_db: 'pd-ssd'
@@ -52,12 +52,12 @@ base_version: !mux
         scylla_repo: http://downloads.scylladb.com/rpm/unstable/centos/scylladb-2.0/55/scylla.repo
     2.1:
         #scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.1.repo
-        scylla_repo: 'http://downloads.scylladb.com.s3.amazonaws.com/deb/ubuntu/scylla-2.1-xenial.list'
+        scylla_repo: 'http://downloads.scylladb.com.s3.amazonaws.com/deb/ubuntu/scylla-2.1-trusty.list'
     2.1+:
         scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/f6c4d558eb84dce0d8a17fc3e9c7d9198695b55b-29b3c6ee621c9bec9e9fa2fafbb9dd6802ce39e5-93105fd9242e8b6e2c50416ec1a268765a266e83/100/scylla.repo
     2.2:
         #scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/centos/scylla-2.2.repo
-        scylla_repo: 'http://downloads.scylladb.com.s3.amazonaws.com/deb/ubuntu/scylla-2.2-xenial.list'
+        scylla_repo: 'http://downloads.scylladb.com.s3.amazonaws.com/deb/ubuntu/scylla-2.2-trusty.list'
     2.2+:
         scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/rpm/unstable/centos/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/34/scylla.repo
     2017.1:
@@ -69,4 +69,4 @@ base_version: !mux
         scylla_repo: https://s3.amazonaws.com/downloads.scylladb.com/enterprise/rpm/unstable/centos/086e2cfec85da448c39a019185fcafcfbaa3c9ec-891c01c2d829c4929973d5eedad0f47f0f4f7438-3cf577a864354c668cdeff55679143c312298687/42/scylla.repo
 
 
-new_scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/deb/unstable/xenial/c3187093a3b4682f1e50692382266996f16ae8b2-003efee26013d898dda493ed349edd46c55750eb-a36d84f3293ac7759eae54772acc2b478b39e4e1/37/scylladb-2.2/scylla.list'
+new_scylla_repo: 'https://s3.amazonaws.com/downloads.scylladb.com/deb/unstable/ubuntu/e95b4ee825203300cbf4112ee83720a5cf938aa0-24c90a358706acefdd538fb86efbd0e4b0712929-branch-2.3/16/scylladb-2.3/scylla.list'
