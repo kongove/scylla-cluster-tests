@@ -12,6 +12,8 @@ from avocado.utils import runtime as avocado_runtime
 import cluster
 import ec2_client
 
+from . import wait
+
 logger = logging.getLogger(__name__)
 
 INSTANCE_PROVISION_ON_DEMAND = 'on_demand'
@@ -430,9 +432,18 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
         endpoint_snitch = self.params.get('endpoint_snitch')
         seed_address = self.get_seed_nodes_by_flag(private_ip=False)
 
+        def scylla_ami_setup_done():
+            #result = node.remoter.run('systemctl status scylla-ami-setup', ignore_status=True)
+            #return 'Started Scylla AMI Setup' in result.stdout
+            #result = node.remoter.run('systemctl status scylla-server', ignore_status=True)
+            #return 'Failed to start Scylla Server.' in result.stdout
+            result = node.remoter.run('test -e /etc/scylla/ami_disabled', ignore_status=True)
+            return result.exit_status != 0
+
         if not cluster.Setup.REUSE_CLUSTER:
 
             node.wait_ssh_up(verbose=verbose)
+            wait.wait_for(scylla_ami_setup_done, step=10, timeout=300)
             if len(self.datacenter) > 1:
                 if not endpoint_snitch:
                     endpoint_snitch = "Ec2MultiRegionSnitch"
