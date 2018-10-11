@@ -1435,6 +1435,8 @@ class BaseScyllaCluster(object):
         return self.seed_nodes_private_ips
 
     def get_seed_nodes(self):
+        return [node for node in self.nodes if node.is_seed]
+
         seed_nodes_private_ips = self.get_seed_nodes_private_ips()
         seed_nodes = []
         for node in self.nodes:
