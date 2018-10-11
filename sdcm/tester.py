@@ -169,7 +169,8 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         logging.getLogger('botocore').setLevel(logging.CRITICAL)
         logging.getLogger('boto3').setLevel(logging.CRITICAL)
         self.init_resources()
-        self.db_cluster.wait_for_init()
+        self.db_cluster.wait_for_init(node_list=self.db_cluster.nodes[:5])
+        self.db_cluster.wait_for_init(node_list=self.db_cluster.nodes[5:])
         if self.cs_db_cluster:
             self.cs_db_cluster.wait_for_init()
         db_node_address = self.db_cluster.nodes[0].private_ip_address

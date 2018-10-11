@@ -1219,21 +1219,22 @@ class BaseCluster(object):
         seeds_num = 5
         if isinstance(n_nodes, list):
             for dc_idx, num in enumerate(n_nodes):
-                if dc_idx == 0:
+                if dc_idx == 0 and n_nodes == [50]:
                     new_nodes = self.add_nodes(seeds_num, dc_idx=dc_idx)
                     for n in new_nodes:
                         n.is_seed = True
-                    self.wait_for_init()
-                    self.add_nodes(num - seeds_num, dc_idx=dc_idx)
+                    #self.wait_for_init()
+                    self.add_nodes(num - seeds_num, dc_idx=dc_idx, enable_auto_bootstrap=True)
                 else:
                     self.add_nodes(num, dc_idx=dc_idx)
+                #self.add_nodes(num, dc_idx=dc_idx)
         elif isinstance(n_nodes, int):  # legacy type
-            new_nodes = self.add_nodes(seeds_num)
-            for n in new_nodes:
-                n.is_seed = True
-            self.wait_for_init()
-            self.add_nodes(n_nodes - seeds_num)
-            #self.add_nodes(n_nodes)
+            #new_nodes = self.add_nodes(seeds_num)
+            #for n in new_nodes:
+            #    n.is_seed = True
+            #self.wait_for_init()
+            #self.add_nodes(n_nodes - seeds_num)
+            self.add_nodes(n_nodes)
         else:
             raise ValueError('Unsupported type: {}'.format(type(n_nodes)))
         self.coredumps = dict()
