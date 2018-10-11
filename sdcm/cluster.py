@@ -1220,14 +1220,14 @@ class BaseCluster(object):
         if isinstance(n_nodes, list):
             for dc_idx, num in enumerate(n_nodes):
                 if dc_idx == 0:
-                    new_nodes = self.add_nodes(seeds_num, dc_idx=dc_idx)
-                    self.wait_for_init(node_list=new_nodes)
+                    self.add_nodes(seeds_num, dc_idx=dc_idx)
+                    self.wait_for_init()
                     self.add_nodes(num - seeds_num, dc_idx=dc_idx)
                 else:
                     self.add_nodes(num, dc_idx=dc_idx)
         elif isinstance(n_nodes, int):  # legacy type
-            new_nodes = self.add_nodes(seeds_num)
-            self.wait_for_init(node_list=new_nodes)
+            self.add_nodes(seeds_num)
+            self.wait_for_init()
             self.add_nodes(n_nodes - seeds_num)
             #self.add_nodes(n_nodes)
         else:
