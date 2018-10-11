@@ -435,10 +435,10 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
         def scylla_ami_setup_done():
             #result = node.remoter.run('systemctl status scylla-ami-setup', ignore_status=True)
             #return 'Started Scylla AMI Setup' in result.stdout
-            #result = node.remoter.run('systemctl status scylla-server', ignore_status=True)
-            #return 'Failed to start Scylla Server.' in result.stdout
-            result = node.remoter.run('test -e /etc/scylla/ami_disabled', ignore_status=True)
-            return result.exit_status != 0
+            result = node.remoter.run('systemctl status scylla-server', ignore_status=True)
+            return 'Failed to start Scylla Server.' in result.stdout
+            #result = node.remoter.run('test -e /etc/scylla/ami_disabled', ignore_status=True)
+            #return result.exit_status != 0
 
         if not cluster.Setup.REUSE_CLUSTER:
 
