@@ -417,7 +417,9 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
                               client_encrypt=self._param_enabled('client_encrypt'),
                               append_scylla_args=self.params.get('append_scylla_args'))
         else:
-            node.config_setup(enable_exp=self._param_enabled('experimental'),
+            seed_address = self.get_seed_nodes_by_flag(private_ip=True)
+            node.config_setup(seed_address=seed_address,
+                              enable_exp=self._param_enabled('experimental'),
                               endpoint_snitch=endpoint_snitch,
                               authenticator=self.params.get('authenticator'),
                               server_encrypt=self._param_enabled('server_encrypt'),
