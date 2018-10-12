@@ -419,16 +419,28 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
                               client_encrypt=self._param_enabled('client_encrypt'),
                               append_scylla_args=self.params.get('append_scylla_args'))
         else:
-            node.config_setup(enable_exp=self._param_enabled('experimental'),
-                              endpoint_snitch=endpoint_snitch,
-                              authenticator=self.params.get('authenticator'),
-                              server_encrypt=self._param_enabled('server_encrypt'),
-                              client_encrypt=self._param_enabled('client_encrypt'),
-                              append_scylla_args=self.params.get('append_scylla_args'))
+            if self.params.get('stop_service', default='true') == 'true':
+                node.config_setup(seed_address=seed_address,
+                                  enable_exp=self._param_enabled('experimental'),
+                                  endpoint_snitch=endpoint_snitch,
+                                  authenticator=self.params.get('authenticator'),
+                                  server_encrypt=self._param_enabled('server_encrypt'),
+                                  client_encrypt=self._param_enabled('client_encrypt'),
+                                  append_scylla_args=self.params.get('append_scylla_args'))
+            else:
+                node.config_setup(enable_exp=self._param_enabled('experimental'),
+                                  endpoint_snitch=endpoint_snitch,
+                                  authenticator=self.params.get('authenticator'),
+                                  server_encrypt=self._param_enabled('server_encrypt'),
+                                  client_encrypt=self._param_enabled('client_encrypt'),
+                                  append_scylla_args=self.params.get('append_scylla_args'))
 
     def node_setup(self, node, verbose=False, timeout=3600):
         endpoint_snitch = self.params.get('endpoint_snitch')
-        seed_address = self.get_seed_nodes_by_flag(private_ip=False)
+        if len(self.datacenter) > 1:
+            seed_address = self.get_seed_nodes_by_flag(private_ip=False)
+        else:
+            seed_address = self.get_seed_nodes_by_flag(private_ip=True)
 
         def scylla_ami_setup_done():
             """
