@@ -119,6 +119,8 @@ class UpgradeTest(FillDatabaseData):
                 else:
                     node.remoter.run('sudo apt-get update')
                     node.remoter.run('sudo apt-get dist-upgrade {} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated'.format(scylla_pkg))
+        if self.db_cluster.params.get('test_sst3', default=None):
+            node.remoter.run("echo 'enable_sstables_mc_format: true' |sudo tee --append /etc/scylla/scylla.yaml")
         node.start_scylla_server()
         node.wait_db_up(verbose=True)
         result = node.remoter.run('scylla --version')
@@ -184,6 +186,8 @@ class UpgradeTest(FillDatabaseData):
         # recover the system tables
         if self.db_cluster.params.get('recover_system_tables', default=None):
             node.remoter.run(cmd, verbose=True)
+        if self.db_cluster.params.get('test_sst3', default=None):
+            node.remoter.run('sudo sed -i -e "s/enable_sstables_mc_format:/#enable_sstables_mc_format:/g" /etc/scylla/scylla.yaml')
         node.remoter.run('sudo systemctl start scylla-server.service')
         node.wait_db_up(verbose=True)
         result = node.remoter.run('scylla --version')
