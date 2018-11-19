@@ -332,8 +332,7 @@ class AWSNode(cluster.BaseNode):
         if any(ss in self._instance.instance_type for ss in ['i3', 'i2']):
             clean_script = dedent("""
                 sudo sed -e '/.*scylla/s/^/#/g' -i /etc/fstab
-                sudo sed -e 's/replace_address_on_first_boot/#replace_address_on_first_boot/g' -i /etc/scylla/scylla.yaml
-                sudo sed -e '/auto_bootstrap:.*/s/False/true/g' -i /etc/scylla/scylla.yaml
+                sudo sed -e '/auto_bootstrap:.*/s/False/True/g' -i /etc/scylla/scylla.yaml
             """)
             self.remoter.run("sudo bash -cxe '%s'" % clean_script)
             output = self.remoter.run('sudo grep replace_address: /etc/scylla/scylla.yaml', ignore_status=True)
