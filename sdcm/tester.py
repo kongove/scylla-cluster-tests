@@ -156,7 +156,7 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         cluster.Setup.reuse_cluster(self.params.get('reuse_cluster', default=False))
 
         # for saving test details in DB
-        self.create_stats = True
+        self.create_stats = False
 
     @clean_resources_on_exception
     def setUp(self):
