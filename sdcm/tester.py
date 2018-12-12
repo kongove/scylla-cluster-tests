@@ -668,7 +668,8 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         if duration is None:
             duration = self.params.get('test_duration')
         timeout = duration * 60 + 600
-        self.update_stress_cmd_details(stress_cmd, prefix)
+        if self.create_stats:
+            self.update_stress_cmd_details(stress_cmd, prefix)
         return self.loaders.run_stress_thread(stress_cmd, timeout,
                                               self.outputdir,
                                               stress_num=stress_num,
