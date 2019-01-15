@@ -995,6 +995,35 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
     def rows_to_list(rows):
         return [list(row) for row in rows]
 
+    def collect_partitions_info(self, table_info, save_into_file_name):
+        # Get and save how many rows in each partition.
+        # It may be used for validation data in the end of test
+        if 'table name' not in table_info.keys() or 'primary key column' not in table_info.keys():
+            self.log.warning('Can\'t collect partitions data. Missed "table name" or "primary key column" info')
+            return {}
+
+        session = self.cql_connection_patient(self.db_cluster.nodes[0])
+
+        # Get distinct partition keys
+        result = self.rows_to_list(
+            session.execute('select distinct {pk} from {table}'.format(pk=table_info['primary key column'],
+                                                                table=table_info['table name']), timeout=300))
+        result.sort()
+
+        # Collect data about partitions' rows amount.
+        partitions = {}
+        self.partitions_stats_file = os.path.join(self.logdir, save_into_file_name)
+        with open(self.partitions_stats_file, 'a') as f:
+            for id in result:
+                partitions[id] = self.rows_to_list(session.execute(
+                    'select count(*) from {table} where {pk} = {id}'.format(table=table_info['table name'],
+                                                                   pk=table_info['primary key column'],
+                                                                   id=id), timeout=300))
+                f.write('{id}:{rows}'.format(id=id, rows=partitions[id]))
+        self.log.info('File with partitions row data: {}'.format(self.partitions_stats_file))
+
+        return partitions
+
     def clean_resources(self):
         self.log.debug('Cleaning up resources used in the test')
         self.kill_stress_thread()

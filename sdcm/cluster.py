@@ -754,10 +754,16 @@ class BaseNode(object):
             if stat_line:
                 try:
                     try:
+                        # Fix for space_node_threshold: if there are a few tables in the keyspace and space is used by the
+                        # table, that arrives last in the cfstats output, will be less then space_node_threshold,
+                        # the nemesis never will be run. Because of this, we sum space of all tables in the keyspace
+                        # This function is used just for wait_total_space_used_per_node, so I fix "Space used.." statistics only
+                        current_value = stat_dict[stat_line[0]] if 'Space used' in stat_line[0] \
+                                                                   and stat_line[0] in stat_dict else 0
                         if '.' in stat_line[1].split()[0]:
-                            stat_dict[stat_line[0]] = float(stat_line[1].split()[0])
+                            stat_dict[stat_line[0]] = float(stat_line[1].split()[0]) + current_value
                         else:
-                            stat_dict[stat_line[0]] = int(stat_line[1].split()[0])
+                            stat_dict[stat_line[0]] = int(stat_line[1].split()[0]) + current_value
                     except IndexError:
                         continue
                 except ValueError:

@@ -44,7 +44,8 @@ class LongevityTest(ClusterTester):
 
             # Run all stress commands
             self.log.debug('stress cmd: {}'.format(stress_cmd))
-            stress_queue.append(self.run_stress_thread(**params))
+            stress_queue.append(self.run_stress_thread(**params) if stress_cmd.startswith('cassandra-stress')
+                                else self.run_stress_thread_bench(stress_cmd=stress_cmd, stats_aggregate_cmds=False))
             time.sleep(10)
 
             # Remove "user profile" param for the next command
@@ -142,6 +143,14 @@ class LongevityTest(ClusterTester):
                 for stress in verify_queue:
                     self.verify_stress_thread(queue=stress)
 
+
+        # # Collect data about partitions and their rows amount
+        # validate_partitions = self.params.get('validate_partitions', default=None)
+        # if validate_partitions:
+        #     self.log.debug('Save partitons info before reads')
+        #     partitions_dict_before = self.collect_partitions_info(table_info=validate_partitions,
+        #                                                           save_into_file_name='partitions_rows_before.log')
+
         stress_cmd = self.params.get('stress_cmd', default=None)
         if stress_cmd:
             # Stress: Same as in prepare_write - allow the load to be spread across all loaders when using MULTI-KEYSPACES
@@ -170,6 +179,14 @@ class LongevityTest(ClusterTester):
 
         for stress in stress_queue:
             self.verify_stress_thread(queue=stress)
+
+        # if validate_partitions:
+        #     self.log.debug('Save partitons info after reads')
+        #     partitions_dict_after = self.collect_partitions_info(table_info=validate_partitions,
+        #                                                          save_into_file_name='partitions_rows_after.log')
+        #     self.assertEqual(partitions_dict_before, partitions_dict_after,
+        #                      msg='Row amount in partitions is not same before and after running of nemesis')
+
 
     def _create_counter_table(self):
         """
