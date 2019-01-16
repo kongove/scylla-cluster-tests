@@ -2086,6 +2086,8 @@ class BaseLoaderSet(object):
             node.remoter.run('sudo apt-get update')
             node.remoter.run('sudo apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated {}-tools'.format(node.scylla_pkg()))
 
+        node.remoter.run('sudo curl -L https://s3.amazonaws.com/scylla-qa-public/stress.jar -o /usr/share/scylla/cassandra/stress.jar', verbose=True)
+        node.remoter.run('sudo curl -L https://s3.amazonaws.com/scylla-qa-public/cassandra-stress -o /usr/bin/cassandra-stress', verbose=True)
         node.wait_cs_installed(verbose=verbose)
         if node.is_rhel_like():
             node.remoter.run('sudo yum install -y screen')

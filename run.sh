@@ -1,0 +1,1 @@
+avocado run longevity_large_partition_test.py:LargePartitionLongevetyTest.test_large_partition_longevity --multiplex tests/longevity-large-partition-1TB-7days.yaml --job-results-dir "./" --filter-only /run/backends/aws /run/databases/scylla  --show-job-log
