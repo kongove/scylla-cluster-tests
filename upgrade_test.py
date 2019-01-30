@@ -17,6 +17,7 @@
 import random
 import time
 import re
+import os
 
 from avocado import main
 
@@ -288,61 +289,63 @@ class UpgradeTest(FillDatabaseData):
         if self.params.get('disable_read_repair_chance', default=None):
             node.remoter.run('cqlsh -e "{}" {}'.format(cmd, node.private_ip_address), verbose=True)
 
-        # upgrade first node
-        self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[0]]
-        self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
-        self.upgrade_node(self.db_cluster.node_to_upgrade)
-        self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
-        self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
+        # # upgrade first node
+        # self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[0]]
+        # self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
+        # self.upgrade_node(self.db_cluster.node_to_upgrade)
+        # self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
+        # self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
 
-        # wait for the prepare write workload to finish
-        self.verify_stress_thread(prepare_write_stress_queue)
+        # # wait for the prepare write workload to finish
+        # self.verify_stress_thread(prepare_write_stress_queue)
 
-        ### read workload
-        self.log.info('Starting c-s read workload for 10m')
-        stress_cmd_read_10m = self.params.get('stress_cmd_read_10m')
-        read_10m_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_10m)
+        # ### read workload
+        # self.log.info('Starting c-s read workload for 10m')
+        # stress_cmd_read_10m = self.params.get('stress_cmd_read_10m')
+        # read_10m_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_10m)
 
-        self.log.info('Sleeping for 60s to let cassandra-stress start before the upgrade...')
-        time.sleep(60)
+        # self.log.info('Sleeping for 60s to let cassandra-stress start before the upgrade...')
+        # time.sleep(60)
 
-        # upgrade second node
-        self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[1]]
-        self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
-        self.upgrade_node(self.db_cluster.node_to_upgrade)
-        self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
-        self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
+        # # upgrade second node
+        # self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[1]]
+        # self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
+        # self.upgrade_node(self.db_cluster.node_to_upgrade)
+        # self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
+        # self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
 
-        # wait for the 10m read workload to finish
-        self.verify_stress_thread(read_10m_stress_queue)
+        # # wait for the 10m read workload to finish
+        # self.verify_stress_thread(read_10m_stress_queue)
 
-        ### read workload (cl=ALL)
-        self.log.info('Starting c-s read workload (cl=ALL n=10000000)')
-        stress_cmd_read_clall = self.params.get('stress_cmd_read_clall')
-        read_clall_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_clall)
-        # wait for the cl=ALL read workload to finish
-        self.verify_stress_thread(read_clall_stress_queue)
+        # ### read workload (cl=ALL)
+        # self.log.info('Starting c-s read workload (cl=ALL n=10000000)')
+        # stress_cmd_read_clall = self.params.get('stress_cmd_read_clall')
+        # read_clall_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_clall)
+        # # wait for the cl=ALL read workload to finish
+        # self.verify_stress_thread(read_clall_stress_queue)
 
-        ### read workload (20m)
-        self.log.info('Starting c-s read workload for 20m')
-        stress_cmd_read_20m = self.params.get('stress_cmd_read_20m')
-        read_20m_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_20m)
+        # ### read workload (20m)
+        # self.log.info('Starting c-s read workload for 20m')
+        # stress_cmd_read_20m = self.params.get('stress_cmd_read_20m')
+        # read_20m_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_20m)
 
-        # rollback second node
-        self.log.info('Rollback Node %s begin', self.db_cluster.nodes[indexes[1]].name)
-        self.rollback_node(self.db_cluster.nodes[indexes[1]])
-        self.log.info('Rollback Node %s ended', self.db_cluster.nodes[indexes[1]].name)
-        self.db_cluster.nodes[indexes[1]].remoter.run("nodetool status")
+        # # rollback second node
+        # self.log.info('Rollback Node %s begin', self.db_cluster.nodes[indexes[1]].name)
+        # self.rollback_node(self.db_cluster.nodes[indexes[1]])
+        # self.log.info('Rollback Node %s ended', self.db_cluster.nodes[indexes[1]].name)
+        # self.db_cluster.nodes[indexes[1]].remoter.run("nodetool status")
 
-        for i in indexes[1:]:
-            self.db_cluster.node_to_upgrade = self.db_cluster.nodes[i]
-            self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
-            self.upgrade_node(self.db_cluster.node_to_upgrade)
-            self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
-            self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
+        # for i in indexes[1:]:
+        #     self.db_cluster.node_to_upgrade = self.db_cluster.nodes[i]
+        #     self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
+        #     self.upgrade_node(self.db_cluster.node_to_upgrade)
+        #     self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
+        #     self.db_cluster.node_to_upgrade.remoter.run("nodetool status")
 
-        # wait for the 20m read workload to finish
-        self.verify_stress_thread(read_20m_stress_queue)
+        # # wait for the 20m read workload to finish
+        # self.verify_stress_thread(read_20m_stress_queue)
+        while not os.path.exists('/tmp/upgrade-finished'):
+            time.sleep(10)
 
         self.log.info('Run some Queries to verify data AFTER UPGRADE')
         self.verify_db_data()
