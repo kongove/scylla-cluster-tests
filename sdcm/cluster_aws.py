@@ -611,6 +611,10 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
             append_scylla_args=self.get_scylla_args(),
         )
         if True or len(self.datacenter) > 1:
+            #setup_params.update(dict(
+            #    seed_address=seed_address,
+            #    broadcast=node.private_ip_address,
+            #))
             setup_params.update(dict(
                 seed_address=seed_address,
                 broadcast=node.public_ip_address,
@@ -621,7 +625,8 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
     def node_setup(self, node, verbose=False, timeout=3600):
         endpoint_snitch = self.params.get('endpoint_snitch')
         if True or len(self.datacenter) > 1:
-            seed_address = self.get_seed_nodes_by_flag(private_ip=False)
+            #seed_address = self.get_seed_nodes_by_flag(private_ip=False)
+            seed_address = self.get_seed_nodes_by_flag(private_ip=True)
         else:
             seed_address = self.get_seed_nodes_by_flag(private_ip=True)
 
