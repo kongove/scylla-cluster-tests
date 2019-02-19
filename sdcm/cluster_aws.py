@@ -148,7 +148,19 @@ class AWSCluster(cluster.BaseCluster):
 
     def _create_spot_instances(self, count,  interfaces, ec2_user_data='', dc_idx=0, tags_list=[]):
         ec2 = ec2_client.EC2Client(region_name=self.region_names[dc_idx])
+        # vpc-e1a44784
+        # subnet-0598a743
+        # subnet-5dbe4338
+        # subnet-177a6363
+        subnet_id_list = ['subnet-0598a743', 'subnet-5dbe4338', 'subnet-177a6363']
+        import random
+        self._ec2_subnet_id[dc_idx] = random.sample(subnet_id_list, 1)[0]
+
         subnet_info = ec2.get_subnet_info(self._ec2_subnet_id[dc_idx])
+        interfaces = [{'DeviceIndex': 0,
+                       'SubnetId': self._ec2_subnet_id[dc_idx],
+                       'AssociatePublicIpAddress': True,
+                       'Groups': self._ec2_security_group_ids[dc_idx]}]
         spot_params = dict(instance_type=self._ec2_instance_type,
                            image_id=self._ec2_ami_id[dc_idx],
                            region_name=subnet_info['AvailabilityZone'],
