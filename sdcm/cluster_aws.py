@@ -613,11 +613,11 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
         if True or len(self.datacenter) > 1:
             #setup_params.update(dict(
             #    seed_address=seed_address,
-            #    broadcast=node.private_ip_address,
+            #    broadcast=node.public_ip_address,
             #))
             setup_params.update(dict(
                 seed_address=seed_address,
-                broadcast=node.public_ip_address,
+                broadcast=node.private_ip_address,
             ))
 
         node.config_setup(**setup_params)
