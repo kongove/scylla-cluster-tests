@@ -193,14 +193,14 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         if self.create_stats:
             self.create_test_stats()
         self.init_resources()
-        #if self.params.get('seeds_first', default='false') == 'true':
-        #    seeds_num = self.params.get('seeds_num', default=1)
-        #    self.db_cluster.wait_for_init(node_list=self.db_cluster.nodes[:seeds_num])
-        #    self.db_cluster.wait_for_init(node_list=self.db_cluster.nodes[seeds_num:])
-        #else:
-        #    self.db_cluster.wait_for_init()
-        for i in self.db_cluster.nodes
-            self.db_cluster.wait_for_init(node_list=[i])
+        if self.params.get('seeds_first', default='false') == 'true':
+            seeds_num = self.params.get('seeds_num', default=1)
+            self.db_cluster.wait_for_init(node_list=self.db_cluster.nodes[:seeds_num])
+            self.db_cluster.wait_for_init(node_list=self.db_cluster.nodes[seeds_num:])
+        else:
+            self.db_cluster.wait_for_init()
+        #for i in self.db_cluster.nodes:
+        #    self.db_cluster.wait_for_init(node_list=[i])
         if self.cs_db_cluster:
             self.cs_db_cluster.wait_for_init()
         db_node_address = self.db_cluster.nodes[0].private_ip_address

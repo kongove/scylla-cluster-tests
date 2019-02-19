@@ -27,6 +27,8 @@ INSTANCE_PROVISION_SPOT_DURATION = 'spot_duration'
 SPOT_CNT_LIMIT = 20
 SPOT_FLEET_LIMIT = 50
 
+spotidx = 0
+
 
 def _prepend_user_prefix(user_prefix, base_name):
     if not user_prefix:
@@ -126,6 +128,25 @@ class AWSCluster(cluster.BaseCluster):
             private_ip_file.write("\n")
 
     def _create_on_demand_instances(self, count, interfaces, ec2_user_data, dc_idx=0, tags_list=[]):
+        global spotidx
+        # vpc-e1a44784
+        # subnet-0598a743
+        # subnet-5dbe4338
+        # subnet-177a6363
+        subnet_id_list = ['subnet-0598a743', 'subnet-5dbe4338', 'subnet-177a6363']
+        import random
+        #ec2_subnet_id = random.sample(subnet_id_list, 1)[0]
+        ec2_subnet_id = subnet_id_list[spotidx % 3]
+        spotidx += 1
+        self._ec2_subnet_id[dc_idx] = ec2_subnet_id
+        print ec2_subnet_id
+        #raise
+
+        #return 
+        interfaces = [{'DeviceIndex': 0,
+                       'SubnetId': ec2_subnet_id,
+                       'AssociatePublicIpAddress': True,
+                       'Groups': self._ec2_security_group_ids[dc_idx]}]
         ami_id = self._ec2_ami_id[dc_idx]
         self.log.debug("Creating {count} on-demand instances using AMI id '{ami_id}'... ".format(**locals()))
         instances = self._ec2_services[dc_idx].create_instances(ImageId=ami_id,
@@ -147,6 +168,7 @@ class AWSCluster(cluster.BaseCluster):
         return instances
 
     def _create_spot_instances(self, count,  interfaces, ec2_user_data='', dc_idx=0, tags_list=[]):
+        global spotidx
         ec2 = ec2_client.EC2Client(region_name=self.region_names[dc_idx])
         # vpc-e1a44784
         # subnet-0598a743
@@ -154,11 +176,18 @@ class AWSCluster(cluster.BaseCluster):
         # subnet-177a6363
         subnet_id_list = ['subnet-0598a743', 'subnet-5dbe4338', 'subnet-177a6363']
         import random
-        self._ec2_subnet_id[dc_idx] = random.sample(subnet_id_list, 1)[0]
+        #ec2_subnet_id = random.sample(subnet_id_list, 1)[0]
+        ec2_subnet_id = subnet_id_list[spotidx % 3]
+        spotidx += 1
+        self._ec2_subnet_id[dc_idx] = ec2_subnet_id
+        print ec2_subnet_id
+        #raise
 
-        subnet_info = ec2.get_subnet_info(self._ec2_subnet_id[dc_idx])
+        subnet_info = ec2.get_subnet_info(ec2_subnet_id)
+        print subnet_info['AvailabilityZone']
+        #return 
         interfaces = [{'DeviceIndex': 0,
-                       'SubnetId': self._ec2_subnet_id[dc_idx],
+                       'SubnetId': ec2_subnet_id,
                        'AssociatePublicIpAddress': True,
                        'Groups': self._ec2_security_group_ids[dc_idx]}]
         spot_params = dict(instance_type=self._ec2_instance_type,
@@ -288,8 +317,16 @@ class AWSCluster(cluster.BaseCluster):
         if cluster.Setup.REUSE_CLUSTER:
             instances = self._get_instances(dc_idx)
         else:
-            instances = self._create_instances(count, ec2_user_data, dc_idx)
-
+            instances = []
+            #for i in range(count):
+            print count
+            if count > 2:
+                instances += self._create_instances(2, ec2_user_data, dc_idx)
+                instances += self._create_instances(2, ec2_user_data, dc_idx)
+                instances += self._create_instances(2, ec2_user_data, dc_idx)
+            else:
+                instances = self._create_instances(count, ec2_user_data, dc_idx)
+    
         added_nodes = [self._create_node(instance, self._ec2_ami_username,
                                          self.node_prefix, node_index,
                                          self.logdir, dc_idx=dc_idx)
