@@ -740,8 +740,8 @@ class Nemesis(object):
             return 'repair-' in result.stdout
 
         wait_wrap.wait_for(func=repair_streaming_exists,
-                           timeout=300,
-                           step=0.01,
+                           timeout=1200,
+                           step=1,
                            throw_exc=True,
                            text='Wait for repair starts')
 
