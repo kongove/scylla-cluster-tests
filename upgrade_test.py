@@ -246,12 +246,12 @@ class UpgradeTest(FillDatabaseData):
         """
 
         self.log.info('Populate DB with many types of tables and data')
-        self.fill_db_data()
+        #self.fill_db_data()
         self.log.info('Run some Queries to verify data BEFORE UPGRADE')
-        self.verify_db_data()
-        self.clean_db_data()
+        #self.verify_db_data()
+        #self.clean_db_data()
         self.log.info('Re-Populate DB with many types of tables and data')
-        self.fill_db_data()
+        #self.fill_db_data()
 
         # sst3 workload (20m): prepare write
         self.log.info('Starting c-s sst3 workload for 20m to prepare data')
@@ -338,7 +338,7 @@ class UpgradeTest(FillDatabaseData):
         self.verify_stress_thread(read_20m_stress_queue)
 
         self.log.info('Run some Queries to verify data AFTER UPGRADE')
-        self.verify_db_data()
+        #self.verify_db_data()
 
         # sst3 workload: verify data by simple read cl=ALL
         self.log.info('Starting c-s sst3 workload to verify data by simple read')
