@@ -2888,9 +2888,11 @@ class FillDatabaseData(ClusterTester):
                             self.assertEqual(str([list(row) for row in res]), a['results'][i])
                         else:
                             res = session.execute(a['queries'][i])
-                            print 'result: %s' % str([list(row) for row in res])
+                            result = [list(row) for row in res]
+                            print 'result: %s' % result
                             print 'expect: %s' % a['results'][i]
-                            self.assertEqual([list(row) for row in res], a['results'][i])
+                            #self.assertEqual([list(row) for row in res], a['results'][i])
+                            self.assertEqual(result, a['results'][i])
                     except Exception as e:
                         print a['queries'][i], e
                         raise e
