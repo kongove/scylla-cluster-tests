@@ -2872,6 +2872,7 @@ class FillDatabaseData(ClusterTester):
                 else:
                     session.default_fetch_size = default_fetch_size
                 for i in range(len(a['queries'])):
+                    print a['queries'][i]
                     try:
                         if a['queries'][i].startswith("#SORTED"):
                             res = session.execute(a['queries'][i].replace('#SORTED', ''))
@@ -2887,6 +2888,7 @@ class FillDatabaseData(ClusterTester):
                             self.assertEqual(str([list(row) for row in res]), a['results'][i])
                         else:
                             res = session.execute(a['queries'][i])
+                            print str([list(row) for row in res])
                             self.assertEqual([list(row) for row in res], a['results'][i])
                     except Exception as e:
                         print a['queries'][i], e
@@ -2894,6 +2896,7 @@ class FillDatabaseData(ClusterTester):
                 if 'invalid_queries' in a:
                     for i in range(len(a['invalid_queries'])):
                         try:
+                            print a['invalid_queries'][i]
                             session.execute(a['invalid_queries'][i])
                             self.fail("query '%s' is not valid" % a['invalid_queries'][i])
                         except InvalidRequest as e:
