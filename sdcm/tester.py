@@ -215,6 +215,14 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
             self.db_cluster.wait_for_init()
         if self.cs_db_cluster:
             self.cs_db_cluster.wait_for_init()
+
+        # change rf RF of system_auth to 3
+        node = self.db_cluster.nodes[0]
+        session = self.cql_connection_patient(node)
+        session.execute(
+            "alter keyspace system_auth with replication = {'class': 'org.apache.cassandra.locator.SimpleStrategy', 'replication_factor':3};")
+        self.db_cluster.repair()
+
         db_node_address = self.db_cluster.nodes[0].private_ip_address
         self.loaders.wait_for_init(db_node_address=db_node_address)
         self.monitors.wait_for_init()
