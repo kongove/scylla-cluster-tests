@@ -230,6 +230,9 @@ class LongevityTest(ClusterTester):
             self.assertEqual(partitions_dict_before, partitions_dict_after,
                              msg='Row amount in partitions is not same before and after running of nemesis')
 
+        self.db_cluster.stop_nemesis()
+
+
 
     def test_batch_custom_time(self):
         """
