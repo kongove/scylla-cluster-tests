@@ -832,6 +832,26 @@ class Nemesis(object):
         if result.stderr:
             self.tester.fail(result.stderr)
 
+    def disrupt_alter_encryption(self, keyspace="keyspace1", table="standard1"):
+        scylla_encryption_options = self.cluster.params.get('scylla_encryption_options', default=None)
+        if scylla_encryption_options is None:
+            return
+
+        cmd = 'desc keyspace1.standard1;'
+        cql_auth = self.cluster.get_cql_auth()
+        cql_auth = '-u {} -p {}'.format(*cql_auth) if cql_auth else ''
+        # ignore status for workaround issue:
+        #   fail to desc schema: 'module' object has no attribute 'viewkeys' #731
+        cmd = 'cqlsh {} -e "{}" {}'.format(cql_auth, cmd, self.target_node.private_ip_address)
+        result = self.target_node.remoter.run(cmd, ignore_status=True, verbose=True)
+
+        # workaround issue #731
+        if 'scylla_encryption_options' not in result.stdout and "'module' object has no attribute 'viewkeys'" not in result.stderr:
+            cmd = "ALTER TABLE {keyspace}.{table} WITH scylla_encryption_options = {scylla_encryption_options};".format(**locals())
+        else:
+            cmd = "ALTER TABLE {keyspace}.{table} WITH scylla_encryption_options = {{'key_provider': 'none'}};".format(**locals())
+        self._run_in_cqlsh(cmd)
+
 
 class NotSpotNemesis(Nemesis):
     def set_target_node(self):
@@ -1268,3 +1288,8 @@ class NodeRestartWithResharding(Nemesis):
     @log_time_elapsed_and_status
     def disrupt(self):
         self.disrupt_restart_with_resharding()
+
+class AlterEncryption(Nemesis):
+    @log_time_elapsed_and_status
+    def disrupt(self):
+        self.disrupt_alter_encryption()
