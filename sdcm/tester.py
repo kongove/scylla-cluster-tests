@@ -878,6 +878,9 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         else:
             auth_provider = None
 
+        if ssl_opts is None and self.params.get('client_encrypt', default=None):
+            ssl_opts = {'ca_certs':'/tmp/ssl_conf/unittest/catest.pem'}
+        self.log.debug(str(ssl_opts))
         cluster = ClusterDriver(node_ips, auth_provider=auth_provider,
                                 compression=compression,
                                 protocol_version=protocol_version,
@@ -1293,7 +1296,7 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         compaction_strategy = "%s" % {"class": "InMemoryCompactionStrategy"}
         cql_cmd = "ALTER table {key_space_name}.{table_name} " \
                   "WITH in_memory=true AND compaction={compaction_strategy}".format(**locals())
-        node.remoter.run('cqlsh -e "{}" {}'.format(cql_cmd, node.private_ip_address), verbose=True)
+        node.remoter.run('cqlsh --ssl -e "{}" {}'.format(cql_cmd, node.private_ip_address), verbose=True)
 
     def get_num_of_hint_files(self, node):
         result = node.remoter.run("sudo find {0.scylla_hints_dir} -name *.log -type f| wc -l".format(self),
