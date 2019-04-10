@@ -1129,6 +1129,9 @@ class BaseNode(object):
             self.remoter.send_files(src='./data_dir/ssl_conf',
                                     dst='/tmp/')
             self.remoter.run('sudo mv /tmp/ssl_conf/*.* /etc/scylla/')
+            self.remoter.run('sudo cp -r /tmp/ssl_conf/unittest /etc/scylla/')
+            self.remoter.run('mkdir -p ~/.cassandra/')
+            self.remoter.run('cp /tmp/ssl_conf/unittest/cqlshrc ~/.cassandra/')
 
         if server_encrypt:
             scylla_yaml_contents += """
@@ -1141,10 +1144,11 @@ server_encryption_options:
 
         if client_encrypt:
             client_encrypt_conf = dedent("""
-                            client_encryption_options:          # <client_encrypt>
-                               enabled: true                    # <client_encrypt>
-                               certificate: /etc/scylla/db.crt  # <client_encrypt>
-                               keyfile: /etc/scylla/db.key      # <client_encrypt>
+                            client_encryption_options:                      # <client_encrypt>
+                               enabled: true                                # <client_encrypt>
+                               certificate: /etc/scylla/unittest/test.crt   # <client_encrypt>
+                               keyfile: /etc/scylla/unittest/test.key       # <client_encrypt>
+                               truststore: /etc/scylla/unittest/catest.pem  # <client_encrypt>
             """)
             scylla_yaml_contents += client_encrypt_conf
 
@@ -2112,7 +2116,7 @@ class BaseScyllaCluster(object):
     def run_cqlsh(self, node, cql_cmd, timeout=60, verbose=True, split=False):
         cql_auth = self.get_cql_auth()
         cql_auth = '-u {} -p {}'.format(*cql_auth) if cql_auth else ''
-        cmd = 'cqlsh --no-color {} -e "{}" {} --request-timeout={}'.format(cql_auth, cql_cmd, node.private_ip_address, timeout)
+        cmd = 'cqlsh --ssl --no-color {} -e "{}" {} --request-timeout={}'.format(cql_auth, cql_cmd, node.private_ip_address, timeout)
         cqlsh_out = node.remoter.run(cmd, timeout=timeout, verbose=verbose)
         # stdout of cqlsh example:
         #      pk
@@ -2326,6 +2330,14 @@ class BaseLoaderSet(object):
             self.kill_stress_thread()
             return
 
+        node.remoter.send_files(src='./data_dir/ssl_conf',
+                                dst='/tmp/')
+        #node.remoter.run('sudo mkdir -p /etc/scylla/')
+        #node.remoter.run('sudo mv /tmp/ssl_conf/*.* /etc/scylla/')
+        #node.remoter.run('sudo chown -R scylla:scylla /etc/scylla/unittest')
+        node.remoter.run('mkdir -p ~/.cassandra/')
+        node.remoter.run('cp /tmp/ssl_conf/unittest/cqlshrc ~/.cassandra/')
+
         result = node.remoter.run('test -e ~/PREPARED-LOADER', ignore_status=True)
         if result.exit_status == 0:
             self.log.debug('Skip loader setup for using a prepared AMI')
@@ -2440,6 +2452,7 @@ class BaseLoaderSet(object):
             if cql_auth and 'user=' not in stress_cmd:
                 # put the credentials into the right place into -mode section
                 stress_cmd = re.sub(r'(-mode.*?)-', r'\1 user={} password={} -'.format(*cql_auth), stress_cmd)
+            stress_cmd += ' -transport "truststore=/tmp/ssl_conf/unittest/cacerts.jks truststore-password=cassandra"'
 
             stress_cmd_opt = stress_cmd.split()[1]
             cs_pipe_name = '/tmp/cs_{}_pipe_$1_$2'.format(stress_cmd_opt)
@@ -2851,7 +2864,7 @@ class BaseLoaderSet(object):
             db_node_ip {str} -- ip of db_node
         """
         cmd = 'SELECT keyspace_name, table_name from system_schema.tables'
-        result = loader_node.remoter.run('cqlsh --no-color --execute "{}" {}'.format(cmd, db_node_ip), verbose=False)
+        result = loader_node.remoter.run('cqlsh --ssl --no-color --execute "{}" {}'.format(cmd, db_node_ip), verbose=False)
 
         avaialable_ks_cf = []
         for row in result.stdout.split('\n'):
@@ -2884,7 +2897,7 @@ class BaseLoaderSet(object):
 
         self.log.info('Fullscan for ks.cf: {}'.format(ks_cf))
         cmd = 'select count(*) from {}'.format(ks_cf)
-        result = loader_node.remoter.run('cqlsh --no-color --execute "{}" {}'.format(cmd, db_node_ip), verbose=False)
+        result = loader_node.remoter.run('cqlsh --ssl --no-color --execute "{}" {}'.format(cmd, db_node_ip), verbose=False)
 
         return result
 

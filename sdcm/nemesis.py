@@ -567,7 +567,7 @@ class Nemesis(object):
         cql_auth = self.cluster.get_cql_auth()
         cql_auth = '-u {} -p {}'.format(*cql_auth) if cql_auth else ''
 
-        node.remoter.run('cqlsh {} -e "{}" {}'.format(cql_auth, cmd, node.private_ip_address), verbose=True)
+        node.remoter.run('cqlsh --ssl {} -e "{}" {}'.format(cql_auth, cmd, node.private_ip_address), verbose=True)
 
     def _modify_table_property(self, name, val, keyspace="keyspace1", table="standard1"):
         disruption_name = "".join([p.strip().capitalize() for p in name.split("_")])
