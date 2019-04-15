@@ -1917,15 +1917,19 @@ class BaseLoaderSet(object):
             node.remoter.run('sudo bash -cxe "%s"' % install_java_script)
 
         elif node.is_debian8():
-            node.remoter.run("sudo sed -i -e 's/jessie-updates/stable-updates/g' /etc/apt/sources.list")
-            node.remoter.run('echo "deb http://archive.debian.org/debian jessie-backports main" |sudo tee /etc/apt/sources.list.d/backports.list')
-            node.remoter.run("echo 'Acquire::Check-Valid-Until \"false\";' |sudo tee /etc/apt/apt.conf.d/99jessie-backports")
-            node.remoter.run('echo "deb http://download.opensuse.org/repositories/home:/scylladb:/scylla-3rdparty-jessie/Debian_8.0/ /" |sudo tee /etc/apt/sources.list.d/scylla-3rdparty.list')
+            #node.remoter.run("sudo sed -i -e 's/jessie-updates/stable-updates/g' /etc/apt/sources.list")
+            #node.remoter.run('echo "deb http://archive.debian.org/debian jessie-backports main" |sudo tee /etc/apt/sources.list.d/backports.list')
+            #node.remoter.run("echo 'Acquire::Check-Valid-Until \"false\";' |sudo tee /etc/apt/apt.conf.d/99jessie-backports")
+            #node.remoter.run('echo "deb http://download.opensuse.org/repositories/home:/scylladb:/scylla-3rdparty-jessie/Debian_8.0/ /" |sudo tee /etc/apt/sources.list.d/scylla-3rdparty.list')
             install_java_script = dedent("""
+                sed -i -e 's/jessie-updates/stable-updates/g' /etc/apt/sources.list
+                echo 'deb http://archive.debian.org/debian jessie-backports main' |sudo tee /etc/apt/sources.list.d/backports.list
+                echo 'Acquire::Check-Valid-Until false;' |sudo tee /etc/apt/apt.conf.d/99jessie-backports
                 apt-get update
                 apt-get install gnupg-curl -y
                 apt-key adv --fetch-keys https://download.opensuse.org/repositories/home:/scylladb:/scylla-3rdparty-jessie/Debian_8.0/Release.key
                 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 17723034C56D4B19
+                echo 'deb http://download.opensuse.org/repositories/home:/scylladb:/scylla-3rdparty-jessie/Debian_8.0/ /' |sudo tee /etc/apt/sources.list.d/scylla-3rdparty.list
                 apt-get update
                 apt-get install -y openjdk-8-jre-headless -t jessie-backports
                 update-java-alternatives -s java-1.8.0-openjdk-amd64
