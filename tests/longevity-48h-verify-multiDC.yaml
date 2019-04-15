@@ -37,7 +37,7 @@ backends: !mux
             subnet_id: 'subnet-ec4a72c4 subnet-5207ee37'
             ami_id_db_scylla: 'AMI_ID_EAST AMI_ID_WEST'
             ami_id_loader: 'ami-050c06c3e20036edc' # Loader dedicated AMI
-            ami_id_monitor: 'ami-01d6b0d7e0d98969b' # Monitor dedicated AMI
+            ami_id_monitor: 'ami-02eac2c0129f6376b' # clean centos
             ami_db_scylla_user: 'centos'
             ami_loader_user: 'centos'
             ami_monitor_user: 'centos'
@@ -49,7 +49,7 @@ backends: !mux
             subnet_id: 'subnet-088fddaf520e4c7a8 subnet-5207ee37'
             ami_id_db_scylla: 'AMI_ID_EU_WEST AMI_ID_US_WEST'
             ami_id_loader: 'ami-0006222380fb72d8d' # Loader dedicated AMI
-            ami_id_monitor: 'ami-0f478f18d613e3662' # Monitor dedicated AMI
+            ami_id_monitor: 'ami-0ff760d16d9497662' # clean centos
             ami_db_scylla_user: 'centos'
             ami_loader_user: 'centos'
             ami_monitor_user: 'centos'
