@@ -79,7 +79,6 @@ class AWSCluster(cluster.BaseCluster):
                                                                    'once': True})
             cluster.CREDENTIALS.append(credential)
 
-        self._ec2_ami_id = ec2_ami_id
         self._ec2_subnet_id = ec2_subnet_id
         self._ec2_security_group_ids = ec2_security_group_ids
         self._ec2_services = services
@@ -91,11 +90,21 @@ class AWSCluster(cluster.BaseCluster):
             ec2_block_device_mappings = []
         self._ec2_block_device_mappings = ec2_block_device_mappings
         self._ec2_user_data = ec2_user_data
-        self._ec2_ami_id = ec2_ami_id
         self.region_names = region_names
-        self.instance_provision = params.get('instance_provision', default=INSTANCE_PROVISION_ON_DEMAND)
         self.params = params
         self.node_type = node_type
+
+        # try to convert AMI-name to AMI-ID
+        new_ec2_ami_id = []
+        for idx, ec2_ami in enumerate(ec2_ami_id):
+            ec2 = ec2_client.EC2Client(region_name=self.region_names[idx],
+                spot_max_price_percentage=self.params.get('spot_max_price', default=0.60))
+            if not ec2_ami.startswith('ami-'):
+                ec2_ami = ec2.get_ami_id_by_name('ec2_ami')
+            new_ec2_ami_id.append(ec2_ami)
+        self._ec2_ami_id = new_ec2_ami_id
+        self.instance_provision = params.get('instance_provision', default=INSTANCE_PROVISION_ON_DEMAND)
+
         super(AWSCluster, self).__init__(cluster_uuid=cluster_uuid,
                                          cluster_prefix=cluster_prefix,
                                          node_prefix=node_prefix,

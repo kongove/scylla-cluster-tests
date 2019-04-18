@@ -374,6 +374,16 @@ class EC2Client(object):
 
         return self.get_instance(instances['Reservations'][0]['Instances'][0]['InstanceId'])
 
+    def get_ami_id_by_name(self, name):
+        # convert AMI-name to AMI-ID
+        images = self._client.describe_images(Filters=[
+            {'Name': 'name',
+             'Values': [name]}
+        ])
+        if not images['Images']:
+            raise Exception('Cannot find image by name: %s' % name)
+        return images['Images'][0]['ImageId']
+
 
 if __name__ == '__main__':
     logging.basicConfig(filename='/tmp/ec2_client.log',
