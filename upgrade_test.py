@@ -104,6 +104,7 @@ class UpgradeTest(FillDatabaseData):
                     node.remoter.run('sudo apt-get remove scylla\* -y')
                     # fixme: add publick key
                     node.remoter.run('sudo apt-get install {}{} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated'.format(scylla_pkg, ver_suffix))
+                    node.remoter.run('sudo systemctl enable scylla-server')
                     node.remoter.run('for conf in $(cat /var/lib/dpkg/info/scylla-*server.conffiles /var/lib/dpkg/info/scylla-*conf.conffiles /var/lib/dpkg/info/scylla-*jmx.conffiles | grep -v init ); do sudo cp -v $conf $conf.backup-2.1; done')
             else:
                 if node.is_rhel_like():
@@ -156,6 +157,7 @@ class UpgradeTest(FillDatabaseData):
             else:
                 node.remoter.run('sudo apt-get remove scylla\* -y')
                 node.remoter.run('sudo apt-get install %s -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated' % node.scylla_pkg())
+                node.remoter.run('sudo systemctl enable scylla-server')
                 node.remoter.run('for conf in $(cat /var/lib/dpkg/info/scylla-*server.conffiles /var/lib/dpkg/info/scylla-*conf.conffiles /var/lib/dpkg/info/scylla-*jmx.conffiles | grep -v init ); do sudo cp -v $conf.backup $conf; done')
                 if not node.is_ubuntu14():
                     node.remoter.run('sudo systemctl daemon-reload')
