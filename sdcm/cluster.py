@@ -2367,6 +2367,8 @@ class BaseLoaderSet(object):
         node.remoter.run("source $HOME/.bashrc", verbose=True)
         node.remoter.run('env', verbose=True)
         node.remoter.run("GOPATH=/home/scylla-test/go /usr/local/go/bin/go get github.com/scylladb/scylla-bench", verbose=True)
+        #node.remoter.run("GOPATH=$HOME/go /usr/local/go/bin/go get github.com/scylladb/scylla-bench", verbose=True)
+        #node.remoter.run("source $HOME/.bashrc && go get github.com/scylladb/scylla-bench", verbose=True)
 
         # gemini tool
         gemini_url = self.params.get('gemini_url')
