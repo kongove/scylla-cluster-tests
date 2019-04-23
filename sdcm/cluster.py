@@ -2208,6 +2208,7 @@ class BaseScyllaCluster(object):
         endpoint_snitch = self.params.get('endpoint_snitch')
         seed_address = self.get_seed_nodes_by_flag()
 
+        node.remoter.run('env', verbose=True)
         if not Setup.REUSE_CLUSTER:
             node.clean_scylla()
             node.install_scylla(scylla_repo=self.params.get('scylla_repo'))
@@ -2358,12 +2359,14 @@ class BaseLoaderSet(object):
             node.remoter.run('sudo yum install git -y')
         else:
             node.remoter.run('sudo apt-get install git -y')
-        node.remoter.run('curl -LO https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz')
-        node.remoter.run('sudo tar -C /usr/local -xvzf go1.9.2.linux-amd64.tar.gz')
-        node.remoter.run("echo 'export GOPATH=$HOME/go' >> $HOME/.bashrc")
-        node.remoter.run("echo 'export PATH=$PATH:/usr/local/go/bin' >> $HOME/.bashrc")
-        node.remoter.run("source $HOME/.bashrc")
-        node.remoter.run("go get github.com/scylladb/scylla-bench")
+        node.remoter.run('env', verbose=True)
+        node.remoter.run('curl -LO https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz', verbose=True)
+        node.remoter.run('sudo tar -C /usr/local -xvzf go1.9.2.linux-amd64.tar.gz', verbose=True)
+        node.remoter.run("echo 'export GOPATH=$HOME/go' >> $HOME/.bashrc", verbose=True)
+        node.remoter.run("echo 'export PATH=$PATH:/usr/local/go/bin' >> $HOME/.bashrc", verbose=True)
+        node.remoter.run("source $HOME/.bashrc", verbose=True)
+        node.remoter.run('env', verbose=True)
+        node.remoter.run("GOPATH=/home/scylla-test/go /usr/local/go/bin/go get github.com/scylladb/scylla-bench", verbose=True)
 
         # gemini tool
         gemini_url = self.params.get('gemini_url')
