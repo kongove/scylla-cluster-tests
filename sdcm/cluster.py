@@ -435,6 +435,9 @@ class BaseNode(object):
         if self.is_ubuntu16() and ubuntu16_pkgs:
             self.remoter.run('sudo apt-get install -y %s' % ubuntu16_pkgs)
             return
+        if self.is_ubuntu18() and ubuntu18_pkgs:
+            self.remoter.run('sudo apt-get install -y %s' % ubuntu18_pkgs)
+            return
         if self.is_ubuntu14() and ubuntu14_pkgs:
             self.remoter.run('sudo apt-get install -y %s' % ubuntu14_pkgs)
             return
@@ -3110,7 +3113,7 @@ class BaseMonitorSet(object):
             self.start_scylla_monitoring(node)
 
     def start_scylla_monitoring(self, node):
-        if node.is_rhel_like() or node.is_ubuntu16():
+        if node.is_rhel_like() or node.is_ubuntu16() or self.node.is_ubuntu18():
             run_script = dedent("""
                 cd {0.monitor_install_path}
                 sudo systemctl start docker
