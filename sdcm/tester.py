@@ -384,6 +384,9 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         gce_image_monitor = self.params.get('gce_image_monitor')
         if not gce_image_monitor:
             gce_image_monitor = self.params.get('gce_image')
+        scylla_repo_db = self.params.get('scylla_repo_db')
+        if not scylla_repo_db:
+            scylla_repo_db = self.params.get('scylla_repo')
         cluster_additional_disks = {'pd-ssd': self.params.get('gce_pd_ssd_disk_size_db', default=0),
                                     'pd-standard': self.params.get('gce_pd_standard_disk_size_db', default=0)}
         common_params = dict(gce_image_username=self.params.get('gce_image_username'),
@@ -392,6 +395,7 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
                              user_prefix=user_prefix,
                              params=self.params,
                              )
+        common_params['params'].update('scylla_repo': scylla_repo_db)
         self.db_cluster = ScyllaGCECluster(gce_image=gce_image_db,
                                            gce_image_type=db_info['disk_type'],
                                            gce_image_size=db_info['disk_size'],
@@ -403,6 +407,7 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
                                            gce_datacenter=gce_datacenter,
                                            **common_params)
 
+        common_params['params'].update('scylla_repo': scylla_repo)
         loader_additional_disks = {'pd-ssd': self.params.get('gce_pd_ssd_disk_size_loader', default=0)}
         self.loaders = LoaderSetGCE(gce_image=self.params.get('gce_image'),
                                     gce_image_type=loader_info['disk_type'],
