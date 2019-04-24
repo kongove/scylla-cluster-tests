@@ -1234,7 +1234,7 @@ server_encryption_options:
                 self.remoter.run('sudo apt-get update')
                 self.remoter.run('sudo apt-get install -y openjdk-8-jre-headless')
                 self.remoter.run('sudo update-java-alternatives -s java-1.8.0-openjdk-amd64')
-            elif self.is_ubuntu18():
+            elif self.is_ubuntu18() or self.is_ubuntu16():
                 self.remoter.run('sudo apt-get install software-properties-common -y')
                 self.remoter.run('sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B2BFD3660EF3F5B')
                 self.remoter.run('sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 17723034C56D4B19')
