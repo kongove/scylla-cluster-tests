@@ -268,6 +268,7 @@ class UpgradeTest(FillDatabaseData):
         # shuffle it so we will upgrade the nodes in a
         # random order
         random.shuffle(indexes)
+        indexes = [2, 4, 3, 1]
 
         # prepare write workload
         self.log.info('Starting c-s prepare write workload (n=10000000)')
