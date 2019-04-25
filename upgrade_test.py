@@ -104,7 +104,7 @@ class UpgradeTest(FillDatabaseData):
                     node.remoter.run('sudo apt-get remove scylla\* -y')
                     # fixme: add publick key
                     node.remoter.run('sudo apt-get install {}{} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated'.format(scylla_pkg, ver_suffix))
-                    if '2018.1' in self.params.get('scylla_repo'):
+                    if '2018.1' in self.params.get('scylla_repo') or '3.0' in self.params.get('scylla_repo'):
                         node.remoter.run('sudo systemctl enable scylla-server')
                     node.remoter.run('for conf in $(cat /var/lib/dpkg/info/scylla-*server.conffiles /var/lib/dpkg/info/scylla-*conf.conffiles /var/lib/dpkg/info/scylla-*jmx.conffiles | grep -v init ); do sudo cp -v $conf $conf.backup-2.1; done')
             else:
@@ -158,7 +158,7 @@ class UpgradeTest(FillDatabaseData):
             else:
                 node.remoter.run('sudo apt-get remove scylla\* -y')
                 node.remoter.run('sudo apt-get install %s -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated' % node.scylla_pkg())
-                if '2018.1' in self.params.get('scylla_repo'):
+                if '2018.1' in self.params.get('scylla_repo') or '3.0' in self.params.get('scylla_repo'):
                     node.remoter.run('sudo systemctl enable scylla-server')
                 node.remoter.run('for conf in $(cat /var/lib/dpkg/info/scylla-*server.conffiles /var/lib/dpkg/info/scylla-*conf.conffiles /var/lib/dpkg/info/scylla-*jmx.conffiles | grep -v init ); do sudo cp -v $conf.backup $conf; done')
                 if not node.is_ubuntu14():
