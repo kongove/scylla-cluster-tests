@@ -368,6 +368,9 @@ class UpgradeTest(FillDatabaseData):
         #self.db_cluster.nodes[0].remoter.run('for i in `sudo find /var/lib/scylla/data/keyspace_sst3/ -type f |grep -v manifest.json |grep -v snapshots`; do echo $i; sudo sstabledump $i 1>/tmp/sstabledump.output || exit 1; done', verbose=True)
 
         self.log.info('all nodes were upgraded, and last workaround is verified.')
+        if '3.0' in self.params.get('scylla_repo'):
+            for node in self.db_cluster.nodes:
+                node._database_error_patterns = ['std::bad_alloc', 'integrity check failed', 'Failed to load schema version']
 
 
 if __name__ == '__main__':

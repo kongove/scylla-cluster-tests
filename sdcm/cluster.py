@@ -331,7 +331,8 @@ class BaseNode(object):
 
         self.database_log = os.path.join(self.logdir, 'database.log')
         self._database_log_errors_index = []
-        self._database_error_patterns = ['std::bad_alloc', 'integrity check failed', 'Failed to load schema version']
+        self._database_error_patterns = ['std::bad_alloc', 'integrity check failed']
+        #self._database_error_patterns = ['std::bad_alloc', 'integrity check failed', 'Failed to load schema version']
         self.termination_event = threading.Event()
         self.start_task_threads()
         # We should disable bootstrap when we create nodes to establish the cluster,
