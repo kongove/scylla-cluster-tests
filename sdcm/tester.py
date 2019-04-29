@@ -1185,11 +1185,10 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
 
         if db_cluster_errors:
             self.log.error('Errors found on DB node logs:')
-            for node_errors in db_cluster_errors:
-                for node_name in node_errors:
-                    for (index, line) in node_errors[node_name]:
-                        self.log.error('%s: L%s -> %s',
-                                       node_name, index + 1, line.strip())
+            for node_name, node_errors in db_cluster_errors.items():
+                for (index, line) in node_errors:
+                    self.log.error('%s: L%s -> %s',
+                                   node_name, index + 1, line.strip())
             self.fail('Errors found on DB node logs (see test logs)')
 
     def tearDown(self):
