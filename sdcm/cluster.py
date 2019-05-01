@@ -1216,6 +1216,8 @@ server_encryption_options:
         :param scylla_repo: scylla repo file URL
         """
         if self.is_rhel_like():
+            self.remoter.run('sudo rm /etc/yum.repos.d/google-cloud.repo', verbose=True, ignore_status=True)
+            self.remoter.run('sudo yum makecache -y', verbose=True, ignore_status=True)
             result = self.remoter.run('ls /etc/yum.repos.d/epel.repo', ignore_status=True)
             if result.exit_status == 0:
                 self.remoter.run('sudo yum update -y --skip-broken --disablerepo=epel', retry=3)
@@ -1223,7 +1225,6 @@ server_encryption_options:
                 self.remoter.run('sudo yum update -y --skip-broken', retry=3)
             self.remoter.run('sudo yum install -y rsync tcpdump screen wget net-tools')
             self.download_scylla_repo(scylla_repo)
-            self.remoter.run('sudo yum makecache', verbose=True, ignore_status=True)
             self.remoter.run('sudo yum install -y python36-PyYAML', verbose=True, retry=3)
             self.remoter.run('sudo yum install -y {}'.format(self.scylla_pkg()))
             self.remoter.run('sudo yum install -y scylla-gdb', ignore_status=True)
@@ -1368,6 +1369,8 @@ server_encryption_options:
 
         self.download_scylla_repo(scylla_repo)
         self.download_scylla_manager_repo(scylla_mgmt_repo)
+        self.remoter.run('sudo rm /etc/yum.repos.d/google-cloud.repo', verbose=True, ignore_status=True)
+        self.remoter.run('sudo yum makecache -y', verbose=True, ignore_status=True)
         if self.is_docker():
             self.remoter.run('sudo yum remove -y scylla scylla-jmx scylla-tools scylla-tools-core'
                              ' scylla-server scylla-conf')
@@ -2357,6 +2360,8 @@ class BaseLoaderSet(object):
             scylla_repo_loader = self.params.get('scylla_repo')
         node.download_scylla_repo(scylla_repo_loader)
         if node.is_rhel_like():
+            node.remoter.run('sudo rm /etc/yum.repos.d/google-cloud.repo', verbose=True, ignore_status=True)
+            node.remoter.run('sudo yum makecache -y', verbose=True, ignore_status=True)
             node.remoter.run('sudo yum install -y {}-tools'.format(node.scylla_pkg()))
             node.remoter.run('sudo yum install -y screen')
         else:
@@ -2974,6 +2979,8 @@ class BaseMonitorSet(object):
 
         if Setup.REUSE_CLUSTER:
             return
+        node.remoter.run('sudo rm /etc/yum.repos.d/google-cloud.repo', verbose=True, ignore_status=True)
+        node.remoter.run('sudo yum makecache -y', verbose=True, ignore_status=True)
         self.install_scylla_monitoring(node)
         self.configure_scylla_monitoring(node)
         try:
