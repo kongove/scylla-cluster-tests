@@ -628,6 +628,10 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
             self.node_config_setup(node, seed_address, endpoint_snitch)
 
             node.stop_scylla_server(verify_down=False)
+            node.remoter.run('sudo curl -L https://s3.amazonaws.com/downloads.scylladb.com/enterprise/rpm/unstable/centos/branch-2019.1/52/scylla.repo -o /etc/yum.repos.d/scylla.repo')
+            node.remoter.run('sudo yum upgrade scylla-enterprise\* -y || true', verbose=True)
+            #node.remoter.send_files('/home/jenkins/encryption-fix/', '/tmp/scylla', verbose=True)
+            #node.remoter.run('sudo yum install /tmp/scylla/*.rpm -y || true', verbose=True)
             node.start_scylla_server(verify_up=False)
 
         node.wait_db_up(verbose=verbose, timeout=timeout)
