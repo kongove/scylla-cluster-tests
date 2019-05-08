@@ -263,7 +263,7 @@ class UpgradeTest(FillDatabaseData):
         stress_cmd_complex_prepare = self.params.get('stress_cmd_complex_prepare')
         complex_cs_thread_pool = self.run_stress_thread(stress_cmd=stress_cmd_complex_prepare, profile='data_dir/complex_schema.yaml')
 
-        # wait for the 20m complex workload to finish
+        # wait for the complex workload to finish
         self.verify_stress_thread(complex_cs_thread_pool)
 
         # generate random order to upgrade
@@ -370,6 +370,7 @@ class UpgradeTest(FillDatabaseData):
         #self.verify_stress_thread(complex_cs_thread_pool)
 
         error_factor = 2
+        error_factor = 4
         schema_load_error_num = 0
 
         for node in self.db_cluster.nodes:
