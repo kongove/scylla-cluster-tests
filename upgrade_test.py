@@ -291,12 +291,12 @@ class UpgradeTest(FillDatabaseData):
         # wait for the prepare write workload to finish
         self.verify_stress_thread(prepare_write_stress_queue)
 
-        # read workload (cl=ONE)
+        # read workload (cl=QUORUM)
         self.log.info('Starting c-s read workload (cl=ONE n=10000000)')
-        stress_cmd_read_cl_one = self.params.get('stress_cmd_read_cl_one')
-        read_cl_one_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_cl_one)
-        # wait for the cl=ONE read workload to finish
-        self.verify_stress_thread(read_cl_one_stress_queue)
+        stress_cmd_read_cl_quorum = self.params.get('stress_cmd_read_cl_quorum')
+        read_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_cl_quorum)
+        # wait for the cl=QUORUM read workload to finish
+        self.verify_stress_thread(read_stress_queue)
 
         # read workload
         self.log.info('Starting c-s read workload for 10m')
