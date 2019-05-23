@@ -132,6 +132,19 @@ class LongevityTest(ClusterTester):
                 self._run_all_stress_cmds(write_queue, params={'stress_cmd': prepare_write_cmd,
                                                                'keyspace_num': keyspace_num})
 
+            # action 1: enable encryption at-rest for all test tables
+            time.sleep(60)
+            scylla_encryption_options = self.params.get('scylla_encryption_options')
+            if scylla_encryption_options is None:
+                self.log.debug('scylla_encryption_options is not set, skipping to enable encryption at-rest for all test tables')
+            else:
+                for table in self.db_cluster.get_test_tables():
+                    node = self.db_cluster.nodes[0]
+                    with self.cql_connection_patient(node) as session:
+                        query = "ALTER TABLE {table} WITH scylla_encryption_options = {scylla_encryption_options};".format(**locals())
+                        self.log.debug('enable encryption at-rest for table {table}, query:\n\t{query}'.format(**locals()))
+                        session.execute(query)
+
             # In some cases we don't want the nemesis to run during the "prepare" stage in order to be 100% sure that
             # all keys were written succesfully
             if self.params.get('nemesis_during_prepare', default='true').lower() == 'true':
@@ -218,6 +231,19 @@ class LongevityTest(ClusterTester):
         if stress_read_cmd:
             params = {'keyspace_num': keyspace_num, 'stress_cmd': stress_read_cmd}
             self._run_all_stress_cmds(stress_queue, params)
+
+        # action 2: enable encryption at-rest for all test tables
+        time.sleep(60)
+        scylla_encryption_options = self.params.get('scylla_encryption_options')
+        if scylla_encryption_options is None:
+            self.log.debug('scylla_encryption_options is not set, skipping to enable encryption at-rest for all test tables')
+        else:
+            for table in self.db_cluster.get_test_tables():
+                node = self.db_cluster.nodes[0]
+                with self.cql_connection_patient(node) as session:
+                    query = "ALTER TABLE {table} WITH scylla_encryption_options = {scylla_encryption_options};".format(**locals())
+                    self.log.debug('enable encryption at-rest for table {table}, query:\n\t{query}'.format(**locals()))
+                    session.execute(query)
 
         for stress in stress_queue:
             self.verify_stress_thread(queue=stress)
