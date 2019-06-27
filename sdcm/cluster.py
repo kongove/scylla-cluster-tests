@@ -897,6 +897,27 @@ class BaseNode(object):
     def reboot(self):
         raise NotImplementedError('Derived classes must implement reboot')
 
+    def do_reboot(self, hard=True, verify_ssh=True, hard_reboot_func=None):
+        result = self.remoter.run('uptime -s')
+        pre_uptime = result.stdout
+
+        def uptime_changed():
+            result = self.remoter.run('uptime -s', ignore_status=True)
+            return pre_uptime != result.stdout
+
+        if hard:
+            self.log.debug('Hardly rebooting node')
+            self._instance_wait_safe(hard_reboot_func)
+        else:
+            self.log.debug('Softly rebooting node')
+            self.remoter.run('sudo reboot', ignore_status=True)
+
+        # wait until the reboot is executed
+        wait.wait_for(func=uptime_changed, step=1, timeout=60, throw_exc=True)
+
+        if verify_ssh:
+            self.wait_ssh_up()
+
     @log_run_info
     def start_task_threads(self):
         if 'db-node' in self.name:  # this should be replaced when DbNode class will be created

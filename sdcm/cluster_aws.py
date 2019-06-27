@@ -442,25 +442,7 @@ class AWSNode(cluster.BaseNode):
                         event_filter.cancel_filter()
 
     def reboot(self, hard=True, verify_ssh=True):
-        result = self.remoter.run('uptime -s')
-        pre_uptime = result.stdout
-
-        def uptime_changed():
-            result = self.remoter.run('uptime -s', ignore_status=True)
-            return pre_uptime != result.stdout
-
-        if hard:
-            self.log.debug('Hardly rebooting node')
-            self._instance_wait_safe(self._instance.reboot)
-        else:
-            self.log.debug('Softly rebooting node')
-            self.remoter.run('sudo reboot', ignore_status=True)
-
-        # wait until the reboot is executed
-        wait.wait_for(func=uptime_changed, step=3, timeout=180, throw_exc=True)
-
-        if verify_ssh:
-            self.wait_ssh_up()
+        self.do_reboot(hard=hard, verify_ssh=verify_ssh, hard_reboot_func=self._instane.reboot)
 
     def destroy(self):
         self.stop_task_threads()
