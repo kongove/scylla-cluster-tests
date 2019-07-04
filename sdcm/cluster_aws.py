@@ -668,6 +668,17 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
             node.stop_scylla_server(verify_down=False)
             node.start_scylla_server(verify_up=False)
 
+        if node.replacement_node_ip:
+            pass
+            #try:
+            #    node.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/migration_manager?level=trace')
+            #    node.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/gossip?level=trace')
+            #except:
+            #    # incase db isn't ready
+            #    pass
+            #time.sleep(100)
+            #node.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/migration_manager?level=trace')
+            #node.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/gossip?level=trace')
         node.wait_db_up(verbose=verbose, timeout=timeout)
         node.check_nodes_status()
 

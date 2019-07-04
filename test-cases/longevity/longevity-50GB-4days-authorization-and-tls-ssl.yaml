@@ -22,6 +22,7 @@ instance_type_db: 'i3.4xlarge'
 instance_type_loader: 'c5.2xlarge'
 
 nemesis_class_name: 'ChaosMonkey'
+#nemesis_class_name: 'NodeTerminateAndReplace'
 nemesis_interval: 5
 
 user_prefix: 'longevity-tls-50gb-4d'

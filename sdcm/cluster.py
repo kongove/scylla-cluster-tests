@@ -1053,6 +1053,8 @@ class BaseNode(object):
         if verbose:
             text = '%s: Waiting for JMX service to be up' % self
         wait.wait_for(func=self.jmx_up, step=60, text=text, timeout=timeout, throw_exc=True)
+        cmd = 'nodetool -h localhost gossipinfo'
+        self.remoter.run(cmd, ignore_status=True)
 
     def wait_jmx_down(self, verbose=True, timeout=None):
         text = None
@@ -1082,7 +1084,11 @@ class BaseNode(object):
         text = None
         if verbose:
             text = '%s: Waiting for DB services to be up' % self
+        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/migration_manager?level=trace', ignore_status=True)
+        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/gossip?level=trace', ignore_status=True)
         wait.wait_for(func=self.db_up, step=60, text=text, timeout=timeout, throw_exc=True)
+        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/migration_manager?level=trace')
+        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/gossip?level=trace')
         self._report_housekeeping_uuid()
 
     def apt_running(self):
