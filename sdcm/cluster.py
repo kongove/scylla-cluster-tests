@@ -775,6 +775,9 @@ class BaseNode(object):
 
     @log_run_info
     def start_task_threads(self):
+        if self.is_gce():
+            # gce: sleep 10 seconds for waiting users are added to system
+            self.termination_event.wait(10)
         if 'db-node' in self.name:  # this should be replaced when DbNode class will be created
             self.start_journal_thread()
         self.start_backtrace_thread()
