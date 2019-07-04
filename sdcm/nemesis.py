@@ -316,7 +316,7 @@ class Nemesis(object):
             self.target_node.stop_scylla_server(verify_up=False, verify_down=True)
             self.target_node.start_scylla_server(verify_up=True, verify_down=False)
 
-    @retrying(n=3, sleep_time=60, allowed_exceptions=(NodeSetupFailed, NodeSetupTimeout))
+    @retrying(n=1, sleep_time=60, allowed_exceptions=(NodeSetupFailed, NodeSetupTimeout))
     def _add_and_init_new_cluster_node(self, old_node_ip=None, timeout=10800):
         """When old_node_private_ip is not None replacement node procedure is initiated"""
         self.log.info("Adding new node to cluster...")
@@ -326,9 +326,12 @@ class Nemesis(object):
         try:
             self.cluster.wait_for_init(node_list=[new_node], timeout=timeout)
         except (NodeSetupFailed, NodeSetupTimeout):
+            cmd = 'nodetool -h localhost gossipinfo'
+            self._run_nodetool(cmd, new_node)
             self.log.warning("Setup of the '%s' failed, removing it from list of nodes" % new_node)
             self.cluster.nodes.remove(new_node)
             self.log.warning("Node will not be terminated. Please terminate manually!!!")
+            self.termination_event.set()
             raise
         self.cluster.wait_for_nodes_up_and_normal(nodes=[new_node])
         self.monitoring_set.reconfigure_scylla_monitoring()

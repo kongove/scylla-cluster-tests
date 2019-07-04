@@ -666,6 +666,9 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
             node.stop_scylla_server(verify_down=False)
             node.start_scylla_server(verify_up=False)
 
+        if node.replacement_node_ip:
+            time.sleep(100)
+            node.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/migration_manager?level=debug')
         node.wait_db_up(verbose=verbose, timeout=timeout)
         node.remoter.run('nodetool status', verbose=True, retry=5)
 

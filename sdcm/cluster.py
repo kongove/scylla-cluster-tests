@@ -937,6 +937,8 @@ class BaseNode(object):
             return False
 
     def db_up(self):
+        #cmd = 'nodetool -h localhost gossipinfo'
+        #self.remoter.run(cmd, ignore_status=True)
         return self.is_port_used(port=9042, service_name="scylla-server")
 
     def jmx_up(self):
