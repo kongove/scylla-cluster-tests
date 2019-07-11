@@ -1492,6 +1492,29 @@ class ClusterTester(db_stats.TestStatsMixin, unittest.TestCase):
                   "WITH in_memory=true AND compaction={compaction_strategy}".format(**locals())
         node.run_cqlsh(cql_cmd)
 
+    def alter_table_encryption(self, table, scylla_encryption_options=None, upgradesstables=True):
+        """
+        Update table encryption
+        """
+        if scylla_encryption_options is None:
+            self.log.debug('scylla_encryption_options is not set, skipping to enable encryption at-rest for all test tables')
+        else:
+            with self.cql_connection_patient(self.db_cluster.nodes[0]) as session:
+                query = "ALTER TABLE {table} WITH scylla_encryption_options = {scylla_encryption_options};".format(**locals())
+                self.log.debug('enable encryption at-rest for table {table}, query:\n\t{query}'.format(**locals()))
+                session.execute(query)
+            if upgradesstables:
+                self.log.debug('upgrade sstables after encryption update')
+                for node in self.db_cluster.nodes:
+                    node.remoter.run('nodetool upgradesstables', verbose=True)
+
+    def disable_table_encryption(self, table, upgradesstables=True):
+        self.alter_table_encryption(table, scylla_encryption_options="{'key_provider': 'none'}", upgradesstables=upgradesstables)
+
+    def alter_test_tables_encryption(self, scylla_encryption_options=None, upgradesstables=True):
+        for table in get_non_system_ks_cf_list(self.loaders.nodes[0], self.db_cluster.nodes[0]):
+            self.alter_table_encryption(table, scylla_encryption_options=scylla_encryption_options, upgradesstables=upgradesstables)
+
     def get_num_of_hint_files(self, node):
         result = node.remoter.run("sudo find {0.scylla_hints_dir} -name *.log -type f| wc -l".format(self),
                                   verbose=True)
