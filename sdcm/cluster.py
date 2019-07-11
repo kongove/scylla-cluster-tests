@@ -1454,6 +1454,13 @@ server_encryption_options:
             logger.debug("%s is a replacement node for '%s'." % (self.name, self.replacement_node_ip))
             scylla_yaml_contents += "\nreplace_address_first_boot: %s\n" % self.replacement_node_ip
 
+        if append_conf and ('scylla_encryption_options' in append_conf or 'kmip_hosts:' in append_conf):
+            self.remoter.send_files(src='./data_dir/encrypt_conf',
+                                    dst='/tmp/')
+            self.remoter.run('sudo mv /tmp/encrypt_conf /etc/')
+            self.remoter.run('sudo mkdir /etc/encrypt_conf/system_key_dir/')
+            self.remoter.run('sudo chown -R scylla:scylla /etc/encrypt_conf/')
+
         if append_conf:
             scylla_yaml_contents += append_conf
 
