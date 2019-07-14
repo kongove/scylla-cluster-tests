@@ -170,6 +170,9 @@ class PerformanceRegressionTest(ClusterTester):
             else:
                 stress_queue.append(self.run_stress_thread(stress_cmd=prepare_write_cmd, stress_num=1,
                                                            prefix='preload-', stats_aggregate_cmds=False))
+            # action 1: enable encryption at-rest for all test tables
+            time.sleep(60)
+            self.alter_test_tables_encryption(scylla_encryption_options=self.params.get('scylla_encryption_options'))
 
             for stress in stress_queue:
                 self.get_stress_results(queue=stress, store_results=False)
