@@ -768,14 +768,19 @@ class ClusterTester(db_stats.TestStatsMixin, Test):
         timeout = self.get_duration(duration)
         if self.create_stats:
             self.update_stress_cmd_details(stress_cmd, prefix, stresser="cassandra-stress", aggregate=stats_aggregate_cmds)
-        return self.loaders.run_stress_thread(stress_cmd, timeout,
-                                              self.outputdir,
-                                              stress_num=stress_num,
-                                              keyspace_num=keyspace_num,
-                                              keyspace_name=keyspace_name,
-                                              profile=profile,
-                                              node_list=self.db_cluster.nodes,
-                                              round_robin=round_robin)
+        ret = self.loaders.run_stress_thread(stress_cmd, timeout,
+                                             self.outputdir,
+                                             stress_num=stress_num,
+                                             keyspace_num=keyspace_num,
+                                             keyspace_name=keyspace_name,
+                                             profile=profile,
+                                             node_list=self.db_cluster.nodes,
+                                             round_robin=round_robin)
+        if 'write' in stress_cmd:
+            # Configure encryption at-rest for all test tables, sleep a while to wait the workload starts and test tables are created
+            time.sleep(60)
+            self.alter_test_tables_encryption(scylla_encryption_options=self.params.get('scylla_encryption_options'))
+        return ret
 
     def run_stress_thread_bench(self, stress_cmd, duration=None, stats_aggregate_cmds=True):
 
