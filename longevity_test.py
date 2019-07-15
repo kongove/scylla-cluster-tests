@@ -124,18 +124,7 @@ class LongevityTest(ClusterTester):
 
             # action 1: enable encryption at-rest for all test tables
             time.sleep(60)
-            scylla_encryption_options = self.params.get('scylla_encryption_options')
-            if scylla_encryption_options is None:
-                self.log.debug('scylla_encryption_options is not set, skipping to enable encryption at-rest for all test tables')
-            else:
-                for table in self.db_cluster.get_test_tables():
-                    node = self.db_cluster.nodes[0]
-                    with self.cql_connection_patient(node) as session:
-                        query = "ALTER TABLE {table} WITH scylla_encryption_options = {scylla_encryption_options};".format(**locals())
-                        self.log.debug('enable encryption at-rest for table {table}, query:\n\t{query}'.format(**locals()))
-                        session.execute(query)
-                for node in self.db_cluster.nodes:
-                    node.remoter.run('nodetool upgradesstables', verbose=True)
+            self.alter_test_tables_encryption(scylla_encryption_options=self.params.get('scylla_encryption_options'))
 
             # In some cases we don't want the nemesis to run during the "prepare" stage in order to be 100% sure that
             # all keys were written succesfully
@@ -226,18 +215,7 @@ class LongevityTest(ClusterTester):
 
         # action 2: enable encryption at-rest for all test tables
         time.sleep(60)
-        scylla_encryption_options = self.params.get('scylla_encryption_options')
-        if scylla_encryption_options is None:
-            self.log.debug('scylla_encryption_options is not set, skipping to enable encryption at-rest for all test tables')
-        else:
-            for table in self.db_cluster.get_test_tables():
-                node = self.db_cluster.nodes[0]
-                with self.cql_connection_patient(node) as session:
-                    query = "ALTER TABLE {table} WITH scylla_encryption_options = {scylla_encryption_options};".format(**locals())
-                    self.log.debug('enable encryption at-rest for table {table}, query:\n\t{query}'.format(**locals()))
-                    session.execute(query)
-            for node in self.db_cluster.nodes:
-                node.remoter.run('nodetool upgradesstables', verbose=True)
+        self.alter_test_tables_encryption(scylla_encryption_options=self.params.get('scylla_encryption_options'))
 
         for stress in stress_queue:
             self.verify_stress_thread(cs_thread_pool=stress)
