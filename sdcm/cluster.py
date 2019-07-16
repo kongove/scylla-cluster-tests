@@ -683,7 +683,7 @@ class BaseNode(object):
             if last:
                 backtrace_cmd += ' -1'
             return self.remoter.run(backtrace_cmd,
-                                    verbose=False, ignore_status=True)
+                                    verbose=True, ignore_status=True)
         except Exception as details:
             self.log.error('Error retrieving core dump backtraces : %s',
                            details)
@@ -777,7 +777,7 @@ class BaseNode(object):
         :rtype: int
         """
         n_backtraces_cmd = 'sudo coredumpctl --no-pager --no-legend 2>&1 ||true'
-        result = self.remoter.run(n_backtraces_cmd, verbose=False, ignore_status=True)
+        result = self.remoter.run(n_backtraces_cmd, verbose=True, ignore_status=True)
         if "No coredumps found" in result.stdout:
             return 0
         return len(result.stdout.splitlines())
