@@ -31,9 +31,8 @@ nemesis_during_prepare: 'true'
 user_prefix: 'longevity-tls-1tb-7d-1dis-2nondis'
 failure_post_behavior: destroy
 space_node_threshold: 644245094
-server_encrypt: 'true'
-# Setting client encryption to false for now, till we will find the way to make c-s work with that
-client_encrypt: 'false'
+server_encrypt: true
+client_encrypt: true
 
 authenticator: 'PasswordAuthenticator'
 authenticator_user: cassandra
