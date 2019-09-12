@@ -1147,8 +1147,10 @@ class BaseNode(object):
             text = '%s: Waiting for DB services to be up' % self
 
         self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=trace', ignore_status=True)
+        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=compaction_manager', ignore_status=True)
         wait.wait_for(func=self.db_up, step=60, text=text, timeout=timeout, throw_exc=True)
         self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=trace')
+        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=compaction_manager')
 
         self.db_init_finished = True
         self._report_housekeeping_uuid()
