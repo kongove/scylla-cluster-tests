@@ -1455,7 +1455,7 @@ server_encryption_options:
             logger.debug("%s is a replacement node for '%s'." % (self.name, self.replacement_node_ip))
             scylla_yaml_contents += "\nreplace_address_first_boot: %s\n" % self.replacement_node_ip
 
-        if append_conf and ('scylla_encryption_options' in append_conf or 'kmip_hosts:' in append_conf):
+        if append_conf and ('system_key_directory' in append_conf or 'system_info_encryption' in append_conf or 'kmip_hosts:' in append_conf):
             ks = KeyStore()
             if not os.path.exists('./data_dir/encrypt_conf/system_key'):
                 ks.download_file('system_key', './data_dir/encrypt_conf/system_key')
