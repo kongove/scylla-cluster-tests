@@ -1037,6 +1037,9 @@ class BaseNode(object):
             return False
 
     def db_up(self):
+        # try to enable trace as early as possible
+        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=trace', ignore_status=True)
+        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=compaction_manager', ignore_status=True)
         return self.is_port_used(port=self.CQL_PORT, service_name="scylla-server")
 
     def jmx_up(self):
@@ -1145,9 +1148,6 @@ class BaseNode(object):
         text = None
         if verbose:
             text = '%s: Waiting for DB services to be up' % self
-
-        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=trace', ignore_status=True)
-        self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=compaction_manager', ignore_status=True)
         wait.wait_for(func=self.db_up, step=60, text=text, timeout=timeout, throw_exc=True)
         self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=trace')
         self.remoter.run('curl -X POST http://127.0.0.1:10000/system/logger/kmip?level=compaction_manager')
