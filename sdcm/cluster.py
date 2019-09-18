@@ -50,7 +50,6 @@ from sdcm.utils.common import log_run_info, retrying, get_data_dir_path, Distro,
     get_latest_gemini_version, get_my_ip
 from .collectd import ScyllaCollectdSetup
 from .db_stats import PrometheusDBStats
-from .keystore import KeyStore
 
 from sdcm.sct_events import Severity, CoreDumpEvent, CassandraStressEvent, DatabaseLogEvent, FullScanEvent, \
     ClusterHealthValidatorEvent
@@ -1462,13 +1461,6 @@ server_encryption_options:
             scylla_yaml_contents += "\nreplace_address_first_boot: %s\n" % self.replacement_node_ip
 
         if append_conf and ('system_key_directory' in append_conf or 'system_info_encryption' in append_conf or 'kmip_hosts:' in append_conf):
-            ks = KeyStore()
-            if not os.path.exists('./data_dir/encrypt_conf/system_key'):
-                ks.download_file('system_key', './data_dir/encrypt_conf/system_key')
-            if not os.path.exists('./data_dir/encrypt_conf/CA.pem'):
-                ks.download_file('CA.pem', './data_dir/encrypt_conf/CA.pem')
-            if not os.path.exists('./data_dir/encrypt_conf/SCYLLADB.pem'):
-                ks.download_file('SCYLLADB.pem', './data_dir/encrypt_conf/SCYLLADB.pem')
             self.remoter.send_files(src='./data_dir/encrypt_conf',
                                     dst='/tmp/')
             self.remoter.run('sudo mv /tmp/encrypt_conf /etc/')

@@ -212,6 +212,13 @@ class ClusterTester(db_stats.TestStatsMixin, unittest.TestCase):
             duration = self.test_duration
         return duration * 60 + 600
 
+    def download_encrypt_keys(self):
+            ks = KeyStore()
+            if not os.path.exists('./data_dir/encrypt_conf/CA.pem'):
+                ks.download_file('CA.pem', './data_dir/encrypt_conf/CA.pem')
+            if not os.path.exists('./data_dir/encrypt_conf/SCYLLADB.pem'):
+                ks.download_file('SCYLLADB.pem', './data_dir/encrypt_conf/SCYLLADB.pem')
+
     @teardown_on_exception
     @log_run_info
     def setUp(self):
@@ -221,6 +228,10 @@ class ClusterTester(db_stats.TestStatsMixin, unittest.TestCase):
         self.loaders = None
         self.monitors = None
         self.connections = []
+
+        append_conf = self.params.get('append_conf')
+        if append_conf and ('system_key_directory' in append_conf or 'system_info_encryption' in append_conf or 'kmip_hosts:' in append_conf):
+            self.download_encrypt_keys()
 
         self.init_resources()
         if self.params.get('seeds_first', default='false') == 'true':
