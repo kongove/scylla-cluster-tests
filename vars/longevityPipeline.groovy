@@ -21,6 +21,8 @@ def call(Map pipelineParams) {
             string(defaultValue: '', description: '', name: 'scylla_ami_id')
             string(defaultValue: '', description: '', name: 'scylla_version')
             string(defaultValue: '', description: '', name: 'scylla_repo')
+            string(defaultValue: '3.1.0.rc5-0.20190919.6a2976562', description: '', name: 'replaced_rpms_version')
+            string(defaultValue: 'http://scratch.scylladb.com/espindola/rpms-issue-4971/', description: '', name: 'replaced_rpms_url')
             string(defaultValue: "${pipelineParams.get('provision_type', 'spot_low_price')}",
                    description: 'spot_low_price|on_demand|spot_fleet|spot_low_price|spot_duration',
                    name: 'provision_type')
@@ -67,6 +69,8 @@ def call(Map pipelineParams) {
                                 export SCT_CLUSTER_BACKEND="${params.backend}"
                                 export SCT_REGION_NAME=${aws_region}
                                 export SCT_CONFIG_FILES="${test_config}"
+                                export SCT_REPLACED_RPMS_VERSION="${replaced_rpms_version}"
+                                export SCT_REPLACED_RPMS_URL="${replaced_rpms_url}"
 
                                 if [[ ! -z "${params.scylla_ami_id}" ]] ; then
                                     export SCT_AMI_ID_DB_SCYLLA="${params.scylla_ami_id}"

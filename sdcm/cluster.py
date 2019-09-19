@@ -2600,6 +2600,8 @@ class BaseScyllaCluster(object):
 
     def update_db_packages(self, node_list=None):
         new_scylla_bin = self.params.get('update_db_packages')
+        if self.params.get('replaced_rpms_version') and self.params.get('replaced_rpms_url'):
+            new_scylla_bin = './replaced_rpms/'
         if new_scylla_bin:
             if node_list is None:
                 node_list = self.nodes

@@ -353,6 +353,9 @@ class SCTConfiguration(dict):
         dict(name="subnet_id", env="SCT_SUBNET_ID",  type=str_or_list,
              help="AWS subnet ids to use"),
 
+        dict(name="replaced_rpms_version", env="SCT_REPLACED_RPMS_VERSION",  type=str, help=""),
+        dict(name="replaced_rpms_url", env="SCT_REPLACED_RPMS_URL",  type=str, help=""),
+
         dict(name="ami_id_db_scylla", env="SCT_AMI_ID_DB_SCYLLA",  type=str,
              help="AMS AMI id to use for scylla db node"),
 

@@ -59,6 +59,7 @@ from sdcm.utils.common import get_data_dir_path, log_run_info, retrying, S3Stora
 from sdcm.utils.log import configure_logging
 from sdcm.db_stats import PrometheusDBStats
 from sdcm.results_analyze import PerformanceResultsAnalyzer
+from sdcm.remote import LocalCmdRunner
 from sdcm.sct_config import SCTConfiguration
 from sdcm.sct_events import start_events_device, stop_events_device, InfoEvent, EVENTS_PROCESSES, FullScanEvent, \
     Severity
@@ -215,6 +216,18 @@ class ClusterTester(db_stats.TestStatsMixin, unittest.TestCase):
         self.loaders = None
         self.monitors = None
         self.connections = []
+
+        localrunner = LocalCmdRunner()
+        rpms_dirname = 'replaced_rpms'
+        replaced_rpms_version = self.params.get('replaced_rpms_version')
+        replaced_rpms_url = self.params.get('replaced_rpms_url')
+
+        if replaced_rpms_version and replaced_rpms_url:
+            localrunner.run('rm -rf ./{rpms_dirname}'.format(**locals()))
+            localrunner.run('mkdir -p ./{rpms_dirname}'.format(**locals()))
+            for pkg in ['scylla', 'scylla-conf', 'scylla-kernel-conf', 'scylla-server', 'scylla-debuginfo']:
+                pkg_fullname = '{pkg}-{replaced_rpms_version}.el7.x86_64.rpm'.format(**locals())
+                localrunner.run('curl {replaced_rpms_url}{pkg_fullname} -o ./{rpms_dirname}/{pkg_fullname}'.format(**locals()))
 
         self.init_resources()
         if self.params.get('seeds_first', default='false') == 'true':
