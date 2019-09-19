@@ -55,6 +55,7 @@ from .cluster_aws import CassandraAWSCluster
 from .cluster_aws import ScyllaAWSCluster
 from .cluster_aws import LoaderSetAWS
 from .cluster_aws import MonitorSetAWS
+from .remote import LocalCmdRunner
 from .utils.common import get_data_dir_path, log_run_info, retrying, S3Storage, clean_cloud_instances, ScyllaCQLSession, \
     get_non_system_ks_cf_list, remove_files
 from .utils.log import configure_logging
@@ -220,6 +221,18 @@ class ClusterTester(db_stats.TestStatsMixin, unittest.TestCase):
         self.loaders = None
         self.monitors = None
         self.connections = []
+
+        localrunner = LocalCmdRunner()
+        rpms_dirname = 'replaced_rpms'
+        replaced_rpms_version = self.params.get('replaced_rpms_version')
+        replaced_rpms_url = self.params.get('replaced_rpms_url')
+
+        if replaced_rpms_version and replaced_rpms_url:
+            localrunner.run('rm -rf ./{rpms_dirname}'.format(**locals()))
+            localrunner.run('mkdir -p ./{rpms_dirname}'.format(**locals()))
+            for pkg in ['scylla', 'scylla-conf', 'scylla-kernel-conf', 'scylla-server', 'scylla-debuginfo']:
+                pkg_fullname = '{pkg}-{replaced_rpms_version}.el7.x86_64.rpm'.format(**locals())
+                localrunner.run('curl {replaced_rpms_url}{pkg_fullname} -o ./{rpms_dirname}/{pkg_fullname}'.format(**locals()))
 
         self.init_resources()
         if self.params.get('seeds_first', default='false') == 'true':
