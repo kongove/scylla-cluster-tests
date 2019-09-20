@@ -2547,7 +2547,15 @@ class BaseScyllaCluster(object):
         def update_scylla_packages(node, queue):
             node.log.info('Updating DB packages')
             node.remoter.run('mkdir /tmp/scylla')
-            node.remoter.send_files(new_scylla_bin, '/tmp/scylla', verbose=True)
+            if new_scylla_bin.startswith('gs://'):
+                packages_dir = tempfile.mkdtemp(dir='/tmp')
+                localrunner.run('gsutil -m cp -r {new_scylla_bin} {packages_dir}'.format(**locals()))
+                src_dir = packages_dir
+            if os.path.exists(new_scylla_bin) and os.path.isdir(new_scylla_bin):
+                src_dir = new_scylla_bin
+            else:
+                raise ValueError('Invalid new_scylla_bin parameter: %s' % new_scylla_bin)
+            node.remoter.send_files(src_dir, '/tmp/scylla', verbose=True)
             node.remoter.run('sudo yum update -y --skip-broken -x scylla\*')
             # replace the packages
             node.remoter.run('yum list installed | grep scylla')
