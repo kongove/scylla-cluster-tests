@@ -14,3 +14,13 @@ nemesis_interval: 5
 
 user_prefix: 'longevity-10gb-3h'
 space_node_threshold: 64424
+
+#replaced_rpms_version = '3.1.0.rc8-1.avi.debug_shared_ptr.20190924.4779ac5a77'
+#replaced_rpms_url = 'http://scratch.scylladb.com/amos/scylla-3.1.0.rc8-1.avi.debug_shared_ptr.20190924.4779ac5a77.el7/'
+#
+#replaced_rpms_version = '3.1.0.rc8-2.avi.debug_shared_ptr.20190924.4779ac5a77'
+#replaced_rpms_url = 'http://scratch.scylladb.com/amos/scylla-3.1.0.rc8-2.avi.debug_shared_ptr.20190924.4779ac5a77/'
+
+update_db_packages: './replaced_rpms/'
+
+
