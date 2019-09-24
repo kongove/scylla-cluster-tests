@@ -33,6 +33,7 @@ scylla_encryption_options: "{ 'cipher_algorithm' : 'AES/ECB/PKCS5Padding', 'secr
 
 # enable system_info_encryption, config kmip_hosts
 append_conf: |
+  system_key_directory: /etc/encrypt_conf/
   system_info_encryption:
       enabled: True  # system_info_encryption
       key_provider: LocalFileSystemKeyProviderFactory  # system_info_encryption
@@ -41,8 +42,8 @@ append_conf: |
   kmip_hosts:
        kmip_test:
            hosts: kmip-interop1.cryptsoft.com
-           certificate: /etc/scylla/conf/SCYLLADB.pem
-           keyfile: /etc/scylla/conf/SCYLLADB.pem
-           truststore: /etc/scylla/conf/CA.pem
+           certificate: /etc/encrypt_conf/SCYLLADB.pem
+           keyfile: /etc/encrypt_conf/SCYLLADB.pem
+           truststore: /etc/encrypt_conf/CA.pem
            priority_string: 'SECURE128:+RSA:-VERS-TLS1.0:-ECDHE-ECDSA'
    
