@@ -844,10 +844,11 @@ class Nemesis(object):
         # randomly select and run one of disrupt_modify_table* methods
         disrupt_func_name = random.choice([dm for dm in dir(self) if dm.startswith("modify_table")])
         disrupt_func = getattr(self, disrupt_func_name)
-        if random.randint(0, 1):
-            disrupt_func()
-        else:
-            self.modify_table_dclocal_read_repair_chance()
+        # if random.randint(0, 1):
+        #     disrupt_func()
+        # else:
+        #     self.modify_table_dclocal_read_repair_chance()
+        self.modify_table_dclocal_read_repair_chance()
 
     def disrupt_mgmt_repair_cli(self):
         self._set_current_disruption('ManagementRepair')
