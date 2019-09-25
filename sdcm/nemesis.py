@@ -558,28 +558,28 @@ class Nemesis(object):
             disrupt_methods = [attr[1] for attr in inspect.getmembers(self) if
                                attr[0] in disrupt_methods and
                                callable(attr[1])]
-        if not predefined_sequence:
-            disrupt_method = random.choice(disrupt_methods)
-        elif use_my_order:
+        if use_my_order:
             if not self._conf_sequence:
                 self._conf_sequence = [
-'disrupt_abort_repair', 
-'disrupt_terminate_and_replace_node', 
-'disrupt_nodetool_refresh', 
-'disrupt_nodetool_cleanup', 
-'disrupt_nodetool_drain', 
-'disrupt_major_compaction', 
-'disrupt_show_toppartitions', 
-'disrupt_mgmt_repair_cli', 
-'disrupt_modify_table', 
-'disrupt_nodetool_drain', 
-'disrupt_no_corrupt_repair', 
-'disrupt_stop_wait_start_scylla_server', 
-'disrupt_nodetool_decommission', 
-'disrupt_destroy_data_then_repair', 
-'disrupt_nodetool_decommission', 
+                    'disrupt_abort_repair',
+                    'disrupt_terminate_and_replace_node',
+                    'disrupt_nodetool_refresh',
+                    'disrupt_nodetool_cleanup',
+                    'disrupt_nodetool_drain',
+                    'disrupt_major_compaction',
+                    'disrupt_show_toppartitions',
+                    'disrupt_mgmt_repair_cli',
+                    'disrupt_modify_table',
+                    'disrupt_nodetool_drain',
+                    'disrupt_no_corrupt_repair',
+                    'disrupt_stop_wait_start_scylla_server',
+                    'disrupt_nodetool_decommission',
+                    'disrupt_destroy_data_then_repair',
+                    'disrupt_nodetool_decommission',
                 ]
             disrupt_method = self._conf_sequence.pop()
+        elif not predefined_sequence:
+            disrupt_method = random.choice(disrupt_methods)
         else:
             if not self._random_sequence:
                 # Generate random sequence, every method has same chance to be called.
@@ -1293,11 +1293,13 @@ class TruncateMonkey(Nemesis):
     def disrupt(self):
         self.disrupt_truncate()
 
+
 class MyChaosMonkey(Nemesis):
 
     @log_time_elapsed_and_status
     def disrupt(self):
         self.call_random_disrupt_method(use_my_order=True)
+
 
 class ChaosMonkey(Nemesis):
 
