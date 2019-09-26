@@ -950,6 +950,8 @@ class Nemesis(object):
             self.tester.fail(result.stderr)
 
     def disrupt_show_toppartitions(self):
+        self.log.info('skip disrupt_show_toppartitions')
+        return
         def _parse_toppartitions_output(output):
             """parsing output of toppartitions
 
