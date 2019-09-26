@@ -560,7 +560,7 @@ class Nemesis(object):
                                callable(attr[1])]
         if use_my_order:
             if not self._conf_sequence:
-                self._conf_sequence = [
+                my_disrupt_methods = [
                     'disrupt_abort_repair',
                     'disrupt_terminate_and_replace_node',
                     'disrupt_nodetool_refresh',
@@ -577,6 +577,9 @@ class Nemesis(object):
                     'disrupt_destroy_data_then_repair',
                     'disrupt_nodetool_decommission',
                 ]
+                self._conf_sequence = [attr[1] for attr in inspect.getmembers(self) if
+                    attr[0] in my_disrupt_methods and
+                    callable(attr[1])]
             disrupt_method = self._conf_sequence.pop()
         elif not predefined_sequence:
             disrupt_method = random.choice(disrupt_methods)
