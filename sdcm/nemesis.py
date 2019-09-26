@@ -79,7 +79,7 @@ class Nemesis(object):
         self.stats = {}
         self.metrics_srv = prometheus.nemesis_metrics_obj()
         self._random_sequence = None
-        self._conf_sequence = None
+        self._conf_sequence = []
 
     def update_stats(self, disrupt, status=True, data={}):
         key = {True: 'runs', False: 'failures'}
@@ -577,9 +577,10 @@ class Nemesis(object):
                     'disrupt_destroy_data_then_repair',
                     'disrupt_nodetool_decommission',
                 ]
-                self._conf_sequence = [attr[1] for attr in inspect.getmembers(self) if
-                    attr[0] in my_disrupt_methods and
-                    callable(attr[1])]
+                for attr in inspect.getmembers(self):
+                    if callable(attr[1]):
+                        methods[attr[0]] = attr[1]
+                self._conf_sequence = [methods[name] for name in my_disrupt_methods]
             disrupt_method = self._conf_sequence.pop()
         elif not predefined_sequence:
             disrupt_method = random.choice(disrupt_methods)
