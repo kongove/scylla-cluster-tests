@@ -1,0 +1,9 @@
+test_duration: 30
+
+n_db_nodes: 1
+n_loaders: 0
+n_monitor_nodes: 0
+
+instance_type_db: 'i3.large'
+
+user_prefix: 'ami-tests'

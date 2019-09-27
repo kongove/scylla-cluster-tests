@@ -1,0 +1,14 @@
+test_duration: 30
+
+n_db_nodes: 1
+n_loaders: 0
+n_monitor_nodes: 0
+
+backend: gce
+gce_instance_type_db: 'n1-standard-2'
+gce_root_disk_type_db: 'pd-ssd'
+gce_root_disk_size_db: 10
+#gce_n_local_ssd_disk_db: 1
+gce_pd_standard_disk_size_db: 1G
+
+user_prefix: 'artifact-tests'
