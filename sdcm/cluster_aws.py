@@ -167,6 +167,8 @@ class AWSCluster(cluster.BaseCluster):  # pylint: disable=too-many-instance-attr
         return instances
 
     def _create_instances(self, count, ec2_user_data='', dc_idx=0):
+        if not count > 0:
+            return
 
         tags_list = create_tags_list()
         tags_list.append({'Key': 'NodeType', 'Value': self.node_type})
@@ -317,6 +319,8 @@ class AWSCluster(cluster.BaseCluster):  # pylint: disable=too-many-instance-attr
         """)
 
     def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False):
+        if not count > 0:
+            return
 
         post_boot_script = cluster.Setup.get_startup_script()
         if self.aws_extra_network_interface:
