@@ -452,6 +452,12 @@ class UpgradeTest(FillDatabaseData):
         # wait for the read workload to finish
         self.verify_stress_thread(read_stress_queue)
 
+        self.log.info('Run some Queries to verify data after upgraded one node')
+        self.verify_db_data()
+        self.clean_db_data()
+        self.log.info('Re-Populate DB with many types of tables and data')
+        self.fill_db_data()
+
         # read workload
         self.log.info('Starting c-s read workload for 10m')
         stress_cmd_read_10m = self.params.get('stress_cmd_read_10m')
@@ -476,6 +482,12 @@ class UpgradeTest(FillDatabaseData):
         read_20m_cs_thread_pool = self.run_stress_thread(stress_cmd=stress_cmd_read_20m)
         self.log.info('Sleeping for 60s to let cassandra-stress start before the rollback...')
         time.sleep(60)
+
+        self.log.info('Run some Queries to verify data after upgraded two nodes')
+        self.verify_db_data()
+        self.clean_db_data()
+        self.log.info('Re-Populate DB with many types of tables and data')
+        self.fill_db_data()
 
         # rollback second node
         self.log.info('Rollback Node %s begin', self.db_cluster.nodes[indexes[1]].name)
