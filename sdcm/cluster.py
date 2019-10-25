@@ -1562,7 +1562,6 @@ server_encryption_options:
             # hack cause of broken caused by EPEL
             self.remoter.run('sudo yum install -y python36-PyYAML', ignore_status=True)
             self.remoter.run('sudo yum install -y {}'.format(self.scylla_pkg()))
-            self.remoter.run('sudo yum install -y http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-server-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-conf-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-kernel-conf-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-debuginfo-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm')
             self.remoter.run('sudo yum install -y scylla-gdb', ignore_status=True)
         else:
             if self.is_ubuntu14():
