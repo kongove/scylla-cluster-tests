@@ -96,6 +96,9 @@ class LongevityTest(ClusterTester):
                                                                              params['interval']))
         return params
 
+    def test_foo(self):
+        pass
+
     def test_custom_time(self):
         """
         Run cassandra-stress with params defined in data_dir/scylla.yaml

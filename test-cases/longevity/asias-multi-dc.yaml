@@ -1,0 +1,18 @@
+test_duration: 5760
+
+n_db_nodes: '1 1 1'
+n_loaders:  1
+n_monitor_nodes: 1
+
+instance_type_db: 'i3.2xlarge'
+
+user_prefix: asias-multi-dc
+failure_post_behavior: keep
+
+space_node_threshold: 6442
+
+nemesis_class_name: 'ChaosMonkey'
+nemesis_interval: 15
+nemesis_during_prepare: false
+
+use_mgmt: true
