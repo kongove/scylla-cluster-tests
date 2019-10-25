@@ -168,7 +168,8 @@ class UpgradeTest(FillDatabaseData):
                     node.remoter.run('for conf in $(cat /var/lib/dpkg/info/scylla-*server.conffiles /var/lib/dpkg/info/scylla-*conf.conffiles /var/lib/dpkg/info/scylla-*jmx.conffiles | grep -v init ); do sudo cp -v $conf $conf.backup-2.1; done')
             else:
                 if node.is_rhel_like():
-                    node.remoter.run('sudo yum update {}{}\* -y'.format(scylla_pkg, ver_suffix))
+                    #node.remoter.run('sudo yum update {}{}\* -y'.format(scylla_pkg, ver_suffix))
+                    node.remoter.run('sudo yum install -y http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-server-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-conf-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-kernel-conf-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-debuginfo-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm')
                 else:
                     node.remoter.run('sudo apt-get update')
                     node.remoter.run('sudo apt-get dist-upgrade {} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated'.format(scylla_pkg))
