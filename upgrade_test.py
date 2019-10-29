@@ -169,7 +169,8 @@ class UpgradeTest(FillDatabaseData):
             else:
                 if node.is_rhel_like():
                     #node.remoter.run('sudo yum update {}{}\* -y'.format(scylla_pkg, ver_suffix))
-                    node.remoter.run('sudo yum install -y http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-server-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-conf-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-kernel-conf-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-debuginfo-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm')
+                    #node.remoter.run('sudo yum install -y http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-server-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-conf-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-kernel-conf-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm http://scratch.scylladb.com/amos/scylla-enterprise-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7/scylla-enterprise-debuginfo-2019.1.2-1.ipv6.20191025.57a63e4ac5.el7.x86_64.rpm')
+                    node.remoter.run('sudo yum install -y http://scratch.scylladb.com/scylla-enterprise-2019.1.2-1.ipv6.20191028/centos/7/x86_64/scylla-enterprise-2019.1.2-1.ipv6.20191028.ac942051b0.el7.x86_64.rpm http://scratch.scylladb.com/scylla-enterprise-2019.1.2-1.ipv6.20191028/centos/7/x86_64/scylla-enterprise-conf-2019.1.2-1.ipv6.20191028.ac942051b0.el7.x86_64.rpm http://scratch.scylladb.com/scylla-enterprise-2019.1.2-1.ipv6.20191028/centos/7/x86_64/scylla-enterprise-debuginfo-2019.1.2-1.ipv6.20191028.ac942051b0.el7.x86_64.rpm http://scratch.scylladb.com/scylla-enterprise-2019.1.2-1.ipv6.20191028/centos/7/x86_64/scylla-enterprise-kernel-conf-2019.1.2-1.ipv6.20191028.ac942051b0.el7.x86_64.rpm http://scratch.scylladb.com/scylla-enterprise-2019.1.2-1.ipv6.20191028/centos/7/x86_64/scylla-enterprise-server-2019.1.2-1.ipv6.20191028.ac942051b0.el7.x86_64.rpm')
                 else:
                     node.remoter.run('sudo apt-get update')
                     node.remoter.run('sudo apt-get dist-upgrade {} -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes --allow-unauthenticated'.format(scylla_pkg))
@@ -484,7 +485,7 @@ class UpgradeTest(FillDatabaseData):
         self.log.info('Sleeping for 60s to let cassandra-stress start before the rollback...')
         time.sleep(60)
 
-        self.fill_and_verify_db_data('after upgraded two nodes')
+        #self.fill_and_verify_db_data('after upgraded two nodes')
 
         # rollback second node
         self.log.info('Rollback Node %s begin', self.db_cluster.nodes[indexes[1]].name)
@@ -500,7 +501,7 @@ class UpgradeTest(FillDatabaseData):
             self.upgrade_node(self.db_cluster.node_to_upgrade)
             self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
             self.db_cluster.node_to_upgrade.check_node_health()
-            self.fill_and_verify_db_data('after upgraded %s' % self.db_cluster.node_to_upgrade.name)
+            #self.fill_and_verify_db_data('after upgraded %s' % self.db_cluster.node_to_upgrade.name)
 
         # wait for the 20m read workload to finish
         self.verify_stress_thread(read_20m_cs_thread_pool)
