@@ -2878,7 +2878,8 @@ class FillDatabaseData(ClusterTester):
             if not a['skip'] and ('skip_condition' not in a or eval(str(a['skip_condition']))):
                 for create_table in a['create_tables']:
                     session.execute(create_table)
-                time.sleep(30)
+                if 'boolean_test' in create_table:
+                    time.sleep(30)
                 for truncate in a['truncates']:
                     session.execute(truncate)
 
