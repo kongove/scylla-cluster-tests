@@ -2890,7 +2890,7 @@ class FillDatabaseData(ClusterTester):
     def cql_insert_data_to_tables(self, session, default_fetch_size):
         # pylint: disable=too-many-nested-blocks
         for item in self.all_verification_items:
-            session.execute("USE keyspace1;")
+            session.execute("USE keyspace_fill_db_data;")
             if not item['skip'] and ('skip_condition' not in item or eval(str(item['skip_condition']))):
                 if 'disable_paging' in item and item['disable_paging']:
                     session.default_fetch_size = 0
@@ -2911,7 +2911,7 @@ class FillDatabaseData(ClusterTester):
         # pylint: disable=too-many-branches,too-many-nested-blocks
 
         for item in self.all_verification_items:
-            session.execute("USE keyspace1;")
+            session.execute("USE keyspace_fill_db_data;")
             if not item['skip'] and ('skip_condition' not in item or eval(str(item['skip_condition']))):
                 if 'disable_paging' in item and item['disable_paging']:
                     session.default_fetch_size = 0
@@ -2958,10 +2958,10 @@ class FillDatabaseData(ClusterTester):
             session.default_consistency_level = ConsistencyLevel.QUORUM
 
             session.execute("""
-                CREATE KEYSPACE IF NOT EXISTS keyspace1
+                CREATE KEYSPACE IF NOT EXISTS keyspace_fill_db_data
                 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'} AND durable_writes = true;
                 """)
-            session.execute("USE keyspace1;")
+            session.execute("USE keyspace_fill_db_data;")
 
             # Create all tables according the above list
             self.cql_create_tables(session)
@@ -2977,7 +2977,7 @@ class FillDatabaseData(ClusterTester):
             # override driver consistency level
             session.default_consistency_level = ConsistencyLevel.QUORUM
 
-            session.execute("USE keyspace1;")
+            session.execute("USE keyspace_fill_db_data;")
 
             self.run_db_queries(session, session.default_fetch_size)
 
@@ -2986,5 +2986,5 @@ class FillDatabaseData(ClusterTester):
         node = self.db_cluster.nodes[0]
         with self.cql_connection_patient(node) as session:
             # pylint: disable=no-member
-            session.execute("DROP KEYSPACE keyspace1;")
+            session.execute("DROP KEYSPACE keyspace_fill_db_data;")
             session.execute("DROP KEYSPACE ks_no_range_ghost_test;")
