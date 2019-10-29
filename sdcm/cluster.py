@@ -1660,7 +1660,24 @@ server_encryption_options:
         """
         result = self.remoter.run('/sbin/ip -o link show |grep ether |awk -F": " \'{print $2}\'', verbose=True)
         devname = result.stdout.strip()
-        self.remoter.run('sudo /usr/lib/scylla/scylla_setup --nic {} --disks {}'.format(devname, ','.join(disks)))
+        if self.params.get('workaround_kernel_bug_for_iotune'):
+            # related issue: https://github.com/scylladb/scylla/issues/5181
+            # a known kernel bug will cause scylla_io_setup fails in executing iotune.
+            self.remoter.run(
+                'sudo /usr/lib/scylla/scylla_setup --nic {} --disks {} --no-io-setup'.format(devname, ','.join(disks)))
+            script = dedent("""echo \"disks:
+  - mountpoint: /var/lib/scylla
+    read_iops: 540317
+    read_bandwidth: 1914761472
+    write_iops: 300319
+    write_bandwidth: 1162022400
+\" |sudo tee /etc/scylla.d/io_properties.yaml
+            echo SEASTAR_IO=\"--num-io-queues=8 --io-properties-file=/etc/scylla.d/io_properties.yaml\" | sudo tee /etc/scylla.d/io.conf
+        """)
+            self.remoter.run("bash -ce '%s'" % script)
+        else:
+            self.remoter.run('sudo /usr/lib/scylla/scylla_setup --nic {} --disks {}'.format(devname, ','.join(disks)))
+
         result = self.remoter.run('cat /proc/mounts')
         assert ' /var/lib/scylla ' in result.stdout, "RAID setup failed, scylla directory isn't mounted correctly"
         self.remoter.run('sudo sync')
