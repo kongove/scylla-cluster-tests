@@ -17,6 +17,7 @@ __author__ = 'Roy Dahan'
 
 
 import random
+import time
 from collections import OrderedDict
 from uuid import UUID
 
@@ -2871,13 +2872,19 @@ class FillDatabaseData(ClusterTester):
             self.cql_insert_data_to_simple_tables(session, rows=insert_rows)
 
     def cql_create_tables(self, session):
+        truncates = []
         # Run through the list of items and create all tables
         for a in self.all_verification_items:
             if not a['skip'] and ('skip_condition' not in a or eval(str(a['skip_condition']))):
                 for create_table in a['create_tables']:
                     session.execute(create_table)
-                for truncate in a['truncates']:
-                    session.execute(truncate)
+                for truncate in item['truncates']:
+                    truncates.append(truncate)
+        # Sleep a while after creating test tables to avoid schema disagreement.
+        # Refs: https://github.com/scylladb/scylla/issues/5235
+        time.sleep(30)
+        for truncate in truncates:
+            session.execute(truncate)
 
     def cql_insert_data_to_tables(self, session, default_fetch_size):
         for a in self.all_verification_items:
