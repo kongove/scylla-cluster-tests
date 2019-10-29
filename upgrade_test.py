@@ -458,7 +458,7 @@ class UpgradeTest(FillDatabaseData):
         read_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_cl_quorum)
         # wait for the read workload to finish
         self.verify_stress_thread(read_stress_queue)
-        self.fill_and_verify_db_data('after upgraded one node')
+        #self.fill_and_verify_db_data('after upgraded one node')
 
         # read workload
         self.log.info('Starting c-s read workload for 10m')
@@ -493,7 +493,7 @@ class UpgradeTest(FillDatabaseData):
         self.log.info('Rollback Node %s ended', self.db_cluster.nodes[indexes[1]].name)
         self.db_cluster.nodes[indexes[1]].check_node_health()
 
-        self.fill_and_verify_db_data('after rollback the second node')
+        #self.fill_and_verify_db_data('after rollback the second node')
 
         for i in indexes[1:]:
             self.db_cluster.node_to_upgrade = self.db_cluster.nodes[i]
