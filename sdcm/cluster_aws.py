@@ -778,6 +778,7 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
             self.node_config_setup(node, seed_address, endpoint_snitch)
 
             node.stop_scylla_server(verify_down=False)
+            node.remoter.run('sudo sed -ie "s/^SCYLLA_ARGS=\"/SCYLLA_ARGS=\"--logger-log-level kmip=debug:replicated_key_provider=debug /g" /etc/sysconfig/scylla-server')
             node.start_scylla_server(verify_up=False)
         else:
             # for reconfigure rsyslog
