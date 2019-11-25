@@ -21,6 +21,9 @@ def call(Map pipelineParams) {
             string(defaultValue: "${pipelineParams.get('post_behaviour', 'destroy')}",
                    description: 'keep|destroy',
                    name: 'post_behaviour')
+            booleanParam(defaultValue: "${pipelineParams.get('workaround_kernel_bug_for_iotune', false)}",
+                 description: 'Workaround a known kernel bug which causes iotune fails in scylla_io_setup',
+                 name: 'workaround_kernel_bug_for_iotune')
         }
         options {
             timestamps()
