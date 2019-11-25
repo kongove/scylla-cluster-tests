@@ -1660,7 +1660,7 @@ server_encryption_options:
         """
         result = self.remoter.run('/sbin/ip -o link show |grep ether |awk -F": " \'{print $2}\'', verbose=True)
         devname = result.stdout.strip()
-        if self.params.get('workaround_kernel_bug_for_iotune'):
+        if self.parent_cluster.params.get('workaround_kernel_bug_for_iotune'):
             # related issue: https://github.com/scylladb/scylla/issues/5181
             # a known kernel bug will cause scylla_io_setup fails in executing iotune.
             self.remoter.run(

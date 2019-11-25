@@ -66,6 +66,8 @@ def call(Map pipelineParams) {
                                             export SCT_SCYLLA_LINUX_DISTRO=${pipelineParams.linux_distro}
                                             export SCT_AMI_ID_DB_SCYLLA_DESC="\$SCT_AMI_ID_DB_SCYLLA_DESC-\$SCT_SCYLLA_LINUX_DISTRO"
 
+                                            export SCT_WORKAROUND_KERNEL_BUG_FOR_IOTUNE=${pipelineParams.workaround_kernel_bug_for_iotune}
+
                                             echo "start test ......."
                                             ./docker/env/hydra.sh run-test ${pipelineParams.test_name} --backend ${params.backend}  --logdir /sct
                                             echo "end test ....."
