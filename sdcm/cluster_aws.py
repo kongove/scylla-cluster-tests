@@ -14,8 +14,9 @@ from datetime import datetime
 from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
 
 import yaml
-from botocore.exceptions import WaiterError, ClientError
 import boto3
+from botocore.exceptions import WaiterError, ClientError
+from paramiko.ssh_exception import NoValidConnectionsError
 
 from sdcm import cluster
 from sdcm import ec2_client
@@ -570,6 +571,12 @@ class AWSNode(cluster.BaseNode):
             raise PublicIpNotReady(self._instance)
         LOGGER.debug("[{0._instance}] Got public ip: {0._instance.public_ip_address}".format(self))
 
+    @retrying(n=3, sleep_time=10, allowed_exceptions=(NoValidConnectionsError,),
+              message="Waiting for stopping scylla-server after instance restart")
+    def _stop_scylla_server_after_restart(self):
+        self.wait_ssh_up()
+        self.stop_scylla_server(verify_down=False)
+
     def restart(self):
         # We differenciate between "Restart" and "Reboot".
         # Restart in AWS will be a Stop and Start of an instance.
@@ -608,7 +615,7 @@ class AWSNode(cluster.BaseNode):
 
         if any(ss in self._instance.instance_type for ss in ['i3', 'i2']):
             try:
-                self.stop_scylla_server(verify_down=False)
+                self._stop_scylla_server_after_restart()
 
                 # the scylla_create_devices has been moved to the '/opt/scylladb' folder in the master branch
                 for create_devices_file in ['/usr/lib/scylla/scylla-ami/scylla_create_devices',
