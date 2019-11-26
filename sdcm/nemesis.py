@@ -2469,6 +2469,16 @@ class NetworkMonkey(Nemesis):
         self.call_random_disrupt_method(disrupt_methods=self.disrupt_methods_list)
 
 
+class StreamingErrMonkey(Nemesis):
+
+    disruptive = True
+
+    @log_time_elapsed_and_status
+    def disrupt(self):
+        self.call_random_disrupt_method(
+            disrupt_methods=['disrupt_decommission_streaming_err', 'disrupt_rebuild_streaming_err', 'disrupt_repair_streaming_err'])
+
+
 class GeminiChaosMonkey(Nemesis):
     # Limit the nemesis scope to use with gemini
     # - StopStartMonkey

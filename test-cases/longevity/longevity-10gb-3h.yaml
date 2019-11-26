@@ -8,8 +8,9 @@ n_monitor_nodes: 1
 
 instance_type_db: 'i3.4xlarge'
 
-nemesis_class_name: 'ChaosMonkey'
+nemesis_class_name: 'StreamingErrMonkey'
 nemesis_interval: 5
 
 user_prefix: 'longevity-10gb-3h'
 space_node_threshold: 64424
+collect_logs: true
