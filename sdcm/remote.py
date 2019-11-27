@@ -44,6 +44,13 @@ class OutputCheckError(Exception):
     """
 
 
+class SSHConnectTimeoutError(Exception):
+
+    """
+    Remote command output check failed.
+    """
+
+
 def _scp_remote_escape(filename):
     """
     Escape special chars for SCP use.
@@ -213,6 +220,9 @@ class RemoteCmdRunner(CommandRunner):  # pylint: disable=too-many-instance-attri
             connect_timeout=300, verbose=True,
             log_file=None, retry=1, watchers=None):
         self.connection.connect_timeout = connect_timeout
+        if not self.is_up(timeout=connect_timeout):
+            err_msg = "Unable to run '{}':\nfailed connecting to '{}' during {}s"
+            raise SSHConnectTimeoutError(err_msg.format(cmd, self.hostname, connect_timeout))
         watchers = watchers if watchers else []
         if verbose:
             watchers.append(OutputWatcher(self.log))
