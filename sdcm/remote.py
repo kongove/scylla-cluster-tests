@@ -218,9 +218,9 @@ class RemoteCmdRunner(CommandRunner):  # pylint: disable=too-many-instance-attri
 
     def run(self, cmd, timeout=None, ignore_status=False,  # pylint: disable=too-many-arguments,arguments-differ
             connect_timeout=300, verbose=True,
-            log_file=None, retry=1, watchers=None):
+            log_file=None, retry=1, watchers=None, check_up=True):
         self.connection.connect_timeout = connect_timeout
-        if not self.is_up(timeout=connect_timeout):
+        if check_up and not self.is_up(timeout=connect_timeout):
             err_msg = "Unable to run '{}':\nfailed connecting to '{}' during {}s"
             raise SSHConnectTimeoutError(err_msg.format(cmd, self.hostname, connect_timeout))
         watchers = watchers if watchers else []
@@ -258,7 +258,7 @@ class RemoteCmdRunner(CommandRunner):  # pylint: disable=too-many-instance-attri
     def _ssh_ping(self, timeout=30, verbose=False):
         cmd = 'true'
         try:
-            result = self.run(cmd, timeout=timeout, verbose=verbose)
+            result = self.run(cmd, timeout=timeout, verbose=verbose, check_up=False)
             return result.ok
         except Exception as details:  # pylint: disable=broad-except
             self.log.debug(details)
