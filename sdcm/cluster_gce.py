@@ -51,6 +51,8 @@ class GCENode(cluster.BaseNode):
                            'NodeIndex': node_index,
                            'NodeType': node_type}
             ex_metadata = gce_create_metadata(ex_metadata)
+            self._instance_wait_safe(self._gce_service.ex_set_node_metadata,
+                                     self._instance, ex_metadata)
             if cluster.TEST_DURATION >= 24 * 60:
                 self.log.info('Test duration set to %s. '
                               'Tagging node with "keep-alive"',
@@ -66,7 +68,7 @@ class GCENode(cluster.BaseNode):
                 self.log.info('Keep cluster on failure %s', cluster.Setup.KEEP_ALIVE_MONITOR_NODES)
                 metadata.append('keep-alive')
             self._instance_wait_safe(self._gce_service.ex_set_node_tags,
-                                     self._instance, metadata, ex_metadata)
+                                     self._instance, metadata)
 
     def set_keep_tag(self):
         if "db" in self.name and cluster.Setup.KEEP_ALIVE_DB_NODES:
