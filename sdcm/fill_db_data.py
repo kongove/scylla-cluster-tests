@@ -2906,6 +2906,7 @@ class FillDatabaseData(ClusterTester):
 
     def run_db_queries(self, session, default_fetch_size):
         for a in self.all_verification_items:
+            session.set_keyspace("keyspace_fill_db_data")
             if not a['skip'] and ('skip_condition' not in a or eval(str(a['skip_condition']))):
                 if 'disable_paging' in a and a['disable_paging']:
                     session.default_fetch_size = 0
