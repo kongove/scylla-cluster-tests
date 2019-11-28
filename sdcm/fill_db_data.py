@@ -2878,7 +2878,7 @@ class FillDatabaseData(ClusterTester):
             if not a['skip'] and ('skip_condition' not in a or eval(str(a['skip_condition']))):
                 for create_table in a['create_tables']:
                     session.execute(create_table)
-                for truncate in item['truncates']:
+                for truncate in a['truncates']:
                     truncates.append(truncate)
         # Sleep a while after creating test tables to avoid schema disagreement.
         # Refs: https://github.com/scylladb/scylla/issues/5235
