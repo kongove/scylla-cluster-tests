@@ -15,6 +15,6 @@ rollingUpgradePipeline(
     test_config: 'test-cases/upgrades/rolling-upgrade.yaml',
     workaround_kernel_bug_for_iotune: true,
 
-    timeout: [time: 300, unit: 'MINUTES'],
+    timeout: [time: 400, unit: 'MINUTES'],
     post_behaviour: 'destroy'
 )
