@@ -2,15 +2,21 @@ test_duration: 180
 stress_cmd: ["cassandra-stress write cl=QUORUM duration=180m -schema 'replication(factor=3) compaction(strategy=SizeTieredCompactionStrategy)' -port jmx=6868 -mode cql3 native -rate threads=1000 -pop seq=1..10000000 -log interval=5"
              ]
 
-n_db_nodes: 6
+#n_db_nodes: 6
+n_db_nodes: 4
 n_loaders: 2
 n_monitor_nodes: 1
 
 instance_type_db: 'i3.4xlarge'
 
-nemesis_class_name: 'StreamingErrMonkey'
+#nemesis_class_name: 'StreamingErrMonkey'
+nemesis_class_name: 'RebuildStreamingErrMonkey'
 nemesis_interval: 5
 
 user_prefix: 'longevity-10gb-3h'
 space_node_threshold: 64424
-collect_logs: true
+#collect_logs: true
+
+#test_id: a1e8f8cb-be47-4606-a1d9-3e68ad293fb4 
+#reuse_cluster: a1e8f8cb-be47-4606-a1d9-3e68ad293fb4 
+store_results_in_elasticsearch: false
