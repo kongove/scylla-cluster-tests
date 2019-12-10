@@ -1,0 +1,87 @@
+keyspace: bat_tpd_pri_msg
+
+keyspace_definition: |
+
+  CREATE KEYSPACE bat_tpd_pri_msg WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}  AND durable_writes = true;
+
+table: request_ui_2_1
+
+table_definition: |
+
+  CREATE TABLE bat_tpd_pri_msg.request_ui_2_1 (
+    primaryrepositoryid text PRIMARY KEY,
+    apiinitiatedtime timestamp,
+    clientappname text,
+    eoid text,
+    eventtime timestamp,
+    fid text,
+    import int,
+    intendedmarket text,
+    intendedroute1 int,
+    intendedroute2 text,
+    messagehash text,
+    messagetype text,
+    mid text,
+    pbrand text,
+    pcn text,
+    potherid text,
+    pothertype text,
+    processtype int,
+    ptype int,
+    pweight decimal,
+    rejectionerrorcode list<text>,
+    rejectionerrordescription list<text>,
+    rejectionerrorinternalid list<text>,
+    reqquantity int,
+    responsetext text,
+    sourcemessageid text,
+    testflag int,
+    tpid text,
+    tppn text,
+    upuis list<text>
+  ) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'ALL'}
+    AND comment = 'Request for unit level UIs'
+    AND compaction = {'class': 'SizeTieredCompactionStrategy'}
+    AND compression = {'sstable_compression': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99.0PERCENTILE';
+
+columnspec:
+  - name: primaryrepositoryid
+    population: exp(1..10000000)
+
+  - name: clientappname
+    size: fixed(5)
+
+# Need to populate the list field with big elements and many of them (about 40MB per list).
+# >>> math.sqrt(40 * 1024 * 1024)
+# 6476.344648024841
+
+  - name: rejectionerrorcode
+    size: fixed(6476)
+
+  - name: rejectionerrordescription
+    size: fixed(6476)
+
+  - name: rejectionerrorinternalid
+    size: fixed(6476)
+
+  - name: upuis
+    size: fixed(6476)
+
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+
+queries:
+  read1:
+    cql: select * from bat_tpd_pri_msg.request_ui_2_1 where primaryrepositoryid = ?
+    fields: samerow
