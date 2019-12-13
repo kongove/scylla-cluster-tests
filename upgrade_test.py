@@ -191,6 +191,8 @@ class UpgradeTest(FillDatabaseData):
         if authorization_in_upgrade:
             node.remoter.run("echo 'authorizer: \"%s\"' |sudo tee --append /etc/scylla/scylla.yaml" %
                              authorization_in_upgrade)
+        node.remoter.run("""sudo sed -ie "s/if cfg.get('SET_CLOCKSOURCE') == 'yes':/if cfg.has_option('SET_CLOCKSOURCE') and cfg.get('SET_CLOCKSOURCE') == 'yes':/" /opt/scylladb/scripts/scylla_util.py""")
+        node.remoter.run("sudo grep SET_CLOCKSOURCE /opt/scylladb/scripts/scylla_util.py")
         node.start_scylla_server()
         node.wait_db_up(verbose=True)
         result = node.remoter.run('scylla --version')
