@@ -12,6 +12,8 @@ RPM_URL = 'https://s3.amazonaws.com/downloads.scylladb.com/enterprise/rpm/unstab
           '9f724fedb93b4734fcfaec1156806921ff46e956-2bdfa9f7ef592edaf15e028faf3b7f695f39ebc1'\
           '-525a0255f73d454f8f97f32b8bdd71c8dec35d3d-a6b2b2355c666b1893f702a587287da978aeec22/71/scylla.repo'
 
+TMP_RPM_URL = 'http://scratch.scylladb.com/amos/yum_repos/master/piotrj_issue5288_v3/scylla.repo'
+
 BROKEN_URL = 'https://www.google.com'
 
 
@@ -21,6 +23,7 @@ class TestVersionUtils(unittest.TestCase):
 
     def test_02_get_branch_version_from_repo(self):
         self.assertEqual(get_branch_version_from_repo(RPM_URL), '2019.1.1')
+        self.assertEqual(get_branch_version_from_repo(TMP_RPM_URL), '2019.1.1')
 
     def test_03_get_branch_version(self):
         self.assertEqual(get_branch_version(RPM_URL), '2019.1.1')
