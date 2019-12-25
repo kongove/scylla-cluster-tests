@@ -358,10 +358,10 @@ class UpgradeTest(FillDatabaseData):
         and after upgrade of every node to check the consistency of data
         """
         self.truncate_entries_flag = False  # not perform truncate entries test
-        self.log.info('Populate DB with many types of tables and data')
-        self.fill_db_data()
-        self.log.info('Run some Queries to verify data BEFORE UPGRADE')
-        self.verify_db_data()
+        #self.log.info('Populate DB with many types of tables and data')
+        #self.fill_db_data()
+        #self.log.info('Run some Queries to verify data BEFORE UPGRADE')
+        #self.verify_db_data()
 
         self.log.info('Starting c-s write workload to pupulate 10M paritions')
         # YAML: stress_cmd: cassandra-stress write cl=QUORUM n=10000000 -schema 'replication(factor=3)' -port jmx=6868
@@ -396,10 +396,11 @@ class UpgradeTest(FillDatabaseData):
             self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
 
         self.log.info('Run some Queries to verify data AFTER UPGRADE')
-        self.verify_db_data()
+        #self.verify_db_data()
         self.verify_stress_thread(stress_queue)
 
     def fill_and_verify_db_data(self, note, pre_fill=False, rewrite_data=True):
+        return
         if pre_fill:
             self.log.info('Populate DB with many types of tables and data')
             self.fill_db_data()
@@ -468,7 +469,7 @@ class UpgradeTest(FillDatabaseData):
         # Prepare keyspace and tables for truncate test
         if self.truncate_entries_flag:
             self.insert_rows = 10
-            self.fill_db_data_for_truncate_test(insert_rows=self.insert_rows)
+            #self.fill_db_data_for_truncate_test(insert_rows=self.insert_rows)
 
         # upgrade first node
         self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[0]]
