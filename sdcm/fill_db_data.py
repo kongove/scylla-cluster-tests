@@ -2910,6 +2910,7 @@ class FillDatabaseData(ClusterTester):
                 else:
                     session.default_fetch_size = default_fetch_size
                 for insert in item['inserts']:
+                    LOGGER.debug("check_insert_sleep: insert (%s)...." % insert)
                     try:
                         if insert.startswith("#REMOTER_RUN"):
                             for node in self.db_cluster.nodes:
@@ -2921,7 +2922,8 @@ class FillDatabaseData(ClusterTester):
                         raise ex
                     # Add delay on client side for inserts of list to avoid list order issue
                     # Referencing https://github.com/scylladb/scylla-enterprise/issues/1177#issuecomment-568762357
-                    if 'list<' in item['create_tables']:
+                    if 'list<' in item['create_tables'][0]:
+                        LOGGER.debug("check_insert_sleep: sleep 1 second ....")
                         time.sleep(1)
 
     def run_db_queries(self, session, default_fetch_size):
