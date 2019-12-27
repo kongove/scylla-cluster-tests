@@ -404,14 +404,17 @@ class UpgradeTest(FillDatabaseData):
         self.verify_stress_thread(stress_queue)
 
     def fill_and_verify_db_data(self, note, pre_fill=False, rewrite_data=True):
-        if pre_fill:
-            self.log.info('Populate DB with many types of tables and data')
-            self.fill_db_data()
-        self.log.info('Run some Queries to verify data %s', note)
-        self.verify_db_data()
-        if rewrite_data:
-            self.log.info('Re-Populate DB with many types of tables and data')
-            self.fill_db_data()
+        try:
+            if pre_fill:
+                self.log.info('Populate DB with many types of tables and data')
+                self.fill_db_data()
+            self.log.info('Run some Queries to verify data %s', note)
+            self.verify_db_data()
+            if rewrite_data:
+                self.log.info('Re-Populate DB with many types of tables and data')
+                self.fill_db_data()
+        except Exception as ex:  # pylint: disable=broad-except
+            self.log.error('verify test failed: %s' % ex)
 
     def test_rolling_upgrade(self):  # pylint: disable=too-many-locals,too-many-statements
         """
@@ -420,14 +423,6 @@ class UpgradeTest(FillDatabaseData):
         we want to use this case to verify the read (cl=ALL) workload works
         well, upgrade all nodes to new version in the end.
         """
-
-        filter_errors = [{'line': 'Failed to load schema', 'type': 'DATABASE_ERROR'},
-                         {'line': 'Failed to load schema', 'type': 'SCHEMA_FAILURE'},
-                         {'line': 'Failed to pull schema', 'type': 'DATABASE_ERROR'},
-                         {'line': 'Backtrace:', 'type': 'BACKTRACE'}]
-
-        for error in filter_errors:
-            DbEventsFilter(type=error['type'], line=error['line'])
 
         # In case the target version >= 3.1 we need to perform test for truncate entries
         target_upgrade_version = self.params.get('target_upgrade_version', default='')
@@ -474,55 +469,59 @@ class UpgradeTest(FillDatabaseData):
             self.insert_rows = 10
             self.fill_db_data_for_truncate_test(insert_rows=self.insert_rows)
 
-        # upgrade first node
-        self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[0]]
-        self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
-        self.upgrade_node(self.db_cluster.node_to_upgrade)
-        self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
-        self.db_cluster.node_to_upgrade.check_node_health()
+        with DbEventsFilter(type='DATABASE_ERROR', line='Failed to load schema'), \
+            DbEventsFilter(type='SCHEMA_FAILURE', line='Failed to load schema'), \
+            DbEventsFilter(type='DATABASE_ERROR', line='Failed to pull schema'):
 
-        # wait for the prepare write workload to finish
-        self.verify_stress_thread(prepare_write_cs_thread_pool)
+            # upgrade first node
+            self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[0]]
+            self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
+            self.upgrade_node(self.db_cluster.node_to_upgrade)
+            self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
+            self.db_cluster.node_to_upgrade.check_node_health()
 
-        # read workload (cl=QUORUM)
-        self.log.info('Starting c-s read workload (cl=QUORUM n=10000000)')
-        stress_cmd_read_cl_quorum = self.params.get('stress_cmd_read_cl_quorum')
-        read_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_cl_quorum)
-        # wait for the read workload to finish
-        self.verify_stress_thread(read_stress_queue)
-        self.fill_and_verify_db_data('after upgraded one node')
+            # wait for the prepare write workload to finish
+            self.verify_stress_thread(prepare_write_cs_thread_pool)
 
-        # read workload
-        self.log.info('Starting c-s read workload for 10m')
-        stress_cmd_read_10m = self.params.get('stress_cmd_read_10m')
-        read_10m_cs_thread_pool = self.run_stress_thread(stress_cmd=stress_cmd_read_10m)
+            # read workload (cl=QUORUM)
+            self.log.info('Starting c-s read workload (cl=QUORUM n=10000000)')
+            stress_cmd_read_cl_quorum = self.params.get('stress_cmd_read_cl_quorum')
+            read_stress_queue = self.run_stress_thread(stress_cmd=stress_cmd_read_cl_quorum)
+            # wait for the read workload to finish
+            self.verify_stress_thread(read_stress_queue)
+            self.fill_and_verify_db_data('after upgraded one node')
 
-        self.log.info('Sleeping for 60s to let cassandra-stress start before the upgrade...')
-        time.sleep(60)
+            # read workload
+            self.log.info('Starting c-s read workload for 10m')
+            stress_cmd_read_10m = self.params.get('stress_cmd_read_10m')
+            read_10m_cs_thread_pool = self.run_stress_thread(stress_cmd=stress_cmd_read_10m)
 
-        # upgrade second node
-        self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[1]]
-        self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
-        self.upgrade_node(self.db_cluster.node_to_upgrade)
-        self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
-        self.db_cluster.node_to_upgrade.check_node_health()
+            self.log.info('Sleeping for 60s to let cassandra-stress start before the upgrade...')
+            time.sleep(60)
 
-        # wait for the 10m read workload to finish
-        self.verify_stress_thread(read_10m_cs_thread_pool)
-        self.fill_and_verify_db_data('after upgraded two nodes')
+            # upgrade second node
+            self.db_cluster.node_to_upgrade = self.db_cluster.nodes[indexes[1]]
+            self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
+            self.upgrade_node(self.db_cluster.node_to_upgrade)
+            self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
+            self.db_cluster.node_to_upgrade.check_node_health()
 
-        # read workload (80m)
-        self.log.info('Starting c-s read workload for 80m')
-        stress_cmd_read_80m = self.params.get('stress_cmd_read_80m')
-        read_80m_cs_thread_pool = self.run_stress_thread(stress_cmd=stress_cmd_read_80m)
-        self.log.info('Sleeping for 60s to let cassandra-stress start before the rollback...')
-        time.sleep(60)
+            # wait for the 10m read workload to finish
+            self.verify_stress_thread(read_10m_cs_thread_pool)
+            self.fill_and_verify_db_data('after upgraded two nodes')
 
-        # rollback second node
-        self.log.info('Rollback Node %s begin', self.db_cluster.nodes[indexes[1]].name)
-        self.rollback_node(self.db_cluster.nodes[indexes[1]])
-        self.log.info('Rollback Node %s ended', self.db_cluster.nodes[indexes[1]].name)
-        self.db_cluster.nodes[indexes[1]].check_node_health()
+            # read workload (80m)
+            self.log.info('Starting c-s read workload for 80m')
+            stress_cmd_read_80m = self.params.get('stress_cmd_read_80m')
+            read_80m_cs_thread_pool = self.run_stress_thread(stress_cmd=stress_cmd_read_80m)
+            self.log.info('Sleeping for 60s to let cassandra-stress start before the rollback...')
+            time.sleep(60)
+
+            # rollback second node
+            self.log.info('Rollback Node %s begin', self.db_cluster.nodes[indexes[1]].name)
+            self.rollback_node(self.db_cluster.nodes[indexes[1]])
+            self.log.info('Rollback Node %s ended', self.db_cluster.nodes[indexes[1]].name)
+            self.db_cluster.nodes[indexes[1]].check_node_health()
 
         self.fill_and_verify_db_data('after rollback the second node')
 
