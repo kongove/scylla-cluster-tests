@@ -465,6 +465,7 @@ class UpgradeTest(FillDatabaseData):
 
         with DbEventsFilter(type='DATABASE_ERROR', line='Failed to load schema'), \
             DbEventsFilter(type='SCHEMA_FAILURE', line='Failed to load schema'), \
+            DbEventsFilter(type='RUNTIME_ERROR', line='Failed to load schema'), \
             DbEventsFilter(type='DATABASE_ERROR', line='Failed to pull schema'):
 
             # upgrade first node
@@ -517,15 +518,15 @@ class UpgradeTest(FillDatabaseData):
             self.log.info('Rollback Node %s ended', self.db_cluster.nodes[indexes[1]].name)
             self.db_cluster.nodes[indexes[1]].check_node_health()
 
-        self.fill_and_verify_db_data('after rollback the second node')
+            self.fill_and_verify_db_data('after rollback the second node')
 
-        for i in indexes[1:]:
-            self.db_cluster.node_to_upgrade = self.db_cluster.nodes[i]
-            self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
-            self.upgrade_node(self.db_cluster.node_to_upgrade)
-            self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
-            self.db_cluster.node_to_upgrade.check_node_health()
-            self.fill_and_verify_db_data('after upgraded %s' % self.db_cluster.node_to_upgrade.name)
+            for i in indexes[1:]:
+                self.db_cluster.node_to_upgrade = self.db_cluster.nodes[i]
+                self.log.info('Upgrade Node %s begin', self.db_cluster.node_to_upgrade.name)
+                self.upgrade_node(self.db_cluster.node_to_upgrade)
+                self.log.info('Upgrade Node %s ended', self.db_cluster.node_to_upgrade.name)
+                self.db_cluster.node_to_upgrade.check_node_health()
+                self.fill_and_verify_db_data('after upgraded %s' % self.db_cluster.node_to_upgrade.name)
 
         # wait for the 80m read workload to finish
         self.verify_stress_thread(read_80m_cs_thread_pool)
