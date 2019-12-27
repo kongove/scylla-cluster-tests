@@ -140,6 +140,7 @@ def call(Map pipelineParams) {
                                             catchError(stageResult: 'FAILURE') {
                                                 wrap([$class: 'BuildUser']) {
                                                     dir('scylla-cluster-tests') {
+                                                        def email_recipients = groovy.json.JsonOutput.toJson(pipelineParams.get('email_recipients', 'qa@scylladb.com'))
                                                         sh """
                                                         #!/bin/bash
 
@@ -147,7 +148,7 @@ def call(Map pipelineParams) {
                                                         env
 
                                                         echo "Start send email ..."
-                                                        ./docker/env/hydra.sh send-email --logdir /sct --email-recipients "${email_recipients}"
+                                                        #./docker/env/hydra.sh send-email --logdir /sct --email-recipients "${email_recipients}"
                                                         echo "Email sent"
                                                         """
                                                     }
