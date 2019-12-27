@@ -34,6 +34,9 @@ def call(Map pipelineParams) {
             booleanParam(defaultValue: "${pipelineParams.get('workaround_kernel_bug_for_iotune', false)}",
                  description: 'Workaround a known kernel bug which causes iotune to fail in scylla_io_setup, only effect GCE backend',
                  name: 'workaround_kernel_bug_for_iotune')
+            string(defaultValue: "${pipelineParams.get('email_recipients', 'qa@scylladb.com')}",
+                   description: 'email recipients of email report',
+                   name: 'email_recipients')
         }
         options {
             timestamps()
@@ -46,7 +49,7 @@ def call(Map pipelineParams) {
                 steps {
                     script {
                         def tasks = [:]
-
+                        def email_recipients = groovy.json.JsonOutput.toJson(params.email_recipients)
                         for (version in supportedUpgradeFromVersions(env.GIT_BRANCH, pipelineParams.base_versions)) {
                             def base_version = version;
                             tasks["${base_version}"] = {
@@ -140,6 +143,7 @@ def call(Map pipelineParams) {
                                             catchError(stageResult: 'FAILURE') {
                                                 wrap([$class: 'BuildUser']) {
                                                     dir('scylla-cluster-tests') {
+                                                        def email_recipients = groovy.json.JsonOutput.toJson(pipelineParams.get('email_recipients', 'qa@scylladb.com'))
                                                         sh """
                                                         #!/bin/bash
 
