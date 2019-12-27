@@ -3523,7 +3523,7 @@ class BaseMonitorSet(object):  # pylint: disable=too-many-public-methods,too-man
             self.configure_scylla_monitoring(node)
             self.restart_scylla_monitoring(sct_metrics=True)
             EVENTS_PROCESSES['EVENTS_GRAFANA_ANNOTATOR'].set_grafana_url(
-                "http://[{0.external_address}]:{1.grafana_port}".format(node, self))
+                "http://{0.external_address}:{1.grafana_port}".format(node, self))
             return
 
         self.install_scylla_monitoring(node)
@@ -3537,7 +3537,7 @@ class BaseMonitorSet(object):  # pylint: disable=too-many-public-methods,too-man
         # be captured.
         self.grafana_start_time = time.time()
         EVENTS_PROCESSES['EVENTS_GRAFANA_ANNOTATOR'].set_grafana_url(
-            "http://[{0.external_address}]:{1.grafana_port}".format(node, self))
+            "http://{0.external_address}:{1.grafana_port}".format(node, self))
         if node.is_rhel_like():
             node.remoter.run('sudo yum install screen -y')
         else:
@@ -3793,7 +3793,7 @@ class BaseMonitorSet(object):  # pylint: disable=too-many-public-methods,too-man
         self.download_scylla_monitoring(node)
 
     def get_grafana_annotations(self, node):
-        annotations_url = "http://[{node_ip}]:{grafana_port}/api/annotations"
+        annotations_url = "http://{node_ip}:{grafana_port}/api/annotations"
         try:
             res = requests.get(annotations_url.format(node_ip=node.external_address, grafana_port=self.grafana_port))
             if res.ok:
@@ -3803,7 +3803,7 @@ class BaseMonitorSet(object):  # pylint: disable=too-many-public-methods,too-man
         return ""
 
     def set_grafana_annotations(self, node, annotations_data):
-        annotations_url = "http://[{node_ip}]:{grafana_port}/api/annotations"
+        annotations_url = "http://{node_ip}:{grafana_port}/api/annotations"
         res = requests.post(annotations_url.format(node_ip=node.external_address, grafana_port=self.grafana_port),
                             data=annotations_data, headers={'Content-Type': 'application/json'})
         self.log.info("posting annotations result: %s", res)  # pylint: disable=no-member
