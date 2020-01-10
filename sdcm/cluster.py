@@ -398,6 +398,7 @@ class BaseNode():  # pylint: disable=too-many-instance-attributes,too-many-publi
         # if we want to add more nodes when the cluster already exists, then we should
         # enable bootstrap.
         self.enable_auto_bootstrap = False
+        self.enable_repair_based_node_ops = None
         self.scylla_version = ''
         self._is_enterprise = None
         self.replacement_node_ip = None  # if node is a replacement for a dead node, store dead node private ip here
@@ -1679,6 +1680,11 @@ class BaseNode():  # pylint: disable=too-many-instance-attributes,too-many-publi
                 self.log.debug('auto_bootstrap is missing, set it `False`.')
                 scylla_yaml_contents += "\nauto_bootstrap: False\n"
 
+        if self.enable_repair_based_node_ops is True:
+            scylla_yaml_contents += "\nenable_repair_based_node_ops: true\n"
+        elif self.enable_repair_based_node_ops is False:
+            scylla_yaml_contents += "\nenable_repair_based_node_ops: false\n"
+
         if authenticator in ['AllowAllAuthenticator', 'PasswordAuthenticator']:
             pattern = re.compile('[# ]*authenticator:.*')
             scylla_yaml_contents = pattern.sub('authenticator: {0}'.format(authenticator),
@@ -2634,7 +2640,8 @@ class BaseCluster:  # pylint: disable=too-many-instance-attributes
     def wait_for_init(self):
         raise NotImplementedError("Derived class must implement 'wait_for_init' method!")
 
-    def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False):
+    def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False,
+                  enable_repair_based_node_ops=None):
         """
         :param count: number of nodes to add
         :param ec2_user_data:
