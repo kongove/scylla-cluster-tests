@@ -431,6 +431,9 @@ class SCTConfiguration(dict):
         dict(name="nemesis_filter_seeds", env="SCT_NEMESIS_FILTER_SEEDS", type=boolean,
              help="""If true runs the nemesis only on non seed nodes"""),
 
+        dict(name="enable_repair_based_node_ops", env="SCT_ENABLE_REPAIR_BASED_NDDE_OPS", type=boolean,
+             help=""),
+
         # Stress Commands
 
         dict(name="stress_cmd", env="SCT_STRESS_CMD", type=str_or_list,

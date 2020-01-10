@@ -321,7 +321,9 @@ class AWSCluster(cluster.BaseCluster):  # pylint: disable=too-many-instance-attr
             sudo systemctl restart network
         """)
 
-    def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False):
+    def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False,
+                  enable_repair_based_node_ops=None):
+
         post_boot_script = cluster.Setup.get_startup_script()
         if self.extra_network_interface:
             post_boot_script += self.configure_eth1_script()
@@ -352,6 +354,7 @@ class AWSCluster(cluster.BaseCluster):  # pylint: disable=too-many-instance-attr
                        enumerate(instances, start=self._node_index + 1)]
         for node in added_nodes:
             node.enable_auto_bootstrap = enable_auto_bootstrap
+            node.enable_repair_based_node_ops = enable_repair_based_node_ops
             if self.params.get('ip_ssh_connections') == 'ipv6' and not node.distro.is_amazon2:
                 node.config_ipv6_as_persistent()
         self._node_index += len(added_nodes)
@@ -759,7 +762,8 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
                                                extra_network_interface=params.get('extra_network_interface'))
         self.version = '2.1'
 
-    def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False):
+    def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False,
+                  enable_repair_based_node_ops=None):
         if not ec2_user_data:
             if self._ec2_user_data and isinstance(self._ec2_user_data, str):
                 ec2_user_data = re.sub(r'(--totalnodes\s)(\d*)(\s)',
@@ -781,7 +785,8 @@ class ScyllaAWSCluster(cluster.BaseScyllaCluster, AWSCluster):
         added_nodes = super(ScyllaAWSCluster, self).add_nodes(count=count,
                                                               ec2_user_data=ec2_user_data,
                                                               dc_idx=dc_idx,
-                                                              enable_auto_bootstrap=enable_auto_bootstrap)
+                                                              enable_auto_bootstrap=enable_auto_bootstrap,
+                                                              enable_repair_based_node_ops=enable_repair_based_node_ops)
         return added_nodes
 
     def node_config_setup(self, node, seed_address=None, endpoint_snitch=None, murmur3_partitioner_ignore_msb_bits=None, client_encrypt=None):  # pylint: disable=too-many-arguments
