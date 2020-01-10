@@ -430,6 +430,7 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         # if we want to add more nodes when the cluster already exists, then we should
         # enable bootstrap.
         self.enable_auto_bootstrap = True
+        self.enable_repair_based_node_ops = None
 
         self.scylla_version = ''
         self._is_enterprise = None
@@ -1628,6 +1629,11 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
                 if 'auto_bootstrap' in scylla_yml:
                     scylla_yml['auto_bootstrap'] = False
 
+            if self.enable_repair_based_node_ops is True:
+                scylla_yml['enable_repair_based_node_ops'] = True
+            elif self.enable_repair_based_node_ops is False:
+                scylla_yml['enable_repair_based_node_ops'] = False
+
             if authenticator in ['AllowAllAuthenticator', 'PasswordAuthenticator']:
                 scylla_yml['authenticator'] = authenticator
 
@@ -2752,7 +2758,8 @@ class BaseCluster:  # pylint: disable=too-many-instance-attributes,too-many-publ
     def wait_for_init(self):
         raise NotImplementedError("Derived class must implement 'wait_for_init' method!")
 
-    def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False):
+    def add_nodes(self, count, ec2_user_data='', dc_idx=0, enable_auto_bootstrap=False,
+                  enable_repair_based_node_ops=None):
         """
         :param count: number of nodes to add
         :param ec2_user_data:
