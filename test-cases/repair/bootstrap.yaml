@@ -2,6 +2,9 @@ test_duration: 1440
 prepare_write_cmd: "cassandra-stress write cl=QUORUM n=1100200300 -schema 'replication(factor=2)' -port jmx=6868 -mode cql3 native -rate threads=1000 -col 'size=FIXED(200) n=FIXED(5)' -pop seq=1..1100200300"
 stress_cmd: "cassandra-stress read cl=QUORUM n=1100200300 -schema 'replication(factor=2)' -port jmx=6868 -mode cql3 native -rate threads=100 -col 'size=FIXED(200) n=FIXED(5)' -pop seq=1..1100200300"
 
+#prepare_write_cmd: "cassandra-stress write cl=QUORUM n=1100200 -schema 'replication(factor=2)' -port jmx=6868 -mode cql3 native -rate threads=1000 -col 'size=FIXED(200) n=FIXED(5)' -pop seq=1..1100200"
+#stress_cmd: "cassandra-stress read cl=QUORUM n=1100200 -schema 'replication(factor=2)' -port jmx=6868 -mode cql3 native -rate threads=100 -col 'size=FIXED(200) n=FIXED(5)' -pop seq=1..1100200"
+
 n_db_nodes: 2
 n_loaders: 1
 n_monitor_nodes: 1
