@@ -960,24 +960,34 @@ class BaseNode():  # pylint: disable=too-many-instance-attributes,too-many-publi
     def stop_task_threads(self, timeout=10):
         if self.termination_event.isSet():
             return
+        self.log.debug('amos-debug: set termination_event')
         self.termination_event.set()
         if self._backtrace_thread:
+            self.log.debug('amos-debug: _backtrace_thread.join')
             self._backtrace_thread.join(timeout)
         if self._db_log_reader_thread:
+            self.log.debug('amos-debug: _db_log_reader_thread.join')
             self._db_log_reader_thread.join(timeout)
         if self._alert_manager:
+            self.log.debug('amos-debug: _alert_manager.stop')
             self._alert_manager.stop(timeout)
         if self._journal_thread:
+            self.log.debug('amos-debug: sudo pkill')
             self.remoter.run(cmd='sudo pkill -f "journalctl.*scylla"', ignore_status=True)
+            self.log.debug('amos-debug: _journal_thread.join')
             self._journal_thread.join(timeout)
         if self._scylla_manager_journal_thread:
+            self.log.debug('amos-debug: stop_scylla_manager_log_capture')
             self.stop_scylla_manager_log_capture(timeout)
         if self._decoding_backtraces_thread:
+            self.log.debug('amos-debug: Setup.DECODING_QUEUE.join')
             Setup.DECODING_QUEUE.put(None)
             Setup.DECODING_QUEUE.join()
+            self.log.debug('amos-debug: _decoding_backtraces_thread.join')
             self._decoding_backtraces_thread.join(timeout)
             self._decoding_backtraces_thread = None
         if self._docker_log_process:
+            self.log.debug('amos-debug: _docker_log_process.kill')
             self._docker_log_process.kill()
 
     def get_cpumodel(self):
