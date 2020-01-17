@@ -982,7 +982,6 @@ class BaseNode():  # pylint: disable=too-many-instance-attributes,too-many-publi
         if self._decoding_backtraces_thread:
             self.log.debug('amos-debug: Setup.DECODING_QUEUE.join')
             Setup.DECODING_QUEUE.join()
-            Setup.DECODING_QUEUE.put(None)
             self.log.debug('amos-debug: _decoding_backtraces_thread.join')
             self._decoding_backtraces_thread.join(timeout)
             self._decoding_backtraces_thread = None
