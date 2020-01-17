@@ -981,8 +981,8 @@ class BaseNode():  # pylint: disable=too-many-instance-attributes,too-many-publi
             self.stop_scylla_manager_log_capture(timeout)
         if self._decoding_backtraces_thread:
             self.log.debug('amos-debug: Setup.DECODING_QUEUE.join')
-            Setup.DECODING_QUEUE.put(None)
             Setup.DECODING_QUEUE.join()
+            Setup.DECODING_QUEUE.put(None)
             self.log.debug('amos-debug: _decoding_backtraces_thread.join')
             self._decoding_backtraces_thread.join(timeout)
             self._decoding_backtraces_thread = None
@@ -1348,8 +1348,11 @@ class BaseNode():  # pylint: disable=too-many-instance-attributes,too-many-publi
             obj = None
             try:
                 obj = Setup.DECODING_QUEUE.get(timeout=5)
+                self.log.debug('amos-debug: get obj %s' % obj)
+                self.log.debug('amos-debug: qsize: %s' % Setup.DECODING_QUEUE.qsize())
                 if obj is None:
                     Setup.DECODING_QUEUE.task_done()
+                    self.log.debug('amos-debug: decode_backtrace: exit1')
                     break
                 event = obj["event"]
                 debug_path_on_monitor = self.copy_scylla_debug_info(obj["node"], obj["debug_file"])
@@ -1365,6 +1368,7 @@ class BaseNode():  # pylint: disable=too-many-instance-attributes,too-many-publi
                     event.publish()
 
             if self.termination_event.isSet() and Setup.DECODING_QUEUE.empty():
+                self.log.debug('amos-debug: decode_backtrace: exit2')
                 break
 
     def copy_scylla_debug_info(self, node, scylla_debug_file):
