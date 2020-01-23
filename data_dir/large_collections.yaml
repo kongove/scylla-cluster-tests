@@ -66,16 +66,16 @@ columnspec:
 # 6476.344648024841
 
   - name: rejectionerrorcode
-    size: fixed(6476)
+    size: fixed(500)
 
   - name: rejectionerrordescription
-    size: fixed(6476)
+    size: fixed(1000)
 
   - name: rejectionerrorinternalid
-    size: fixed(6476)
+    size: fixed(1)
 
   - name: upuis
-    size: fixed(6476)
+    size: fixed(2)
 
 insert:
   partitions: fixed(1)
