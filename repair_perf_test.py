@@ -21,6 +21,7 @@ class RepairPerfTest(ClusterTester):
                                              enable_repair_based_node_ops=enable_repair_based_node_ops)[0]
         self.db_cluster.wait_for_init(node_list=[new_node], timeout=10800)
         self.db_cluster.wait_for_nodes_up_and_normal(nodes=[new_node])
+        self.monitors.reconfigure_scylla_monitoring()
 
         self.verify_stress_thread(cs_thread_pool=stress)
 
@@ -42,5 +43,6 @@ class RepairPerfTest(ClusterTester):
         target_node.run_nodetool("decommission")
 
         self.db_cluster.terminate_node(target_node)
+        self.monitors.reconfigure_scylla_monitoring()
 
         self.verify_stress_thread(cs_thread_pool=stress)
