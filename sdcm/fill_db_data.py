@@ -2975,7 +2975,10 @@ class FillDatabaseData(ClusterTester):
             session.default_consistency_level = ConsistencyLevel.QUORUM
             session.set_keyspace("keyspace_fill_db_data")
             # clean original test data by truncate
-            self.truncate_tables(session)
+            try:
+                self.truncate_tables(session)
+            except Exception as ex:
+                LOGGER.debug("Found error in truncate tables: '%s'", ex)
 
             # Insert data to the tables according to the "inserts" and flush to disk in several cases (nodetool flush)
             self.cql_insert_data_to_tables(session, session.default_fetch_size)
