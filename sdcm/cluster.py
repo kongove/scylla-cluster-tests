@@ -1680,10 +1680,10 @@ class BaseNode():  # pylint: disable=too-many-instance-attributes,too-many-publi
                 self.log.debug('auto_bootstrap is missing, set it `False`.')
                 scylla_yaml_contents += "\nauto_bootstrap: False\n"
 
-        if self.enable_repair_based_node_ops is True:
-            scylla_yaml_contents += "\nenable_repair_based_node_ops: true\n"
-        elif self.enable_repair_based_node_ops is False:
-            scylla_yaml_contents += "\nenable_repair_based_node_ops: false\n"
+        #if self.enable_repair_based_node_ops is True:
+        #    scylla_yaml_contents += "\nenable_repair_based_node_ops: true\n"
+        #elif self.enable_repair_based_node_ops is False:
+        #    scylla_yaml_contents += "\nenable_repair_based_node_ops: false\n"
 
         if authenticator in ['AllowAllAuthenticator', 'PasswordAuthenticator']:
             pattern = re.compile('[# ]*authenticator:.*')
