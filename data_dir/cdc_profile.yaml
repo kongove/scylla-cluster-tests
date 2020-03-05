@@ -14,9 +14,16 @@ table_definition: |
     number int,
     starttime timestamp,
     weight decimal,
-    users list<text>,
+    steps float,
+    t_num tinyint,
+    bvalue blob,
+    boy boolean,
+    vname varchar,
+    vage varint,
+    users list<int>,
+    names list<text>,
   ) WITH bloom_filter_fp_chance = 0.01
-    AND cdc = {'enabled': false, 'preimage': false}
+    AND cdc = {'enabled': true, 'preimage': false}
     AND caching = {'keys': 'ALL', 'rows_per_partition': 'ALL'}
     AND comment = 'Request for unit level UIs'
     AND compaction = {'class': 'SizeTieredCompactionStrategy'}
@@ -34,6 +41,14 @@ table_definition: |
 columnspec:
   - name: pkid
     population: exp(1..10000000)
+
+  - name: users
+    size: fixed(2)
+    population: uniform(1..1000)
+
+  - name: names
+    size: fixed(2)
+    population: uniform(1..2)
 
 insert:
   partitions: fixed(1)
