@@ -350,7 +350,7 @@ class Nemesis():  # pylint: disable=too-many-instance-attributes,too-many-public
 
         return file_for_destroy
 
-    def _destroy_data_and_restart_scylla(self):
+    def _destroy_data_and_restart_scylla(self, corrupt_by_dd=False):
 
         ks_cfs = get_non_system_ks_cf_list(loader_node=random.choice(self.loaders.nodes),
                                            db_node=self.target_node)
@@ -366,7 +366,10 @@ class Nemesis():  # pylint: disable=too-many-instance-attributes,too-many-public
             for _ in range(5):
                 file_for_destroy = self._choose_file_for_destroy(ks_cfs)
 
-                result = self.target_node.remoter.run('sudo rm -f %s' % file_for_destroy)
+                if corrupt_by_dd:
+                    result = self.target_node.remoter.run('sudo dd if=/dev/random of=%s count=1024' % file_for_destroy)
+                else:
+                    result = self.target_node.remoter.run('sudo rm -f %s' % file_for_destroy)
                 if result.stderr:
                     raise FilesNotCorrupted('Files were not corrupted. CorruptThenRepair nemesis can\'t be run. '
                                             'Error: {}'.format(result))
@@ -1716,6 +1719,17 @@ class Nemesis():  # pylint: disable=too-many-instance-attributes,too-many-public
         finally:
             self.target_node.remoter.run("sudo /sbin/ifup eth1")
 
+    def disrupt_scrub(self):
+        self.log.debug("Corrupt the sstable file")
+        self._destroy_data_and_restart_scylla(corrupt_by_dd=True)
+
+        self.log.debug("Rebuild sstables by sstablescrub")
+        for i in get_non_system_ks_cf_list(self.loaders.nodes[0], self.cluster.nodes[0]):
+            ks, cf = i.split('.')
+            scrub_cmd = 'curl -s -X GET --header "Content-Type: application/json" --header ' \
+                        '"Accept: application/json" "http://127.0.0.1:10000/storage_service/keyspace_scrub/{}?skip_corrupted=true"'.format(ks)
+            result = self.target_node.remoter.run(scrub_cmd)
+
 
 class NotSpotNemesis(Nemesis):
     def set_target_node(self):
@@ -2403,3 +2417,11 @@ COMPLEX_NEMESIS = [NoOpMonkey, ChaosMonkey,
                    AllMonkey, MdcChaosMonkey,
                    DisruptiveMonkey, NonDisruptiveMonkey, GeminiNonDisruptiveChaosMonkey,
                    GeminiChaosMonkey, NetworkMonkey]
+
+
+class ScrubMonkey(Nemesis):
+    disruptive = False
+
+    @log_time_elapsed_and_status
+    def disrupt(self):
+        self.disrupt_scrub()
