@@ -42,6 +42,7 @@ table_definition: |
     nums_list list<int>,
     nums_set set<int>,
     names_set set<text>,
+    books_set set<text>,
   ) WITH bloom_filter_fp_chance = 0.01
     AND caching = {'keys': 'ALL', 'rows_per_partition': 'ALL'}
     AND comment = 'Request for unit level UIs'
@@ -59,7 +60,7 @@ table_definition: |
 
 columnspec:
   - name: pk_id
-    population: seq(1..10000000)
+    population: seq(1..11000000)
 
   - name: clientappname
     size: fixed(5)
@@ -79,8 +80,8 @@ columnspec:
     size: fixed(5)
 
   - name: users_desc
-    size: exp(1..2048)
-    population: exp(1..2048)
+    size: fixed(2850)
+    population: uniform(1..2850)
 
   - name: users_comment
     size: fixed(1)
@@ -90,15 +91,20 @@ columnspec:
 
   - name: nums_list
     size: fixed(2)
-    population: exp(1..10000)
+    population: uniform(1..10000)
 
   - name: nums_set
     size: fixed(100)
-    population: exp(1..10000)
+    population: uniform(1..10000)
 
   - name: names_set
-    size: exp(1..2048)
-    population: exp(1..2048)
+    size: fixed(2850)
+    population: uniform(1..2850)
+
+  - name: books_set
+    size: fixed(2)
+    #size: fixed(2850)
+    #population: uniform(1..2850)
 
 insert:
   batchtype: UNLOGGED
