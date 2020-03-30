@@ -60,3 +60,5 @@ repos:
   hooks:
       - id: commitlint
         stages: [commit-msg]
+default_language_version:
+    python: python3
