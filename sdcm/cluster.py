@@ -3241,6 +3241,10 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods
 
     def node_setup(self, node, verbose=False, timeout=3600):
         node.wait_ssh_up(verbose=verbose, timeout=timeout)
+        node.remoter.run('sudo yum update kernel -y')
+        self.log.debug('Softly rebooting node')
+        self.remoter.run('sudo reboot', ignore_status=True)
+        node.wait_ssh_up(verbose=verbose, timeout=timeout)
 
         if not Setup.REUSE_CLUSTER:
             self._scylla_pre_install(node)
