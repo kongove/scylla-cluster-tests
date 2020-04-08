@@ -65,8 +65,8 @@ columnspec:
     population: uniform(1..10000)
 
   - name: names_set
-    size: fixed(500)
-    population: uniform(1..500)
+    size: fixed(1024)
+    population: uniform(1..1024)
 
   - name: books_set
     size: fixed(2)
