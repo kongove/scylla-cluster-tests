@@ -65,13 +65,13 @@ columnspec:
     population: uniform(1..10000)
 
   - name: names_set
-    size: fixed(1024)
-    population: uniform(1..1024)
+    size: fixed(2048)
+    population: uniform(1..2048)
 
   - name: books_set
-    size: fixed(2)
-    #size: fixed(1448)
-    #population: uniform(1..1448)
+    #size: fixed(2)
+    size: fixed(2048)
+    population: uniform(1..2048)
 
 insert:
   batchtype: UNLOGGED
