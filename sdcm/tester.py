@@ -1414,7 +1414,7 @@ class ClusterTester(db_stats.TestStatsMixin, unittest.TestCase):  # pylint: disa
                                                                                     compaction_strategy=compaction_strategy)
         node.run_cqlsh(cql_cmd)
 
-    def alter_table_encryption(self, table, scylla_encryption_options=None, upgradesstables=True):
+    def alter_table_encryption(self, table, scylla_encryption_options=None, upgradesstables=None):
         """
         Update table encryption
         """
@@ -1438,7 +1438,14 @@ class ClusterTester(db_stats.TestStatsMixin, unittest.TestCase):  # pylint: disa
     def alter_test_tables_encryption(self, scylla_encryption_options=None, upgradesstables=True):
         for table in get_non_system_ks_cf_list(self.loaders.nodes[0], self.db_cluster.nodes[0], filter_out_mv=True):
             self.alter_table_encryption(
-                table, scylla_encryption_options=scylla_encryption_options, upgradesstables=upgradesstables)
+                table, scylla_encryption_options=scylla_encryption_options)
+        if upgradesstables:
+            self.log.debug('upgrade sstables after encryption update')
+            for node in self.db_cluster.nodes:
+                try:
+                    node.remoter.run('nodetool upgradesstables', verbose=True, ignore_status=True)
+                except Exception as ex:
+                    self.log.debug('upgradesstables failed: {}'.format(ex))
 
     def get_num_of_hint_files(self, node):
         result = node.remoter.run("sudo find {0.scylla_hints_dir} -name *.log -type f| wc -l".format(self),
