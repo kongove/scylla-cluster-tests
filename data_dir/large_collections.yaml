@@ -36,7 +36,7 @@ table_definition: |
 
 columnspec:
   - name: pk_id
-    population: seq(1..11000000)
+    population: seq(1..8000000)
 
 # Need to populate the list field with big elements and many of them (about 40MB per list).
 # >>> math.sqrt(40 * 1024 * 1024)
