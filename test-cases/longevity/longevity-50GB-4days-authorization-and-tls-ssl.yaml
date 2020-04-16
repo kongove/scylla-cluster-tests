@@ -27,6 +27,7 @@ instance_type_loader: 'c4.2xlarge'
 #nemesis_class_name: 'ChaosMonkey'
 nemesis_class_name: 'MultipleHardRebootNodeMonkey'
 nemesis_interval: 5
+nemesis_during_prepare: false
 
 user_prefix: 'longevity-tls-50gb-4d'
 
