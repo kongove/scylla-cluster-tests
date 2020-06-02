@@ -1769,14 +1769,13 @@ class Nemesis:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             Execute some nodetool command to start persistent streaming
             task: decommission | rebuild | repair
             """
-            if nodetool_task in ['repair', 'rebuild']:
-                self._destroy_data_and_restart_scylla()
-
             try:
                 self.target_node.run_nodetool(nodetool_task)
             except Exception:  # pylint: disable=broad-except
                 self.log.debug('%s is stopped' % nodetool_task)
 
+        if task in ['repair', 'rebuild']:
+            self._destroy_data_and_restart_scylla()
         self.task_used_streaming = None
         streaming_thread = threading.Thread(target=streaming_task_thread, kwargs={'nodetool_task': task})
         streaming_thread.start()
