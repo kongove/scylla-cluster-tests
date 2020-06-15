@@ -516,6 +516,10 @@ class Nemesis:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             self.target_node.remoter.run('sudo tar xvfz {} -C /var/lib/scylla/data/keyspace1/{}/upload/'.format(
                 sstable_file, upload_dir))
             self.target_node.run_nodetool(sub_cmd="refresh", args="-- keyspace1 standard1")
+            # The loaded keys only exists in the target node even the RF is 3, the verify query might fail.
+            # So repair all nodes after refresh, the keys will be distributed to other nodes.
+            for node in self.cluster.nodes:
+                node.run_nodetool("repair")
             cmd = "select * from keyspace1.standard1 where key=0x32373131364f334f3830"
             result = self.target_node.run_cqlsh(cmd)
             assert '(1 rows)' in result.stdout, 'The key is not loaded by `nodetool refresh`'
