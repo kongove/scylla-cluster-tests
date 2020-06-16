@@ -567,6 +567,8 @@ class Nemesis:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 if f'| {col} ' not in result.stdout:
                     alter_cmd = f'ALTER TABLE keyspace1.standard1 ADD \\"{col}\\" blob'
                     self.target_node.run_cqlsh(alter_cmd)
+                    self.target_node.run_nodetool('flush', args='keyspace1 standard1')
+                    self.target_node.run_nodetool("repair")
             # Drop one special key before refresh, we will verify refresh by query in the end
             delete_cmd = "DELETE FROM keyspace1.standard1 WHERE key=0x32373131364f334f3830"
             self.target_node.run_cqlsh(delete_cmd)
