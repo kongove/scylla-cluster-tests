@@ -523,6 +523,13 @@ class Nemesis:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             node.run_nodetool(sub_cmd="refresh", args="-- keyspace1 standard1")
 
         if result is not None and result.exit_status == 0:
+            query_cmd = "SELECT * FROM keyspace1.standard1 LIMIT 1"
+            result = self.target_node.run_cqlsh(query_cmd)
+            # Add columns if they don't exist, otherwise the sstable files won't loaded by cluster by refresh
+            for col in ['C1', 'C2', 'C3', 'C4']:
+                if f'| {col} ' not in result.stdout:
+                    alter_cmd = f'ALTER TABLE keyspace1.standard1 ADD \\"{col}\\" blob'
+                    self.target_node.run_cqlsh(alter_cmd)
             # Drop one special key before refresh, we will verify refresh by query in the end
             delete_cmd = "DELETE FROM keyspace1.standard1 WHERE key=0x32373131364f334f3830"
             self.target_node.run_cqlsh(delete_cmd)
