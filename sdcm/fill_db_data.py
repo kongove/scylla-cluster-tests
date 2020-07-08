@@ -298,7 +298,7 @@ class FillDatabaseData(ClusterTester):
                 [[3, 'http://foo.com', 42]]],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': '#2029'},
         # limit_multiget_test: issue ##2574 Validate LIMIT option for 'multiget' in SELECT statements
         {
             'create_tables': ["""CREATE TABLE limit_multiget_test (
@@ -319,7 +319,7 @@ class FillDatabaseData(ClusterTester):
             ],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': '#2029 order of keys is not applied with LIMIT for multiget IN'},
         # simple_tuple_query_test: CASSANDRA-8613
         {
             'create_tables': [
@@ -447,7 +447,7 @@ class FillDatabaseData(ClusterTester):
             ],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Index support is not enabled'},
         # select_key_in_test: Query for KEY IN (...)
         {
             'create_tables': ["""CREATE TABLE select_key_in_test (
@@ -563,7 +563,7 @@ class FillDatabaseData(ClusterTester):
                 []],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': '#2566 Clustering column "c2" cannot be restricted by an IN relation'},
         # order_by_test: Check ORDER BY support in SELECT statement
         {
             'create_tables': ["""CREATE TABLE order_by_test1 (
@@ -783,7 +783,7 @@ class FillDatabaseData(ClusterTester):
             'results': [[['Bob'], ['Tom']]],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': 'INDEX'},
         # deletion_test: Test simple deletion and in particular check for CASSANDRA-4193 bug
         {
             'create_tables': ["""CREATE TABLE deletion_test1 (
@@ -1100,7 +1100,7 @@ class FillDatabaseData(ClusterTester):
             'invalid_queries': ["SELECT * FROM range_query_2ndary_test WHERE setid = 0 AND row < 1;"],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Index support is not enabled'},
         # set_test
         {
             'create_tables': ["""CREATE TABLE set_test (
@@ -1434,7 +1434,7 @@ class FillDatabaseData(ClusterTester):
                                 ],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Index support is not enabled'},
         # limit_bugs_test: Test for LIMIT bugs from CASSANDRA-4579
         {
             'create_tables': ["""CREATE TABLE limit_bugs_test1 (
@@ -1483,7 +1483,7 @@ class FillDatabaseData(ClusterTester):
                         ],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'limit_bugs_test'},
         # npe_composite_table_slice_test: Test for NPE when trying to select a slice from a composite table CASSANDRA-4532
         {
             'create_tables': ["""CREATE TABLE npe_composite_table_slice_test(
@@ -1593,7 +1593,7 @@ class FillDatabaseData(ClusterTester):
                         [[1, 0], [1, 3], [0, 0]]],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Index support is not enabled'},
         # refuse_in_with_indexes_test: Test for the validation bug of CASSANDRA-4709
         {
             'create_tables': [
@@ -1615,7 +1615,7 @@ class FillDatabaseData(ClusterTester):
             'invalid_queries': ["select * from refuse_in_with_indexes_test where col2 in ('bar4', 'bar5');"],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Index support is not enabled'},
         # reversed_compact_test: Test for CASSANDRA-4716 bug and more generally for good behavior of ordering
         {
             'create_tables': [
@@ -1880,7 +1880,7 @@ class FillDatabaseData(ClusterTester):
             'results': [[[1, SortedSet(['bar1', 'bar2'])], [1, SortedSet(['bar2', 'bar3'])], [2, SortedSet(['baz'])]]],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Index support is not enabled'},
         # truncate_clean_cache_test
         {
             'create_tables': [
@@ -1951,7 +1951,7 @@ class FillDatabaseData(ClusterTester):
             'invalid_queries': ["SELECT * FROM composite_partition_key_validation_test WHERE a=1"],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'bug? Partition key parts: b must be restricted as other parts are'},
         # multi_in_test
         {
             'create_tables': [
@@ -2009,7 +2009,7 @@ class FillDatabaseData(ClusterTester):
             'invalid_queries': ["select zipcode from multi_in_test where zipcode='06902'"],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': '#2566 Clustering column "state" cannot be restricted by an IN relation'},
         # multi_in_test
         {
             'create_tables': [
@@ -2067,7 +2067,7 @@ class FillDatabaseData(ClusterTester):
             'invalid_queries': ["select zipcode from multi_in_compact_test where zipcode='06902'"],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': '#2566 Clustering column "state" cannot be restricted by an IN relation'},
         # multi_in_compact_non_composite_test
         {
             'create_tables': [
@@ -2379,7 +2379,7 @@ class FillDatabaseData(ClusterTester):
             'invalid_queries': ["SELECT * FROM range_key_ordered_test WHERE k >= -1 AND k < 1;"],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'ordered=True cluster.set_partitioner("org.apache.cassandra.dht.ByteOrderedPartitioner") required'},
         # nonpure_function_collection_test: CASSANDRA-5795
         {
             'create_tables': [
@@ -2476,7 +2476,7 @@ class FillDatabaseData(ClusterTester):
                         [[0], [1], [2]]],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'ordered=True cluster.set_partitioner("org.apache.cassandra.dht.ByteOrderedPartitioner") required'},
         # function_with_null_test
         {
             'create_tables': ["""
@@ -2524,7 +2524,7 @@ class FillDatabaseData(ClusterTester):
                 "SELECT * FROM internal_application_error_on_select_test WHERE a = 3 AND b IN (1, 3)"],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Indexes are not supported yet'},
         # store_sets_with_if_not_exists_test: Test to fix bug where sets are not stored by INSERT with IF NOT EXISTS CASSANDRA-6069
         {
             'create_tables': ["""
@@ -2608,7 +2608,7 @@ class FillDatabaseData(ClusterTester):
                         []],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Invalid number of arguments in call to function system.uuid: 0 required but 1 provided'},
         # non-frozen user_types_test
         # only tests normal non-frozen UDT. Non-frozen UDT isn't supported inside collection.
         {
@@ -2711,7 +2711,7 @@ class FillDatabaseData(ClusterTester):
                         []],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'allow filtering <Error from server: code=2000 [Syntax error in CQL query] message="line 1:0 no viable alternative at input ''">'},
         # nan_infinity_test
         {
             'create_tables': ["CREATE TABLE nan_infinity_test (f float PRIMARY KEY)"],
@@ -2795,7 +2795,7 @@ class FillDatabaseData(ClusterTester):
             'results': [[[2]]],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': 'Index support is not enabled'},
         # cas_and_ttl_test
         {
             'create_tables': ["CREATE TABLE cas_and_ttl_test (k int PRIMARY KEY, v int, lock boolean)"],
@@ -2833,7 +2833,7 @@ class FillDatabaseData(ClusterTester):
             'invalid_queries': ["SELECT v1, v2, v3 FROM tuple_notation_test WHERE k = 0 AND (v1, v3) > (1, 0)"],
             'min_version': '',
             'max_version': '',
-            'skip': ''},
+            'skip': 'CHECK INVALID QURY IN 2.0'},
         # in_order_by_without_selecting_test: Test that columns don't need to be selected for ORDER BY when there is a IN
         # CASSANDRA-4911
         {
@@ -2865,7 +2865,7 @@ class FillDatabaseData(ClusterTester):
                         ],
             'min_version': '3.0',
             'max_version': '',
-            'skip': ''},
+            'skip': '#2029'},
         # cas_and_compact_test: Test for CAS with compact storage table, and CASSANDRA-6813 in particular
         {
             'create_tables': ["""
