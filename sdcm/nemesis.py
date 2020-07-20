@@ -575,6 +575,9 @@ class Nemesis:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         self._set_current_disruption('MajorCompaction %s' % self.target_node)
         self.target_node.run_nodetool("compact")
 
+    def disrupt_nodetool_refresh_small(self, big_sstable=False, skip_download=False):
+        self.disrupt_nodetool_refresh(big_sstable=big_sstable)
+
     def disrupt_nodetool_refresh(self, big_sstable=True, skip_download=False):
         self._set_current_disruption('Refresh keyspace1.standard1 on {}'.format(self.target_node.name))
 
@@ -2323,6 +2326,11 @@ class ChaosMonkey(Nemesis):
     def disrupt(self):
         self.call_random_disrupt_method()
 
+class MyLimitedChaosMonkey(Nemesis):
+
+    @log_time_elapsed_and_status
+    def disrupt(self):
+        self.call_random_disrupt_method(disrupt_methods=['disrupt_nodetool_refresh', 'disrupt_nodetool_refresh_small'])
 
 class LimitedChaosMonkey(Nemesis):
 
