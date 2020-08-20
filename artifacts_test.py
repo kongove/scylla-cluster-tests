@@ -69,6 +69,8 @@ class ArtifactsTest(ClusterTester):
                            "scylla_node_image": node.image if node else 'Node has not been initialized',
                            "scylla_packages_installed": scylla_packages,
                            "scylla_repo": self.params.get("scylla_repo"),
+                           "unified_package": self.params.get("unified_package"),
+                           "nonroot_offline_install": self.params.get("nonroot_offline_install"),
                            "scylla_version": node.scylla_version if node else 'Node has not been initialized', })
 
         return email_data
