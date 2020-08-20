@@ -1730,6 +1730,7 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         with open(yaml_dst_path, 'w') as scylla_yaml_file:
             scylla_yaml_file.write(scylla_yaml_contents)
         self.log.debug("Scylla YAML configuration:\n%s", scylla_yaml_contents)
+        self.remoter.run('sudo rm -f /tmp/scylla.yaml')
         wait.wait_for(self.remoter.send_files, step=10, text='Waiting for copying scylla.yaml to node',
                       timeout=300, throw_exc=True, src=yaml_dst_path, dst='/tmp/scylla.yaml')
         self.remoter.run('sudo mv /tmp/scylla.yaml {}'.format(yaml_file))
@@ -1868,6 +1869,7 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
             scylla_yaml_file.write(scylla_yaml_contents)
 
         self.log.debug("Scylla YAML configuration:\n%s", scylla_yaml_contents)
+        self.remoter.run('sudo rm -f /tmp/scylla.yaml')
         wait.wait_for(self.remoter.send_files, step=10, text='Waiting for copying scylla.yaml to node',
                       timeout=300, throw_exc=True, src=yaml_dst_path, dst='/tmp/scylla.yaml')
         self.remoter.run('sudo mv /tmp/scylla.yaml {}'.format(yaml_file))
