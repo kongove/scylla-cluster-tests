@@ -86,6 +86,7 @@ WORKSPACE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 SCYLLA_YAML_PATH = "/etc/scylla/scylla.yaml"
 SCYLLA_MANAGER_YAML_PATH = "/etc/scylla-manager/scylla-manager.yaml"
 SCYLLA_DIR = "/var/lib/scylla"
+INSTALL_DIR = "~/scylladb"
 
 INSTANCE_PROVISION_ON_DEMAND = 'on_demand'
 SPOT_TERMINATION_CHECK_DELAY = 5
@@ -555,6 +556,10 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
     def distro(self):
         self.log.info("Trying to detect Linux distribution...")
         return Distro.from_os_release(self.remoter.run("cat /etc/os-release", ignore_status=True).stdout)
+
+    @cached_property
+    def is_nonroot_install(self):
+        return self.parent_cluster.params.get("unified_package") and self.parent_cluster.params.get("nonroot_offline_install")
 
     @property
     def is_client_encrypt(self):
@@ -1947,7 +1952,7 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
             install_cmds = dedent(f"""
                 tar xvfz ./unified_package.tar.gz
                 sed -ie 's/has_java=false/has_java=true/g' ./scylla-jmx/install.sh
-                ./install.sh --nonroot {sysconfdir_option}
+                ./install.sh --nonroot {sysconfdir_option} --python3 ~/scylladb/python3/bin/python3
                 sudo rm -f /tmp/scylla.yaml
             """)
             # Known issue: https://github.com/scylladb/scylla/issues/7071
@@ -2044,8 +2049,8 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
             extra_setup_args += ' --swap-directory / '
         if self.parent_cluster.params.get('unified_package'):
             extra_setup_args += ' --no-verify-package --no-io-setup'
-            self.remoter.send_files(src='./configurations/io.conf', dst='./install_root/etc/scylla.d/')
-            self.remoter.send_files(src='./configurations/io_properties.yaml', dst='./install_root/etc/scylla.d/')
+            self.remoter.send_files(src='./configurations/io.conf', dst=f'{INSTALL_DIR}/etc/scylla.d/')
+            self.remoter.send_files(src='./configurations/io_properties.yaml', dst=f'{INSTALL_DIR}/etc/scylla.d/')
 
         if self.parent_cluster.params.get('workaround_kernel_bug_for_iotune'):
             self.log.warning(dedent("""
@@ -2236,23 +2241,38 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         else:
             self.remoter.run('sudo systemctl restart scylla-manager.service')
 
+    def wrap_cmd_with_permission(self, cmd):
+        """Generate commandline prefix according to the privilege"""
+        if self.is_nonroot_install:
+            return f'{cmd} --user'
+        else:
+            return f'sudo {cmd}'
+
+    @property
+    def systemctl(self):
+        return self.wrap_cmd_with_permission('systemctl')
+
+    @property
+    def journalctl(self):
+        return self.wrap_cmd_with_permission('journalctl')
+
     def start_scylla_server(self, verify_up=True, verify_down=False, timeout=300, verify_up_timeout=300):
         if verify_down:
             self.wait_db_down(timeout=timeout)
-        if not self.is_ubuntu14():
-            self.remoter.run('sudo systemctl start scylla-server.service', timeout=timeout)
-        else:
+        if self.is_ubuntu14():
             self.remoter.run('sudo service scylla-server start', timeout=timeout)
+        else:
+            self.remoter.run(f'{self.systemctl} start scylla-server.service', timeout=timeout)
         if verify_up:
             self.wait_db_up(timeout=verify_up_timeout)
 
     def start_scylla_jmx(self, verify_up=True, verify_down=False, timeout=300, verify_up_timeout=300):
         if verify_down:
             self.wait_jmx_down(timeout=timeout)
-        if not self.is_ubuntu14():
-            self.remoter.run('sudo systemctl start scylla-jmx.service', timeout=timeout)
-        else:
+        if self.is_ubuntu14():
             self.remoter.run('sudo service scylla-jmx start', timeout=timeout)
+        else:
+            self.remoter.run(f'{self.systemctl} start scylla-jmx.service', timeout=timeout)
         if verify_up:
             self.wait_jmx_up(timeout=verify_up_timeout)
 
@@ -2267,10 +2287,11 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
     def stop_scylla_server(self, verify_up=False, verify_down=True, timeout=300, ignore_status=False):
         if verify_up:
             self.wait_db_up(timeout=timeout)
-        if not self.is_ubuntu14():
-            self.remoter.run('sudo systemctl stop scylla-server.service', timeout=timeout, ignore_status=ignore_status)
-        else:
+        if self.is_ubuntu14():
             self.remoter.run('sudo service scylla-server stop', timeout=timeout, ignore_status=ignore_status)
+        else:
+            self.remoter.run(f'{self.systemctl} stop scylla-server.service',
+                             timeout=timeout, ignore_status=ignore_status)
         if verify_down:
             self.wait_db_down(timeout=timeout)
 
@@ -2278,7 +2299,7 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         if verify_up:
             self.wait_jmx_up(timeout=timeout)
         if not self.is_ubuntu14():
-            self.remoter.run('sudo systemctl stop scylla-jmx.service', timeout=timeout)
+            self.remoter.run(f'{self.systemctl} stop scylla-jmx.service', timeout=timeout)
         else:
             self.remoter.run('sudo service scylla-jmx stop', timeout=timeout)
         if verify_down:
@@ -2293,11 +2314,11 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
     def restart_scylla_server(self, verify_up_before=False, verify_up_after=True, timeout=300, ignore_status=False):
         if verify_up_before:
             self.wait_db_up(timeout=timeout)
-        if not self.distro.is_ubuntu14:
-            self.remoter.run("sudo systemctl restart scylla-server.service",
+        if self.distro.is_ubuntu14:
+            self.remoter.run("sudo service scylla-server restart",
                              timeout=timeout, ignore_status=ignore_status)
         else:
-            self.remoter.run("sudo service scylla-server restart",
+            self.remoter.run(f"{self.systemctl} restart scylla-server.service",
                              timeout=timeout, ignore_status=ignore_status)
         if verify_up_after:
             self.wait_db_up(timeout=timeout)
@@ -2305,10 +2326,10 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
     def restart_scylla_jmx(self, verify_up_before=False, verify_up_after=True, timeout=300):
         if verify_up_before:
             self.wait_jmx_up(timeout=timeout)
-        if not self.distro.is_ubuntu14:
-            self.remoter.run("sudo systemctl restart scylla-jmx.service", timeout=timeout)
-        else:
+        if self.distro.is_ubuntu14:
             self.remoter.run("sudo service scylla-jmx restart", timeout=timeout)
+        else:
+            self.remoter.run(f"{self.systemctl} restart scylla-jmx.service", timeout=timeout)
         if verify_up_after:
             self.wait_jmx_up(timeout=timeout)
 
@@ -3617,6 +3638,13 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
                 self._scylla_install(node)
             else:
                 self._wait_for_preinstalled_scylla(node)
+            if node.is_nonroot_install:
+                node.stop_scylla_server(verify_down=False)
+                node.remoter.run(f'{INSTALL_DIR}/sbin/scylla_setup --no-raid-setup --no-io-setup', ignore_status=True)
+                node.remoter.send_files(src='./configurations/io.conf', dst=f'{INSTALL_DIR}/etc/scylla.d/')
+                node.remoter.send_files(src='./configurations/io_properties.yaml', dst=f'{INSTALL_DIR}/etc/scylla.d/')
+                node.start_scylla_server(verify_up=wait_db_up, verify_up_timeout=timeout)
+                return
 
             if Setup.BACKTRACE_DECODING:
                 node.install_scylla_debuginfo()
