@@ -89,6 +89,7 @@ WORKSPACE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 SCYLLA_YAML_PATH = "/etc/scylla/scylla.yaml"
 SCYLLA_DIR = "/var/lib/scylla"
 INSTALL_DIR = "~/scylladb"
+TEST_USER = 'scylla-test'
 
 INSTANCE_PROVISION_ON_DEMAND = 'on_demand'
 SPOT_TERMINATION_CHECK_DELAY = 5
@@ -2089,8 +2090,11 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
             extra_setup_args += ' --swap-directory / '
         if self.parent_cluster.params.get('unified_package'):
             extra_setup_args += ' --no-verify-package --no-io-setup'
-            self.remoter.send_files(src='./configurations/io.conf', dst=f'{INSTALL_DIR}/etc/scylla.d/')
-            self.remoter.send_files(src='./configurations/io_properties.yaml', dst=f'{INSTALL_DIR}/etc/scylla.d/')
+            for conf in ['io.conf', 'io_properties.yaml']:
+                self.remoter.send_files(src=os.path.join('./configurations/', conf),  # pylint: disable=not-callable
+                                        dst='/tmp/')
+                dest_conf = self.add_install_prefix(f'/etc/scylla.d/{conf}')
+                self.remoter.run(f'sudo mv /tmp/{conf} {dest_conf}')
 
         if self.parent_cluster.params.get('workaround_kernel_bug_for_iotune'):
             self.log.warning(dedent("""
@@ -3707,9 +3711,31 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
                 self._wait_for_preinstalled_scylla(node)
             if node.is_nonroot_install:
                 node.stop_scylla_server(verify_down=False)
+
+                # workaround scylla issue in offline install
+                node.remoter.run(f'mkdir -p {INSTALL_DIR}/var/lib/scylla')
+                node.remoter.run(f'mkdir -p {INSTALL_DIR}/opt/scylladb')
+                node.remoter.run(f'ln -s {INSTALL_DIR}/python3 {INSTALL_DIR}/opt/scylladb/python3')
+
                 node.remoter.run(f'{INSTALL_DIR}/sbin/scylla_setup --no-raid-setup --no-io-setup', ignore_status=True)
                 node.remoter.send_files(src='./configurations/io.conf', dst=f'{INSTALL_DIR}/etc/scylla.d/')
                 node.remoter.send_files(src='./configurations/io_properties.yaml', dst=f'{INSTALL_DIR}/etc/scylla.d/')
+
+                # workaround scylla issue in offline install
+                node.remoter.run(
+                    f"sed -ie 's/io-properties-file=/io-properties-file=\/home\/{TEST_USER}\/scylladb/g' {INSTALL_DIR}/etc/scylla.d/io.conf")
+                node.remoter.run(
+                    f"sed -ie 's/mountpoint: .*/mountpoint: \/home\/{TEST_USER}\/scylladb/g' {INSTALL_DIR}/etc/scylla.d/io_properties.yaml")
+                if node.distro.is_debian or node.distro.is_ubuntu:
+                    node.remoter.run(
+                        f"sed -ie 's/sysconfig/default/g' /home/{TEST_USER}/.config/systemd/user/scylla-jmx.service.d/nonroot.conf")
+                # todo: need to check if the scylla-jmx is correct
+                #node.remoter.run(
+                #    f"sed -ie 's/ExecStart=.*scylla-jmx /ExecStart=\/home\/{TEST_USER}\/scylladb\/jmx\/symlinks\/scylla-jmx /g' /home/{TEST_USER}/.config/systemd/user/scylla-jmx.service.d/nonroot.conf")
+                node.remoter.run(
+                    f"echo 'WorkingDirectory=' >> /home/{TEST_USER}/.config/systemd/user/scylla-jmx.service.d/nonroot.conf")
+                # TODO: update $PATH: ./scylladb/share/cassandra/bin/:./scylladb/bin/
+                node.remoter.run('systemctl --user daemon-reload')
                 node.start_scylla_server(verify_up=wait_db_up, verify_up_timeout=timeout)
                 return
 
