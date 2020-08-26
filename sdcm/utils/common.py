@@ -64,6 +64,7 @@ LOGGER = logging.getLogger('utils')
 DEFAULT_AWS_REGION = "eu-west-1"
 DOCKER_CGROUP_RE = re.compile("/docker/([0-9a-f]+)")
 SCYLLA_AMI_OWNER_ID = "797456418907"
+SCYLLA_YAML_PATH = "/etc/scylla/scylla.yaml"
 
 
 def deprecation(message):
