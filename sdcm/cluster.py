@@ -2659,9 +2659,11 @@ class BaseCluster:  # pylint: disable=too-many-instance-attributes,too-many-publ
 
         if isinstance(n_nodes, list):
             for dc_idx, num in enumerate(n_nodes):
-                self.add_nodes(num, dc_idx=dc_idx, enable_auto_bootstrap=Setup.AUTO_BOOTSTRAP)
+                self.add_nodes(num, dc_idx=dc_idx, enable_auto_bootstrap=Setup.AUTO_BOOTSTRAP,
+                               enable_repair_based_node_ops=self.params.get('enable_repair_based_node_ops'))
         elif isinstance(n_nodes, int):  # legacy type
-            self.add_nodes(n_nodes, enable_auto_bootstrap=Setup.AUTO_BOOTSTRAP)
+            self.add_nodes(n_nodes, enable_auto_bootstrap=Setup.AUTO_BOOTSTRAP,
+                           enable_repair_based_node_ops=self.params.get('enable_repair_based_node_ops'))
         else:
             raise ValueError('Unsupported type: {}'.format(type(n_nodes)))
         self.coredumps = dict()
