@@ -1976,6 +1976,7 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         if nonroot:
             install_cmds = dedent(f"""
                 tar xvfz ./unified_package.tar.gz
+                sed -ie 's/has_java=false/has_java=true/g' ./scylla-jmx/install.sh
                 ./install.sh --nonroot {sysconfdir_option}
                 sudo rm -f /tmp/scylla.yaml
             """)
@@ -1984,6 +1985,7 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         else:
             install_cmds = dedent(f"""
                 tar xvfz ./unified_package.tar.gz
+                sed -ie 's/has_java=false/has_java=true/g' ./scylla-jmx/install.sh
                 ./install.sh --housekeeping {sysconfdir_option}
                 rm -f /tmp/scylla.yaml
             """)
@@ -2081,7 +2083,9 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
             # swap setup is supported
             extra_setup_args += ' --swap-directory / '
         if self.parent_cluster.params.get('unified_package'):
-            extra_setup_args += ' --no-verify-package '
+            extra_setup_args += ' --no-verify-package --no-io-setup'
+            self.remoter.send_files(src='./configurations/io.conf', dst='./install_root/etc/scylla.d/')
+            self.remoter.send_files(src='./configurations/io_properties.yaml', dst='./install_root/etc/scylla.d/')
 
         if self.parent_cluster.params.get('workaround_kernel_bug_for_iotune'):
             self.log.warning(dedent("""
