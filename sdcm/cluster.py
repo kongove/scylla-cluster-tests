@@ -3608,10 +3608,14 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
             self._reuse_cluster_setup(node)
 
         if wait_db_up:
-            node.wait_db_up(verbose=verbose, timeout=timeout)
+            self.log.info('start to wait db up ....')
+            node.wait_db_up(verbose=True, timeout=timeout)
+            self.log.info('end to wait db up ....')
             nodes_status = node.get_nodes_status()
+            self.log.info('start to check nodes status ....')
             check_nodes_status(nodes_status=nodes_status, current_node=node,
                                removed_nodes_list=self.dead_nodes_ip_address_list)  # pylint: disable=no-member
+            self.log.info('end to check nodes status ....')
             self.clean_replacement_node_ip(node)
 
     def _scylla_install(self, node):
