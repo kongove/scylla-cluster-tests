@@ -3612,6 +3612,8 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
             node.wait_db_up(verbose=True, timeout=timeout)
             self.log.info('end to wait db up ....')
             nodes_status = node.get_nodes_status()
+            # only verify status of current setup node, other nodes might be in UJ status
+            nodes_status = {node.ip_address: nodes_status[node.ip_address]}
             self.log.info('start to check nodes status ....')
             check_nodes_status(nodes_status=nodes_status, current_node=node,
                                removed_nodes_list=self.dead_nodes_ip_address_list)  # pylint: disable=no-member
