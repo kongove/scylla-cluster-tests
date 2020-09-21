@@ -3150,12 +3150,12 @@ COMPLEX_NEMESIS = [NoOpMonkey, ChaosMonkey,
 
 
 # TODO: https://trello.com/c/vwedwZK2/1881-corrupt-the-scrub-fails
-# class CorruptThenScrubMonkey(Nemesis):
-#     disruptive = False
-#
-#     @log_time_elapsed_and_status
-#     def disrupt(self):
-#         self.disable_disrupt_corrupt_then_scrub()
+class CorruptThenScrubMonkey(Nemesis):
+    disruptive = False
+
+    @log_time_elapsed_and_status
+    def disrupt(self):
+        self.disable_disrupt_corrupt_then_scrub()
 
 
 class MemoryStressMonkey(Nemesis):
