@@ -24,3 +24,10 @@ use_mgmt: true
 pre_create_schema: True
 sstable_size: 100
 use_legacy_cluster_init: false
+
+append_scylla_yaml: |
+  read_request_timeout_in_ms: 30000
+  range_request_timeout_in_ms: 30000
+  write_request_timeout_in_ms: 30000
+  truncate_request_timeout_in_ms: 30000
+  request_timeout_in_ms: 30000
