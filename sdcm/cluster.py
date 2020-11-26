@@ -3772,7 +3772,7 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
 
                 # simple config
                 node.remoter.run(
-                    f"echo 'cluster_name: \"{self.name}\"' >> {INSTALL_DIR}/etc/scylla/scylla.yaml")
+                    f"echo 'cluster_name: \"{self.name}\"' >> {INSTALL_DIR}/etc/scylla/scylla.yaml")  # pylint: disable=no-member
                 node.remoter.run(
                     f"sed -ie 's/- seeds: .*/- seeds: {node.ip_address}/g' {INSTALL_DIR}/etc/scylla/scylla.yaml")
                 node.remoter.run(
