@@ -2007,10 +2007,12 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
             sysconfdir_option = ''
             self.remoter.run('sudo yum install -y java-1.8.0-openjdk')
         elif self.distro.is_debian10:
-            sysconfdir_option = '--sysconfdir /etc/default'
+            # sysconfdir_option = '--sysconfdir /etc/default'
+            sysconfdir_option = ''
             self.remoter.run('sudo apt-get install -y openjdk-11-jre-headless')
         else:
-            sysconfdir_option = '--sysconfdir /etc/default'
+            #sysconfdir_option = '--sysconfdir /etc/default'
+            sysconfdir_option = ''
             self.remoter.run('sudo apt-get install -y openjdk-8-jre-headless')
             self.remoter.run('sudo update-java-alternatives --jre-headless -s java-1.8.0-openjdk-amd64')
 
@@ -3482,7 +3484,7 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
                     pass
         return node_info_list
 
-    @retrying(n=3, sleep_time=5)
+    @retrying(n=10, sleep_time=5)
     def get_nodetool_status(self, verification_node=None):  # pylint: disable=too-many-locals
         """
             Runs nodetool status and generates status structure.
