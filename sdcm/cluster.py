@@ -1562,6 +1562,7 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
                            sudo=True)
 
     def remote_scylla_yaml(self, path=SCYLLA_YAML_PATH):
+        path = self.add_install_prefix(path)
         return self._remote_yaml(path=path)
 
     def remote_manager_yaml(self, path=SCYLLA_MANAGER_YAML_PATH):
@@ -2020,9 +2021,8 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
 
     def get_scylla_version(self) -> str:
         self.scylla_version = self.scylla_version_detailed = ""
-
-        cmd = "scylla --version"
-        result = self.remoter.run(cmd, ignore_status=True)
+        scylla_path = self.add_install_prefix("/usr/bin/scylla")
+        result = self.remoter.run(f"{scylla_path} --version", ignore_status=True)
         if result.ok:
             self.scylla_version_detailed = result.stdout.strip()
             if build_id := self.get_scylla_build_id():
@@ -3741,6 +3741,8 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
                 node.remoter.send_files(src='./configurations/io_properties.yaml', dst=f'{INSTALL_DIR}/etc/scylla.d/')
 
                 # simple config
+                node.remoter.run(
+                    f"echo 'cluster_name: \"{self.name}\"' >> {INSTALL_DIR}/etc/scylla/scylla.yaml")
                 node.remoter.run(
                     f"sed -ie 's/- seeds: .*/- seeds: {node.ip_address}/g' {INSTALL_DIR}/etc/scylla/scylla.yaml")
                 node.remoter.run(
