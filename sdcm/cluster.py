@@ -3450,7 +3450,7 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
                     pass
         return node_info_list
 
-    @retrying(n=3, sleep_time=5)
+    @retrying(n=30, sleep_time=5)
     def get_nodetool_status(self, verification_node=None):  # pylint: disable=too-many-locals
         """
             Runs nodetool status and generates status structure.
