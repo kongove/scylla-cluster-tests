@@ -2005,15 +2005,16 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         # https://github.com/scylladb/scylla-jmx/issues/127
         if self.is_rhel_like():
             sysconfdir_option = ''
-            self.remoter.run('sudo yum install -y java-1.8.0-openjdk')
+            # mdadm and xfsprogs are used in raid setup
+            self.remoter.run('sudo yum install -y java-1.8.0-openjdk xfsprogs mdadm')
         elif self.distro.is_debian10:
             # sysconfdir_option = '--sysconfdir /etc/default'
             sysconfdir_option = ''
-            self.remoter.run('sudo apt-get install -y openjdk-11-jre-headless')
+            self.remoter.run('sudo apt-get install -y openjdk-11-jre-headless xfsprogs mdadm')
         else:
             #sysconfdir_option = '--sysconfdir /etc/default'
             sysconfdir_option = ''
-            self.remoter.run('sudo apt-get install -y openjdk-8-jre-headless')
+            self.remoter.run('sudo apt-get install -y openjdk-8-jre-headless xfsprogs mdadm')
             self.remoter.run('sudo update-java-alternatives --jre-headless -s java-1.8.0-openjdk-amd64')
 
         if nonroot:
