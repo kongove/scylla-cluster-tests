@@ -3604,17 +3604,17 @@ class CDCStressorMonkey(Nemesis):
         self.disrupt_run_cdcstressor_tool()
 
 
-# Disable unstable streaming err nemesises
+#Disable unstable streaming err nemesises
 #
-# class DecommissionStreamingErrMonkey(Nemesis):
-#
-#     disruptive = True
-#
-#     @log_time_elapsed_and_status
-#     def disrupt(self):
-#         self.disrupt_decommission_streaming_err()
-#
-#
+class DecommissionStreamingErrMonkey(Nemesis):
+
+    disruptive = True
+
+    @log_time_elapsed_and_status
+    def disrupt(self):
+        self.disrupt_decommission_streaming_err()
+
+
 # class RebuildStreamingErrMonkey(Nemesis):
 #
 #     disruptive = True
