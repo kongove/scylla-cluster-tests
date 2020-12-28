@@ -2049,18 +2049,24 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         if nonroot:
             install_cmds = dedent(f"""
                 tar xvfz ./unified_package.tar.gz
+                echo -------
+                echo $XDG_RUNTIME_DIR
+                echo -------
                 ./install.sh --nonroot {sysconfdir_option}
                 sudo rm -f /tmp/scylla.yaml
             """)
             # Known issue: https://github.com/scylladb/scylla/issues/7071
-            self.remoter.run('bash -cxe "%s"' % install_cmds)
+            self.remoter.run('bash -cxe "%s"' % install_cmds, verbose=True)
         else:
             install_cmds = dedent(f"""
                 tar xvfz ./unified_package.tar.gz
+                echo -------
+                echo $XDG_RUNTIME_DIR
+                echo -------
                 ./install.sh --housekeeping {sysconfdir_option}
                 rm -f /tmp/scylla.yaml
             """)
-            self.remoter.run('sudo bash -cxe "%s"' % install_cmds)
+            self.remoter.run('sudo bash -cxe "%s"' % install_cmds, verbose=True)
 
     def install_scylla_debuginfo(self):
         self.log.info("Installing Scylla debug info...")
