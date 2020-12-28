@@ -3859,6 +3859,9 @@ class BaseScyllaCluster:  # pylint: disable=too-many-public-methods, too-many-in
                     f"sed -ie 's/io-properties-file=/io-properties-file=\/home\/{TEST_USER}\/scylladb/g' {INSTALL_DIR}/etc/scylla.d/io.conf")
                 node.remoter.run(
                     f"sed -ie 's/mountpoint: .*/mountpoint: \/home\/{TEST_USER}\/scylladb/g' {INSTALL_DIR}/etc/scylla.d/io_properties.yaml")
+                node.remoter.run(
+                    f"sed -ie 's/WorkingDirectory=.*/WorkingDirectory=\/home\/{TEST_USER}\/scylladb/g' /home/{TEST_USER}/.config/systemd/user/scylla-jmx.service.d/nonroot.conf")
+                node.remoter.run('systemctl --user daemon-reload')
 
                 # simple config
                 node.remoter.run(
