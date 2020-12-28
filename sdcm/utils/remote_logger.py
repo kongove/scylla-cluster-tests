@@ -116,7 +116,7 @@ class SSHLoggerBase(NodeLoggerBase):
 class SSHScyllaSystemdLogger(SSHLoggerBase):
     @property
     def _logger_cmd(self) -> str:
-        return f'{self.node.journalctl} -f --no-tail --no-pager '
+        # return f'{self.node.journalctl} -f --no-tail --no-pager '
         return f'{self.node.journalctl} -f --no-tail --no-pager ' \
                '--utc {since} ' \
                '-u scylla-ami-setup.service ' \
