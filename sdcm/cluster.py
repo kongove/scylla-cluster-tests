@@ -2047,6 +2047,18 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
             self.remoter.run('sudo update-java-alternatives --jre-headless -s java-1.8.0-openjdk-amd64')
 
         if nonroot:
+            result = self.remoter.run('env', verbose=True)
+            self.log.info(result.stdout)
+            self.log.info(result.stderr)
+            result = self.remoter.run('systemctl status user@1000.service', verbose=True)
+            self.log.info(result.stdout)
+            self.log.info(result.stderr)
+            result = self.remoter.run('ls', verbose=True, change_context=True)
+            self.log.info(result.stdout)
+            self.log.info(result.stderr)
+            result = self.remoter.run('env', verbose=True)
+            self.log.info(result.stdout)
+            self.log.info(result.stderr)
             install_cmds = dedent(f"""
                 tar xvfz ./unified_package.tar.gz
                 echo -------
