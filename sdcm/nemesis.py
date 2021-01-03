@@ -37,7 +37,8 @@ from cassandra import ConsistencyLevel
 from sdcm.cluster import SCYLLA_YAML_PATH, NodeSetupTimeout, NodeSetupFailed, ClusterNodesNotReady
 from sdcm.mgmt import TaskStatus
 from sdcm.utils.common import remote_get_file, get_db_tables, generate_random_string, \
-    update_certificates, reach_enospc_on_node, clean_enospc_on_node, parse_nodetool_listsnapshots
+    update_certificates, reach_enospc_on_node, clean_enospc_on_node, parse_nodetool_listsnapshots, \
+    update_authenticator
 from sdcm.utils.decorators import retrying, timeout
 from sdcm.utils import cdc
 from sdcm.utils.decorators import retrying, latency_calculator_decorator
@@ -465,6 +466,29 @@ class Nemesis:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if not self._is_it_on_kubernetes():
             raise UnsupportedNemesis('RollingRestartCluster is supported only for kubernetes backends')
         self.cluster.rollout_restart()
+
+    def disrupt_toggle_authenticator_type(self):
+        """
+        If prepare_saslauthd is enabled, saslauthd and ldap environment will be prepared for
+        using SaslauthdAuthenticator. We have same account (cassandra) for SaslauthdAuthenticator
+        and PasswordAuthenticator, so it can be toggled smoothly without effect to c-s workloads.
+
+        It's only support to switch from PasswordAuthenticator, the authenticator will be reset
+        back in the end of nemesis.
+        """
+        self._set_current_disruption('ToggleAuthenticatorType %s' % self.target_node)
+        # Switch to com.scylladb.auth.SaslauthdAuthenticator
+        if self.cluster.params.get('prepare_saslauthd') and 'PasswordAuthenticator' in self.cluster.params.get('authenticator'):
+            update_authenticator(self.cluster.nodes, 'com.scylladb.auth.SaslauthdAuthenticator')
+            try:
+                # Run connect a new session after authenticator switch, and run a short workload
+                self._prepare_test_table(ks='keyspace_for_authenticator_switch', table='standard1')
+            finally:
+                update_authenticator(self.cluster.nodes, 'PasswordAuthenticator')
+
+            # Run connect a new session after authenticator switch, drop the test keyspace
+            with self.cluster.cql_connection_patient(self.target_node) as session:
+                session.execute(f'DROP KEYSPACE keyspace_for_authenticator_switch')
 
     def disrupt_restart_with_resharding(self):
         self._set_current_disruption('RestartNodeWithResharding %s' % self.target_node)
@@ -3542,6 +3566,14 @@ class ClusterRollingRestart(Nemesis):
     @log_time_elapsed_and_status
     def disrupt(self):
         self.disrupt_rolling_restart_cluster()
+
+
+class ToggleAuthenticatorType(Nemesis):
+    disruptive = True  # the nemesis has rolling restart
+
+    @log_time_elapsed_and_status
+    def disrupt(self):
+        self.disrupt_toggle_authenticator_type()
 
 
 class TopPartitions(Nemesis):

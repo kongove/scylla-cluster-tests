@@ -2151,3 +2151,15 @@ def shorten_cluster_name(name: str, max_string_len: int):
     if max_alpha_chunk_size == 0:
         return name
     return '-'.join([current, last_chunk])
+
+
+def update_authenticator(nodes, authenticator='AllowAllAuthenticator', restart=True):
+    """
+    Update the authenticator of nodes, restart the nodes to make the change effective
+    """
+    for node in nodes:
+        node.remoter.run(
+            f"sed -ie 's/^authenticator:.*/authenticator: {authenticator}/g' /etc/scylla/scylla.yaml")
+        if restart:
+            node.restart_scylla_server()
+            node.wait_db_up()
