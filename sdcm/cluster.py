@@ -1620,6 +1620,9 @@ class BaseNode(AutoSshContainerMixin, WebDriverContainerMixin):  # pylint: disab
         if not self.parent_cluster.ldap_configured:
             self.run_cqlsh(f'CREATE ROLE \'{LDAP_ROLE}\' WITH SUPERUSER=true')
             for user in LDAP_USERS:
+                if user == 'cassandra':
+                    # User `cassandra' has been created by default
+                    continue
                 self.run_cqlsh(f'CREATE ROLE \'{user}\' WITH login=true AND password=\'{LDAP_PASSWORD}\'')
             self.parent_cluster.ldap_configured = True
 

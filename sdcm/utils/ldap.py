@@ -22,9 +22,9 @@ LDAP_SSH_TUNNEL_LOCAL_PORT = 5001
 LDAP_SSH_TUNNEL_SSL_PORT = 5002
 ORGANISATION = 'ScyllaDB'
 LDAP_DOMAIN = 'scylladb.com'
-LDAP_PASSWORD = 'scylla'
+LDAP_PASSWORD = 'cassandra'
 LDAP_ROLE = 'scylla_ldap'
-LDAP_USERS = ['scylla-qa', 'dummy-user']
+LDAP_USERS = ['cassandra', 'scylla-qa', 'dummy-user']
 LDAP_BASE_OBJECT = (lambda l: ','.join([f'dc={part}' for part in l.split('.')]))(LDAP_DOMAIN)
 
 
