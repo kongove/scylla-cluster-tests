@@ -518,6 +518,7 @@ class UpgradeTest(FillDatabaseData):
             # wait for the read workload to finish
             self.verify_stress_thread(read_stress_queue)
             self.fill_and_verify_db_data('after upgraded one node')
+            raise Exception('End the test')
             self.search_for_idx_token_error_after_upgrade(node=self.db_cluster.node_to_upgrade,
                                                           step=step+' - after upgraded one node')
 
