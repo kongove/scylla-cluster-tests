@@ -7,7 +7,11 @@ repos:
     -   id: trailing-whitespace
         exclude: .git/*
     -   id: end-of-file-fixer
-        exclude: .git/*
+        exclude: >
+            (?x)^(
+                .git/.*|
+                data_dir/sstable_with_invalid_fragment/.*
+            )$
     -   id: check-yaml
         args:
         - --allow-multiple-documents
