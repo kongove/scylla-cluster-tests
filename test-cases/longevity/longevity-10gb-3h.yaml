@@ -16,3 +16,11 @@ ssh_transport: 'libssh2'
 
 user_prefix: 'longevity-10gb-3h'
 space_node_threshold: 64424
+
+server_encrypt: true
+client_encrypt: true
+
+authenticator: 'PasswordAuthenticator'
+authenticator_user: cassandra
+authenticator_password: cassandra
+authorizer: 'CassandraAuthorizer'
