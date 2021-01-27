@@ -3197,6 +3197,11 @@ class CategoricalMonkey(Nemesis):
         bound_method = method.__get__(self, CategoricalMonkey)
         self.execute_disrupt_method(bound_method)
 
+class MyLimitedChaosMonkey(Nemesis):
+
+    @log_time_elapsed_and_status
+    def disrupt(self):
+        self.call_random_disrupt_method(disrupt_methods=['disrupt_truncate_large_partition', 'disrupt_truncate'])
 
 class LimitedChaosMonkey(Nemesis):
 
