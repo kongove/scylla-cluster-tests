@@ -75,6 +75,7 @@ class ArtifactsTest(ClusterTester):
         self.log.info("All users except image user 'centos' were created after the boot.")
 
     def test_scylla_service(self):
+        return
         if self.params["cluster_backend"] == "aws":
             with self.subTest("check ENA support"):
                 assert self.node.ena_support, "ENA support is not enabled"
